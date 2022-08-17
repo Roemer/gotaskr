@@ -185,8 +185,13 @@ func printTaskRuns() {
 	fmt.Println(strings.Repeat("-", 50))
 	totalDuration := time.Duration(0)
 	for _, run := range taskRun {
-		fmt.Printf("%-30s%-20s", run.name, formatDuration(run.duration))
-		fmt.Println()
+		text := fmt.Sprintf("%-30s%-20s", run.name, formatDuration(run.duration))
+		if run.err != nil {
+			color.Red(text)
+			color.Set(color.FgGreen)
+		} else {
+			fmt.Println(text)
+		}
 		totalDuration += run.duration
 	}
 	fmt.Println(strings.Repeat("-", 50))
