@@ -1,4 +1,7 @@
 # gotaskr
+[![Go Reference](https://pkg.go.dev/badge/github.com/roemer/gotaskr.svg)](https://pkg.go.dev/github.com/roemer/gotaskr)
+![GitHub](https://img.shields.io/github/license/roemer/gotaskr)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/roemer/gotaskr)
 
 ## Introduction
 gotaskr (Go-Task-Runner) is a generic task runner which is invoked via CLI.
@@ -20,6 +23,8 @@ There are some inbuilt helpers for often used tasks for various DevOps tasks.
 - Chainable tasks
 - Inbuilt helpers for various DevOps tasks
 - Small footprint and easily extendable
+
+https://proxy.golang.org/github.com/roemer/gotaskr/@v/v0.0.1.info
 
 ## Quick-Start
 Create a new go project and use the following code as main method:
