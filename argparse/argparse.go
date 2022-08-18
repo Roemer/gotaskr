@@ -1,3 +1,4 @@
+// Package argparse is a simple parser for command line arguments.
 package argparse
 
 import (
@@ -5,10 +6,12 @@ import (
 	"strings"
 )
 
+// ParseArgs parses the arguments from the os.Args (ignoring the first one).
 func ParseArgs() map[string]string {
 	return ParseArgString(os.Args[1:])
 }
 
+// ParseArgString parses the arguments from a given array.
 func ParseArgString(args []string) map[string]string {
 	var argsMap map[string]string = make(map[string]string)
 
@@ -60,6 +63,12 @@ func ParseArgString(args []string) map[string]string {
 			argsMap[lastKey] = arg
 			continue
 		}
+	}
+
+	// Make sure to add the last key when no value was provided
+	if nextIsValue || nextCanBeValue {
+		nextIsValue = false
+		argsMap[lastKey] = ""
 	}
 
 	return argsMap

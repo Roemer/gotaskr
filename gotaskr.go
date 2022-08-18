@@ -115,13 +115,13 @@ func Task(name string, taskFunc func() error) *TaskObject {
 
 // TaskObject represents a registered task.
 type TaskObject struct {
-	name         string
-	description  string
-	taskFunc     func() error
-	dependencies []string
-	didRun       bool
-	duration     time.Duration
-	err          error
+	name         string        // The name of the task.
+	description  string        // The description of the task.
+	taskFunc     func() error  // The function of the task.
+	dependencies []string      // A list of dependecy tasks.
+	didRun       bool          // A flag to indicate if the task did already run.
+	duration     time.Duration // A runtime duration of the task if it ran already.
+	err          error         // The error (if any) of the task when it ran.
 }
 
 // DependsOn adds dependencies in the given order. Duplicate dependencies are removed.

@@ -1,3 +1,4 @@
+// Package execr is a wapper to run exec commands.
 package execr
 
 import (
@@ -8,13 +9,15 @@ import (
 	"github.com/roemer/gotaskr/goext"
 )
 
+// CmdError is an error which is returned when a command failed to execute.
 type CmdError struct {
-	msg      string
-	ExitCode int
+	msg      string // Contains the error message
+	ExitCode int    // Contains the exit code of the command
 }
 
 func (e *CmdError) Error() string { return e.msg }
 
+// Run runs an executable with the given arguments.
 func Run(executable string, arguments ...string) error {
 	cmd := exec.Command(executable, arguments...)
 	return RunCommand(cmd)
@@ -22,9 +25,6 @@ func Run(executable string, arguments ...string) error {
 
 // RunCommand runs a command and writes the stdout and stderr into the console in realtime.
 func RunCommand(cmd *exec.Cmd) error {
-	//stdReader, _ := cmd.StdoutPipe()
-	//cmd.Stderr = cmd.Stdout
-
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -35,12 +35,6 @@ func RunCommand(cmd *exec.Cmd) error {
 		return err
 	}
 
-	/*scanner := bufio.NewScanner(stdReader)
-	scanner.Split(bufio.ScanLines)
-	for scanner.Scan() {
-		m := scanner.Text()
-		fmt.Println(m)
-	}*/
 	if err := cmd.Wait(); err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			exitCode := exitError.ExitCode()

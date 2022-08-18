@@ -1,5 +1,6 @@
 # gotaskr
 [![Go Reference](https://pkg.go.dev/badge/github.com/roemer/gotaskr.svg)](https://pkg.go.dev/github.com/roemer/gotaskr)
+[![Docs github.io](https://img.shields.io/badge/Docs-github.io-blue.svg)](https://roemer.github.io/gotaskr/)
 ![GitHub](https://img.shields.io/github/license/roemer/gotaskr)
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/roemer/gotaskr)
 
@@ -27,8 +28,26 @@ There are some inbuilt helpers for often used tasks for various DevOps tasks.
 https://proxy.golang.org/github.com/roemer/gotaskr/@v/v0.0.1.info
 
 ## Quick-Start
-Create a new go project and use the following code as main method:
+Create a new go project:
+```
+go mod init my-project
+```
+
+Add gotaskr:
+```
+go get github.com/roemer/gotaskr
+```
+
+Create a `build.go` file:
 ```go
+package main
+
+import (
+	"os"
+
+	"github.com/roemer/gotaskr"
+)
+
 func main() {
 	os.Exit(gotaskr.Execute())
 }
