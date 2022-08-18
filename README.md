@@ -25,8 +25,6 @@ There are some inbuilt helpers for often used tasks for various DevOps tasks.
 - Inbuilt helpers for various DevOps tasks
 - Small footprint and easily extendable
 
-https://proxy.golang.org/github.com/roemer/gotaskr/@v/v0.0.1.info
-
 ## Quick-Start
 Create a new go project:
 ```
@@ -68,3 +66,6 @@ go run . --target My-Task
 
 ## Examples
 Have a look at the [examples](examples) from this repository.
+
+## Documentation
+Have a look at the [wiki](../../wiki) for additional information.
