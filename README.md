@@ -1,6 +1,6 @@
 # gotaskr
 [![Go Reference](https://pkg.go.dev/badge/github.com/roemer/gotaskr.svg)](https://pkg.go.dev/github.com/roemer/gotaskr)
-[![Docs github.io](https://img.shields.io/badge/Docs-github.io-blue.svg)](https://roemer.github.io/gotaskr/)
+[![Docs wiki](https://img.shields.io/badge/Docs-wiki-blue.svg)](https://github.com/Roemer/gotaskr/wiki)
 ![GitHub](https://img.shields.io/github/license/roemer/gotaskr)
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/roemer/gotaskr)
 
