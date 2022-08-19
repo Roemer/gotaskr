@@ -34,6 +34,7 @@ func Execute() int {
 
 	log.Information("Running gotaskr")
 	printArguments()
+	log.Information()
 	err := RunTarget(target)
 	exitCode := 0
 	if err != nil {
@@ -43,6 +44,8 @@ func Execute() int {
 		} else {
 			exitCode = 1
 		}
+		color.Red("Failed with error: %v", err)
+		log.Information()
 	}
 	printTaskRuns()
 	return exitCode
@@ -99,10 +102,7 @@ func RunTarget(target string) error {
 	currentTask.duration = elapsed
 	currentTask.err = err
 	taskRun = append(taskRun, currentTask)
-	if err != nil {
-		color.Red("Failed with error: %v", err)
-	}
-	log.Information() // Make sure to add a newline to separate from the next task
+	log.Information()
 	return err
 }
 
