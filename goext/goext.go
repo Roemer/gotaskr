@@ -25,17 +25,8 @@ func Ternary[T any](cond bool, vtrue, vfalse T) T {
 
 // Printfln allows to use Printf and Println in one call.
 func Printfln(format string, a ...any) (n int, err error) {
-	n1, err1 := fmt.Printf(format, a...)
-	n2, err2 := fmt.Println()
-	n = n1 + n2
-	err = nil
-	if err1 != nil {
-		err = err1
-	}
-	if err2 != nil {
-		err = err2
-	}
-	return
+	text := fmt.Sprintf(format, a...)
+	return fmt.Println(text)
 }
 
 // RemoveEmpty removes all empty strings from an array.

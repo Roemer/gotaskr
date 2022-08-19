@@ -21,6 +21,7 @@ There are some inbuilt helpers for often used tasks for various DevOps tasks.
 - Output from subprocesses directly visible
 - Tasks are written in plain Go
 - Each task can have custom arguments
+- Arguments are named (non-positional) and can be optional
 - Chainable tasks
 - Inbuilt helpers for various DevOps tasks
 - Small footprint and easily extendable

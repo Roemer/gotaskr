@@ -9,7 +9,7 @@ import (
 
 func init() {
 	gotaskr.Task("Hello", func() error {
-		name := gotaskr.GetArgument("name", "Wulfgang")
+		name, _ := gotaskr.GetArgumentOrDefault("name", "Wulfgang")
 		fmt.Println("Hi ", name)
 		return nil
 	}).Description("Just a hello task")

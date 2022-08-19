@@ -10,6 +10,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/roemer/gotaskr/argparse"
 	"github.com/roemer/gotaskr/execr"
+	"github.com/roemer/gotaskr/log"
 )
 
 // Generate a map that holds all passed arguments from the cli
@@ -23,15 +24,16 @@ var taskRun []*TaskObject
 
 // Execute is the entry point of gotaskr.
 func Execute() int {
-	if !HasArgument("target") {
+	log.Initialize(HasArgument("verbose") || HasArgument("v"))
+
+	target, hasTarget := GetArgument("target")
+	if !hasTarget {
 		printTasks()
 		return 0
 	}
 
-	fmt.Print("Running gotaskr")
+	log.Information("Running gotaskr")
 	printArguments()
-	fmt.Println()
-	target := GetArgument("target", "Usage")
 	err := RunTarget(target)
 	exitCode := 0
 	if err != nil {
@@ -47,24 +49,35 @@ func Execute() int {
 }
 
 // GetArgument returns the value of the argument with the given name
-// or the defaultValue otherwise.
-func GetArgument(argName string, defaultValue string) string {
-	v, exist := argumentsMap[argName]
-	if exist {
-		return v
+// and also a flag, if the argument was present or not.
+func GetArgument(argName string) (string, bool) {
+	return GetArgumentOrDefault(argName, "")
+}
+
+// GetArgumentOrDefault returns the value of the argument with the given name
+// or the given default value if the value was not present
+// and also a flag, if the argument was present or not.
+func GetArgumentOrDefault(argName string, defaultValue string) (string, bool) {
+	value, exists := argumentsMap[argName]
+	if exists {
+		return value, true
 	}
-	return defaultValue
+	return defaultValue, false
 }
 
 // HasArgument returns true if an arument was set and false otherwise.
 func HasArgument(argName string) bool {
-	_, exist := argumentsMap[argName]
+	_, exist := GetArgument(argName)
 	return exist
 }
 
 // RunTarget runs the given task and all the needed dependencies.
 func RunTarget(target string) error {
 	var currentTask = taskMap[target]
+	// Early exit if the target does not exist
+	if currentTask == nil {
+		return fmt.Errorf("Target does not exist: %s", target)
+	}
 	// Early exit if the task did already run
 	if currentTask.didRun {
 		return currentTask.err
@@ -89,7 +102,7 @@ func RunTarget(target string) error {
 	if err != nil {
 		color.Red("Failed with error: %v", err)
 	}
-	fmt.Println()
+	log.Information() // Make sure to add a newline to separate from the next task
 	return err
 }
 
@@ -97,7 +110,7 @@ func runTaskFunc(currentTask *TaskObject) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("Task panicked: %v", r)
-			fmt.Println(err)
+			log.Information(err)
 		}
 	}()
 	err = currentTask.taskFunc()
@@ -143,46 +156,48 @@ func (taskObject *TaskObject) Description(description string) *TaskObject {
 }
 
 func printTasks() {
-	fmt.Println("Please specify one of the following targets:")
+	log.Information("Please specify one of the following targets:")
+	var sb strings.Builder
 	for _, task := range taskMap {
-		fmt.Printf(" - %s", task.name)
+		fmt.Fprintf(&sb, " - %s", task.name)
 		if task.description != "" {
-			fmt.Printf(": %s", task.description)
+			fmt.Fprintf(&sb, ": %s", task.description)
 		}
-		fmt.Println()
+		sb.WriteString(log.Newline)
 	}
+	log.Information(sb.String())
 }
 
 func printArguments() {
 	if len(argumentsMap) > 0 {
-		fmt.Println(" with arguments:")
+		log.Debug("Arguments:")
+		var sb strings.Builder
 		isFirst := true
 		for key, val := range argumentsMap {
 			if !isFirst {
-				fmt.Print(", ")
+				sb.WriteString(", ")
 			}
 			if isFirst {
 				isFirst = false
 			}
-			s := fmt.Sprintf("%s=\"%s\"", key, val)
-			fmt.Print(s)
+			fmt.Fprintf(&sb, "%s=\"%s\"", key, val)
 		}
+		sb.WriteString(log.Newline)
+		log.Debug(sb.String())
 	}
-	fmt.Println()
 }
+
 func printTaskHeader(taskName string) {
-	fmt.Println(strings.Repeat("=", 40))
-	fmt.Printf("%-50s", taskName)
-	fmt.Println()
-	fmt.Println(strings.Repeat("=", 40))
+	log.Information(strings.Repeat("=", 40))
+	log.Informationf("%-50s", taskName)
+	log.Information(strings.Repeat("=", 40))
 }
 
 func printTaskRuns() {
 	color.Set(color.FgGreen)
 	defer color.Unset()
-	fmt.Printf("%-30s%-20s", "Task", "Duration")
-	fmt.Println()
-	fmt.Println(strings.Repeat("-", 50))
+	log.Informationf("%-30s%-20s", "Task", "Duration")
+	log.Information(strings.Repeat("-", 50))
 	totalDuration := time.Duration(0)
 	for _, run := range taskRun {
 		text := fmt.Sprintf("%-30s%-20s", run.name, formatDuration(run.duration))
@@ -190,13 +205,12 @@ func printTaskRuns() {
 			color.Red(text)
 			color.Set(color.FgGreen)
 		} else {
-			fmt.Println(text)
+			log.Information(text)
 		}
 		totalDuration += run.duration
 	}
-	fmt.Println(strings.Repeat("-", 50))
-	fmt.Printf("%-30s%-20s", "Total", formatDuration(totalDuration))
-	fmt.Println()
+	log.Information(strings.Repeat("-", 50))
+	log.Informationf("%-30s%-20s", "Total", formatDuration(totalDuration))
 }
 
 func formatDuration(duration time.Duration) string {

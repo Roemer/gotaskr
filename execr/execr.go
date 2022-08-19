@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/roemer/gotaskr/goext"
+	"github.com/roemer/gotaskr/log"
 )
 
 // CmdError is an error which is returned when a command failed to execute.
@@ -28,7 +28,7 @@ func RunCommand(cmd *exec.Cmd) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	goext.Printfln("Executing %s with arguments: %s", cmd.Path, cmd.Args[1:])
+	log.Debugf("Executing %s with arguments: %s", cmd.Path, cmd.Args[1:])
 
 	err := cmd.Start()
 	if err != nil {
