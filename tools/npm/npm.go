@@ -11,7 +11,10 @@ type InitSettings struct {
 	WorkingDirectory string
 }
 
-func Init(settings InitSettings) error {
+func Init(settings *InitSettings) error {
+	if settings == nil {
+		settings = &InitSettings{}
+	}
 	args := []string{
 		"init",
 		"-y",
@@ -26,7 +29,10 @@ type RunSettings struct {
 	Script           string
 }
 
-func Run(settings RunSettings) error {
+func Run(settings *RunSettings) error {
+	if settings == nil {
+		settings = &RunSettings{}
+	}
 	args := []string{
 		"run",
 		settings.Script,
@@ -37,7 +43,7 @@ func Run(settings RunSettings) error {
 }
 
 func RunScript(script string) error {
-	return Run(RunSettings{Script: script})
+	return Run(&RunSettings{Script: script})
 }
 
 type CleanInstallSettings struct {
@@ -47,12 +53,15 @@ type CleanInstallSettings struct {
 	PreferOffline    bool
 }
 
-func CleanInstall(settings CleanInstallSettings) error {
+func CleanInstall(settings *CleanInstallSettings) error {
+	if settings == nil {
+		settings = &CleanInstallSettings{}
+	}
 	args := []string{
 		"ci",
-		goext.Ternary(settings.NoAudit, "--no-audit", ""),
-		goext.Ternary(settings.PreferOffline, "--prefer-offline", ""),
 	}
+	args = goext.AddIf(args, settings.NoAudit, "--no-audit")
+	args = goext.AddIf(args, settings.PreferOffline, "--prefer-offline")
 	args = addCache(args, settings.CacheDir)
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
@@ -71,17 +80,20 @@ type InstallSettings struct {
 	SaveExact        bool
 }
 
-func Install(settings InstallSettings) error {
+func Install(settings *InstallSettings) error {
+	if settings == nil {
+		settings = &InstallSettings{}
+	}
 	args := []string{
 		"install",
 		settings.PackageSpec,
-		goext.Ternary(settings.SaveProd, "--save-prod", ""),
-		goext.Ternary(settings.SaveDev, "--save-dev", ""),
-		goext.Ternary(settings.SaveOptional, "--save-optional", ""),
-		goext.Ternary(settings.SaveExact, "--save-exact", ""),
-		goext.Ternary(settings.NoAudit, "--no-audit", ""),
-		goext.Ternary(settings.PreferOffline, "--prefer-offline", ""),
 	}
+	args = goext.AddIf(args, settings.SaveProd, "--save-prod")
+	args = goext.AddIf(args, settings.SaveDev, "--save-dev")
+	args = goext.AddIf(args, settings.SaveOptional, "--save-optional")
+	args = goext.AddIf(args, settings.SaveExact, "--save-exact")
+	args = goext.AddIf(args, settings.NoAudit, "--no-audit")
+	args = goext.AddIf(args, settings.PreferOffline, "--prefer-offline")
 	args = addCache(args, settings.CacheDir)
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
@@ -89,15 +101,9 @@ func Install(settings InstallSettings) error {
 }
 
 func addCache(args []string, cacheDir string) []string {
-	if cacheDir != "" {
-		args = append(args, "--cache", cacheDir)
-	}
-	return args
+	return goext.AddIf(args, cacheDir != "", "--cache", cacheDir)
 }
 
 func addLogLevel(args []string, logLevel string) []string {
-	if logLevel != "" {
-		args = append(args, "--loglevel", logLevel)
-	}
-	return args
+	return goext.AddIf(args, logLevel != "", "--loglevel", logLevel)
 }

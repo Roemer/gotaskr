@@ -7,6 +7,14 @@ import (
 	"strconv"
 )
 
+// AddIf adds the given values to an array if the condition is fulfilled.
+func AddIf[T any](args []T, cond bool, values ...T) []T {
+	if cond {
+		args = append(args, values...)
+	}
+	return args
+}
+
 // Ternary adds the missing ternary operator.
 func Ternary[T any](cond bool, vtrue, vfalse T) T {
 	if cond {
