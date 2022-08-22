@@ -28,7 +28,7 @@ func RunCommand(cmd *exec.Cmd) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	log.Debugf("Executing %s with arguments: %s", cmd.Path, cmd.Args[1:])
+	log.Debugf("Executing '%s' with arguments: %s", cmd.Path, cmd.Args[1:])
 
 	err := cmd.Start()
 	if err != nil {
@@ -39,7 +39,7 @@ func RunCommand(cmd *exec.Cmd) error {
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			exitCode := exitError.ExitCode()
-			return &CmdError{msg: fmt.Sprintf("Cmd failed with exit code %d", exitCode), ExitCode: exitCode}
+			return &CmdError{msg: fmt.Sprintf("cmd failed with exit code %d", exitCode), ExitCode: exitCode}
 		}
 	}
 	return err

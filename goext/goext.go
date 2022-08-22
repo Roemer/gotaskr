@@ -4,7 +4,6 @@ package goext
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strconv"
 )
@@ -48,24 +47,24 @@ func RunInDirectory(path string, f func() error) (err error) {
 	// Get the current directory
 	pwd, err := os.Getwd()
 	if err != nil {
-		return fmt.Errorf("Cannot get current directory: %v", err)
+		return fmt.Errorf("cannot get current directory: %v", err)
 	}
 	// Make sure to reset to the previous folder
 	defer func() {
 		err = os.Chdir(pwd)
 		if err != nil {
-			err = fmt.Errorf("Cannot change back to directory %s: %v", strconv.Quote(pwd), err)
+			err = fmt.Errorf("cannot change back to directory %s: %v", strconv.Quote(pwd), err)
 		}
 	}()
 	// Change the path
 	err = os.Chdir(path)
 	if err != nil {
-		return fmt.Errorf("Cannot change to directory %s: %v", strconv.Quote(path), err)
+		return fmt.Errorf("cannot change to directory %s: %v", strconv.Quote(path), err)
 	}
 	// Execute the function
 	err = f()
 	if err != nil {
-		return fmt.Errorf("Inner method failed: %v", err)
+		return fmt.Errorf("inner method failed: %v", err)
 	}
 	return
 }
@@ -95,7 +94,7 @@ func WriteJsonToFile(object any, outputFilePath string, indented bool) error {
 	if err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(outputFilePath, data, 0755); err != nil {
+	if err := os.WriteFile(outputFilePath, data, 0755); err != nil {
 		return err
 	}
 	return nil
