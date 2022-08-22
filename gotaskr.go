@@ -4,6 +4,7 @@ package gotaskr
 
 import (
 	"fmt"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -38,10 +39,14 @@ func Execute() int {
 	err := RunTarget(target)
 	exitCode := 0
 	if err != nil {
-		if err, ok := err.(*execr.CmdError); ok {
+		if ierr, ok := err.(*execr.CmdError); ok {
 			// Custom exit code form CmdErrors
-			exitCode = err.ExitCode
+			exitCode = ierr.ExitCode
+		} else if ierr, ok := err.(*exec.ExitError); ok {
+			// Exit code from exec
+			exitCode = ierr.ExitCode()
 		} else {
+			// Any other error
 			exitCode = 1
 		}
 		color.Red("Failed with error: %v", err)
@@ -188,19 +193,19 @@ func printArguments() {
 }
 
 func printTaskHeader(taskName string) {
-	log.Information(strings.Repeat("=", 40))
-	log.Informationf("%-50s", taskName)
-	log.Information(strings.Repeat("=", 40))
+	log.Information(strings.Repeat("=", 50))
+	log.Informationf("%s", taskName)
+	log.Information(strings.Repeat("=", 50))
 }
 
 func printTaskRuns() {
 	color.Set(color.FgGreen)
 	defer color.Unset()
-	log.Informationf("%-30s%-20s", "Task", "Duration")
-	log.Information(strings.Repeat("-", 50))
+	log.Informationf("%-40s%-20s", "Task", "Duration")
+	log.Information(strings.Repeat("-", 60))
 	totalDuration := time.Duration(0)
 	for _, run := range taskRun {
-		text := fmt.Sprintf("%-30s%-20s", run.name, formatDuration(run.duration))
+		text := fmt.Sprintf("%-40s%-20s", run.name, formatDuration(run.duration))
 		if run.err != nil {
 			color.Red(text)
 			color.Set(color.FgGreen)
@@ -209,8 +214,8 @@ func printTaskRuns() {
 		}
 		totalDuration += run.duration
 	}
-	log.Information(strings.Repeat("-", 50))
-	log.Informationf("%-30s%-20s", "Total", formatDuration(totalDuration))
+	log.Information(strings.Repeat("-", 60))
+	log.Informationf("%-40s%-20s", "Total", formatDuration(totalDuration))
 }
 
 func formatDuration(duration time.Duration) string {

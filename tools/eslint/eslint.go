@@ -3,17 +3,18 @@ package eslint
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 )
 
 type EsLintReport struct {
-	Files []EsLintFile
+	Files []*EsLintFile
 }
 
 type EsLintFile struct {
-	FilePath string          `json:"filePath"`
-	Messages []EsLintMessage `json:"messages"`
+	FilePath string           `json:"filePath"`
+	Messages []*EsLintMessage `json:"messages"`
 }
 
 type EsLintMessage struct {
@@ -39,7 +40,7 @@ func ParseEsLintReport(esLintReportPath string) (*EsLintReport, error) {
 		return nil, err
 	}
 
-	var esLintReportFiles []EsLintFile
+	var esLintReportFiles []*EsLintFile
 	err = json.Unmarshal(byteValue, &esLintReportFiles)
 	if err != nil {
 		return nil, err
@@ -50,4 +51,17 @@ func ParseEsLintReport(esLintReportPath string) (*EsLintReport, error) {
 	}
 
 	return esLintReport, nil
+}
+
+func SeverityToString(severity int64) string {
+	switch severity {
+	case 0:
+		return "off"
+	case 1:
+		return "warn"
+	case 2:
+		return "error"
+	default:
+		return fmt.Sprintf("unknown (%d)", severity)
+	}
 }

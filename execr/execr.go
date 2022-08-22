@@ -35,11 +35,12 @@ func RunCommand(cmd *exec.Cmd) error {
 		return err
 	}
 
-	if err := cmd.Wait(); err != nil {
+	err = cmd.Wait()
+	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			exitCode := exitError.ExitCode()
 			return &CmdError{msg: fmt.Sprintf("Cmd failed with exit code %d", exitCode), ExitCode: exitCode}
 		}
 	}
-	return nil
+	return err
 }
