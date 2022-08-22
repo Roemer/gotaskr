@@ -2,7 +2,9 @@
 package goext
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strconv"
 )
@@ -78,5 +80,23 @@ func PanicOnError(err error) {
 // Noop is a no operation function that can be used for tasks.
 // For example if they are just used for multiple dependencies.
 func Noop() error {
+	return nil
+}
+
+// WriteJsonToFile writes the given object into a file.
+func WriteJsonToFile(object any, outputFilePath string, indented bool) error {
+	var data []byte
+	var err error
+	if indented {
+		data, err = json.MarshalIndent(object, "", "  ")
+	} else {
+		data, err = json.Marshal(object)
+	}
+	if err != nil {
+		return err
+	}
+	if err := ioutil.WriteFile(outputFilePath, data, 0755); err != nil {
+		return err
+	}
 	return nil
 }

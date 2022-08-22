@@ -2,31 +2,9 @@
 package gitlab
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"os"
-
 	"github.com/roemer/gotaskr/goext"
+	"github.com/roemer/gotaskr/tools/eslint"
 )
-
-type EsLintReport struct {
-	Files []EsLintFile
-}
-
-type EsLintFile struct {
-	FilePath string          `json:"filePath"`
-	Messages []EsLintMessage `json:"messages"`
-}
-
-type EsLintMessage struct {
-	RuleId    string `json:"ruleId"`
-	Severity  int64  `json:"severity"`
-	Message   string `json:"message"`
-	Line      int64  `json:"line"`
-	EndLine   int64  `json:"endLine"`
-	Column    int64  `json:"column"`
-	EndColumn int64  `json:"endColumn"`
-}
 
 // GitLabReport defines the data for the quality report for GitLab.
 // See https://docs.gitlab.com/ee/ci/testing/code_quality.html#implementing-a-custom-tool for details
@@ -51,32 +29,8 @@ type GitLabCodeQualityLines struct {
 	End   int64 `json:"end"`
 }
 
-func ParseEsLintReport(esLintReportPath string) (*EsLintReport, error) {
-	jsonFile, err := os.Open(esLintReportPath)
-	if err != nil {
-		return nil, err
-	}
-	defer jsonFile.Close()
-
-	byteValue, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		return nil, err
-	}
-
-	var esLintReportFiles []EsLintFile
-	err = json.Unmarshal(byteValue, &esLintReportFiles)
-	if err != nil {
-		return nil, err
-	}
-
-	esLintReport := &EsLintReport{
-		Files: esLintReportFiles,
-	}
-
-	return esLintReport, nil
-}
-
-func ConvertEsLintReportToGitLabReport(esLintReport *EsLintReport) (*GitLabReport, error) {
+// ConvertEsLintReportToGitLabReport converts the given eslint.EsLintReport to a GitLabReport.
+func ConvertEsLintReportToGitLabReport(esLintReport *eslint.EsLintReport) (*GitLabReport, error) {
 	gitLabReport := &GitLabReport{
 		Entries: []GitLabCodeQualityEntry{},
 	}
@@ -100,13 +54,18 @@ func ConvertEsLintReportToGitLabReport(esLintReport *EsLintReport) (*GitLabRepor
 	return gitLabReport, nil
 }
 
+// MergeGitLabReports merges the given GitLabReports to a single GitLabReport.
+func MergeGitLabReports(gitLabReports []*GitLabReport) *GitLabReport {
+	gitLabReport := &GitLabReport{
+		Entries: []GitLabCodeQualityEntry{},
+	}
+	for _, r := range gitLabReports {
+		gitLabReport.Entries = append(gitLabReport.Entries, r.Entries...)
+	}
+	return gitLabReport
+}
+
+// WriteGitLabReport writes the GitLabReport into a json file.
 func WriteGitLabReport(gitLabReport *GitLabReport, outputFilePath string) error {
-	data, err := json.MarshalIndent(gitLabReport.Entries, "", "  ")
-	if err != nil {
-		return err
-	}
-	if err := ioutil.WriteFile(outputFilePath, data, 0755); err != nil {
-		return err
-	}
-	return nil
+	return goext.WriteJsonToFile(gitLabReport.Entries, outputFilePath, true)
 }
