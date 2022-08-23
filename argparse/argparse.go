@@ -67,7 +67,6 @@ func ParseArgString(args []string) map[string]string {
 
 	// Make sure to add the last key when no value was provided
 	if nextIsValue || nextCanBeValue {
-		nextIsValue = false
 		argsMap[lastKey] = ""
 	}
 

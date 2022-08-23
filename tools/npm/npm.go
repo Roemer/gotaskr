@@ -103,7 +103,3 @@ func Install(settings *InstallSettings) error {
 func addCache(args []string, cacheDir string) []string {
 	return goext.AddIf(args, cacheDir != "", "--cache", cacheDir)
 }
-
-func addLogLevel(args []string, logLevel string) []string {
-	return goext.AddIf(args, logLevel != "", "--loglevel", logLevel)
-}
