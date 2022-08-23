@@ -11,6 +11,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/roemer/gotaskr/argparse"
 	"github.com/roemer/gotaskr/execr"
+	"github.com/roemer/gotaskr/goext"
 	"github.com/roemer/gotaskr/log"
 )
 
@@ -33,23 +34,52 @@ func Execute() int {
 		return 0
 	}
 
+	// Log start
 	log.Information(strings.Repeat("-", 50))
 	log.Information("Running gotaskr")
 	log.Information(strings.Repeat("-", 50))
 	printArguments()
 	log.Information()
-	err := RunTarget(target)
-	log.Information(strings.Repeat("-", 50))
-	log.Information("Finished running")
-	log.Information(strings.Repeat("-", 50))
-	exitCode := 0
-	// Check the defered errors
-	for _, run := range taskRun {
-		if run.deferedErr != nil {
-			exitCode = 1
-			color.Red("Defered error in '%s': %v", run.name, run.deferedErr)
+	// Validate dependencies and convert dependees to dependencies
+	for _, task := range taskMap {
+		for _, followup := range task.followups {
+			followupTask := taskMap[followup]
+			if followupTask == nil {
+				color.Red("Followup '%s' for '%s' does not exist.", followup, task.name)
+				return 1
+			}
+		}
+		for _, dependency := range task.dependencies {
+			dependencyTask := taskMap[dependency]
+			if dependencyTask == nil {
+				color.Red("Dependency '%s' for '%s' does not exist.", dependency, task.name)
+				return 1
+			}
+		}
+		for _, dependee := range task.dependees {
+			dependeeTask := taskMap[dependee]
+			if dependeeTask == nil {
+				color.Red("Dependee '%s' for '%s' does not exist.", dependee, task.name)
+				return 1
+			}
+			dependeeTask.DependsOn(task.name)
 		}
 	}
+	// Run the target
+	err := RunTarget(target)
+	// Run finished
+	log.Information()
+	log.Information(strings.Repeat("-", 50))
+	log.Information("Finished running")
+	exitCode := 0
+	// Print errors and check the defered errors
+	for _, run := range taskRun {
+		printTaskError(run, true)
+		if run.deferedErr != nil {
+			exitCode = 1
+		}
+	}
+	log.Information(strings.Repeat("-", 50))
 	if err != nil {
 		if ierr, ok := err.(*execr.CmdError); ok {
 			// Custom exit code form CmdErrors
@@ -104,8 +134,10 @@ func RunTarget(target string) error {
 	if currentTask.didRun {
 		return currentTask.err
 	}
+	// Get the flag for exclusive runs
+	exclusive := HasArgument("exclusive") || HasArgument("e")
 	// Run dependencies
-	if len(currentTask.dependencies) > 0 {
+	if !exclusive && len(currentTask.dependencies) > 0 {
 		for _, dependency := range currentTask.dependencies {
 			err := RunTarget(dependency)
 			if err != nil {
@@ -118,28 +150,29 @@ func RunTarget(target string) error {
 	start := time.Now()
 	err := runTaskFunc(currentTask)
 	elapsed := time.Since(start)
-	if currentTask.deferOnError {
-		color.Red("Defered error: %v", err)
+	// Handle error deferring
+	if err != nil && currentTask.deferOnError {
 		currentTask.deferedErr = err
 		err = nil
 	}
-	if currentTask.continueOnError {
+	// Handle error skipping
+	if err != nil && currentTask.continueOnError {
+		currentTask.ignoredErr = err
 		err = nil
 	}
 	currentTask.didRun = true
 	currentTask.duration = elapsed
 	currentTask.err = err
 	taskRun = append(taskRun, currentTask)
+	printTaskFooter(currentTask)
 	if err != nil {
-		color.Red("Failed with error: %v", err)
-		log.Information()
 		return err
 	}
 	log.Information()
-	// Run dependees
-	if len(currentTask.dependees) > 0 {
-		for _, dependee := range currentTask.dependees {
-			err := RunTarget(dependee)
+	// Run followup tasks
+	if !exclusive && len(currentTask.followups) > 0 {
+		for _, followup := range currentTask.followups {
+			err := RunTarget(followup)
 			if err != nil {
 				return err
 			}
@@ -175,34 +208,45 @@ type TaskObject struct {
 	taskFunc        func() error  // The function of the task.
 	dependencies    []string      // A list of dependecy tasks.
 	dependees       []string      // A list of dependee tasks.
+	followups       []string      // A list of followup tasks.
 	continueOnError bool          // A flag to incdicate if the run should continue when an error occured.
 	deferOnError    bool          // A flag to indicate if the error should be deferred until the end.
 	didRun          bool          // A flag to indicate if the task did already run.
 	duration        time.Duration // A runtime duration of the task if it ran already.
 	err             error         // The error (if any) of the task when it ran.
+	ignoredErr      error         // The error (if any) which is ignored.
 	deferedErr      error         // The deferred error (if any) of the task when it ran.
 }
 
 // DependsOn adds dependencies in the given order. Duplicate dependencies are removed.
 func (taskObject *TaskObject) DependsOn(taskName ...string) *TaskObject {
-	keys := make(map[string]bool)
 	for _, entry := range taskName {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			taskObject.dependencies = append(taskObject.dependencies, entry)
+		if entry == taskObject.name {
+			continue
 		}
+		taskObject.dependencies = goext.AppendIfMissing(taskObject.dependencies, entry)
 	}
 	return taskObject
 }
 
 // DependeeOf adds dependees in the given order. Duplicate dependees are removed.
 func (taskObject *TaskObject) DependeeOf(taskName ...string) *TaskObject {
-	keys := make(map[string]bool)
 	for _, entry := range taskName {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			taskObject.dependees = append(taskObject.dependees, entry)
+		if entry == taskObject.name {
+			continue
 		}
+		taskObject.dependees = goext.AppendIfMissing(taskObject.dependees, entry)
+	}
+	return taskObject
+}
+
+// Then adds followup tasks in the given order.
+func (taskObject *TaskObject) Then(taskName ...string) *TaskObject {
+	for _, entry := range taskName {
+		if entry == taskObject.name {
+			continue
+		}
+		taskObject.followups = goext.AppendIfMissing(taskObject.followups, entry)
 	}
 	return taskObject
 }
@@ -261,6 +305,26 @@ func printTaskHeader(taskName string) {
 	log.Information(strings.Repeat("=", 50))
 	log.Informationf("%s", taskName)
 	log.Information(strings.Repeat("=", 50))
+}
+
+func printTaskFooter(task *TaskObject) {
+	log.Information(strings.Repeat("-", 50))
+	log.Informationf("Finished task: %s", formatDuration(task.duration))
+	printTaskError(task, false)
+	log.Information(strings.Repeat("-", 50))
+}
+
+func printTaskError(task *TaskObject, withTaskName bool) {
+	taskString := goext.Ternary(withTaskName, fmt.Sprintf(" in '%s'", task.name), "")
+	if task.err != nil {
+		color.Red("Task error%s: %v", taskString, task.err)
+	}
+	if task.ignoredErr != nil {
+		color.Red("Ignored error%s: %v", taskString, task.ignoredErr)
+	}
+	if task.deferedErr != nil {
+		color.Red("Defered error%s: %v", taskString, task.deferedErr)
+	}
 }
 
 func printTaskRuns() {

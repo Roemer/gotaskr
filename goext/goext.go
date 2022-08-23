@@ -8,12 +8,22 @@ import (
 	"strconv"
 )
 
-// AddIf adds the given values to an array if the condition is fulfilled.
-func AddIf[T any](args []T, cond bool, values ...T) []T {
+// AddIf adds the given values to a slice if the condition is fulfilled.
+func AddIf[T any](slice []T, cond bool, values ...T) []T {
 	if cond {
-		args = append(args, values...)
+		return append(slice, values...)
 	}
-	return args
+	return slice
+}
+
+// AppendIfMissing appends the given element if it is missing in the slice.
+func AppendIfMissing[T comparable](slice []T, value T) []T {
+	for _, ele := range slice {
+		if ele == value {
+			return slice
+		}
+	}
+	return append(slice, value)
 }
 
 // Ternary adds the missing ternary operator.
