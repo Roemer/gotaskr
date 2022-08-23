@@ -33,16 +33,20 @@ func Execute() int {
 		return 0
 	}
 
+	log.Information(strings.Repeat("-", 50))
 	log.Information("Running gotaskr")
+	log.Information(strings.Repeat("-", 50))
 	printArguments()
 	log.Information()
 	err := RunTarget(target)
+	log.Information(strings.Repeat("-", 50))
 	log.Information("Finished running")
+	log.Information(strings.Repeat("-", 50))
 	exitCode := 0
 	// Check the defered errors
 	for _, run := range taskRun {
 		if run.deferedErr != nil {
-			err = run.deferedErr
+			exitCode = 1
 			color.Red("Defered error in '%s': %v", run.name, run.deferedErr)
 		}
 	}
@@ -57,6 +61,7 @@ func Execute() int {
 			// Any other error
 			exitCode = 1
 		}
+
 	}
 	log.Information()
 	printTaskRuns()
@@ -91,7 +96,9 @@ func RunTarget(target string) error {
 	var currentTask = taskMap[target]
 	// Early exit if the target does not exist
 	if currentTask == nil {
-		return fmt.Errorf("Target does not exist: %s", target)
+		err := fmt.Errorf("target does not exist: %s", target)
+		color.Red("%v", err)
+		return err
 	}
 	// Early exit if the task did already run
 	if currentTask.didRun {
@@ -112,6 +119,7 @@ func RunTarget(target string) error {
 	err := runTaskFunc(currentTask)
 	elapsed := time.Since(start)
 	if currentTask.deferOnError {
+		color.Red("Defered error: %v", err)
 		currentTask.deferedErr = err
 		err = nil
 	}
@@ -122,11 +130,12 @@ func RunTarget(target string) error {
 	currentTask.duration = elapsed
 	currentTask.err = err
 	taskRun = append(taskRun, currentTask)
-	log.Information()
 	if err != nil {
 		color.Red("Failed with error: %v", err)
+		log.Information()
 		return err
 	}
+	log.Information()
 	// Run dependees
 	if len(currentTask.dependees) > 0 {
 		for _, dependee := range currentTask.dependees {
@@ -142,7 +151,7 @@ func RunTarget(target string) error {
 func runTaskFunc(currentTask *TaskObject) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("Task panicked: %v", r)
+			err = fmt.Errorf("task panicked: %v", r)
 			log.Information(err)
 		}
 	}()
