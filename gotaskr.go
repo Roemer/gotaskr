@@ -37,7 +37,15 @@ func Execute() int {
 	printArguments()
 	log.Information()
 	err := RunTarget(target)
+	log.Information("Finished running")
 	exitCode := 0
+	// Check the defered errors
+	for _, run := range taskRun {
+		if run.deferedErr != nil {
+			err = run.deferedErr
+			color.Red("Defered error in '%s': %v", run.name, run.deferedErr)
+		}
+	}
 	if err != nil {
 		if ierr, ok := err.(*execr.CmdError); ok {
 			// Custom exit code form CmdErrors
@@ -49,9 +57,8 @@ func Execute() int {
 			// Any other error
 			exitCode = 1
 		}
-		color.Red("Failed with error: %v", err)
-		log.Information()
 	}
+	log.Information()
 	printTaskRuns()
 	return exitCode
 }
@@ -99,15 +106,36 @@ func RunTarget(target string) error {
 			}
 		}
 	}
+	// Run the task itself
 	printTaskHeader(target)
 	start := time.Now()
 	err := runTaskFunc(currentTask)
 	elapsed := time.Since(start)
+	if currentTask.deferOnError {
+		currentTask.deferedErr = err
+		err = nil
+	}
+	if currentTask.continueOnError {
+		err = nil
+	}
 	currentTask.didRun = true
 	currentTask.duration = elapsed
 	currentTask.err = err
 	taskRun = append(taskRun, currentTask)
 	log.Information()
+	if err != nil {
+		color.Red("Failed with error: %v", err)
+		return err
+	}
+	// Run dependees
+	if len(currentTask.dependees) > 0 {
+		for _, dependee := range currentTask.dependees {
+			err := RunTarget(dependee)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return err
 }
 
@@ -133,13 +161,17 @@ func Task(name string, taskFunc func() error) *TaskObject {
 
 // TaskObject represents a registered task.
 type TaskObject struct {
-	name         string        // The name of the task.
-	description  string        // The description of the task.
-	taskFunc     func() error  // The function of the task.
-	dependencies []string      // A list of dependecy tasks.
-	didRun       bool          // A flag to indicate if the task did already run.
-	duration     time.Duration // A runtime duration of the task if it ran already.
-	err          error         // The error (if any) of the task when it ran.
+	name            string        // The name of the task.
+	description     string        // The description of the task.
+	taskFunc        func() error  // The function of the task.
+	dependencies    []string      // A list of dependecy tasks.
+	dependees       []string      // A list of dependee tasks.
+	continueOnError bool          // A flag to incdicate if the run should continue when an error occured.
+	deferOnError    bool          // A flag to indicate if the error should be deferred until the end.
+	didRun          bool          // A flag to indicate if the task did already run.
+	duration        time.Duration // A runtime duration of the task if it ran already.
+	err             error         // The error (if any) of the task when it ran.
+	deferedErr      error         // The deferred error (if any) of the task when it ran.
 }
 
 // DependsOn adds dependencies in the given order. Duplicate dependencies are removed.
@@ -151,6 +183,30 @@ func (taskObject *TaskObject) DependsOn(taskName ...string) *TaskObject {
 			taskObject.dependencies = append(taskObject.dependencies, entry)
 		}
 	}
+	return taskObject
+}
+
+// DependeeOf adds dependees in the given order. Duplicate dependees are removed.
+func (taskObject *TaskObject) DependeeOf(taskName ...string) *TaskObject {
+	keys := make(map[string]bool)
+	for _, entry := range taskName {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			taskObject.dependees = append(taskObject.dependees, entry)
+		}
+	}
+	return taskObject
+}
+
+// ContinueOnError will continue with dependencies or dependees even when the task returned an error.
+func (taskObject *TaskObject) ContinueOnError() *TaskObject {
+	taskObject.continueOnError = true
+	return taskObject
+}
+
+// DeferOnError will continue with dependencies or dependees even when the task returned an error.
+func (taskObject *TaskObject) DeferOnError() *TaskObject {
+	taskObject.deferOnError = true
 	return taskObject
 }
 
@@ -206,7 +262,7 @@ func printTaskRuns() {
 	totalDuration := time.Duration(0)
 	for _, run := range taskRun {
 		text := fmt.Sprintf("%-40s%-20s", run.name, formatDuration(run.duration))
-		if run.err != nil {
+		if run.err != nil || run.deferedErr != nil {
 			color.Red(text)
 			color.Set(color.FgGreen)
 		} else {
