@@ -24,6 +24,9 @@ var taskMap map[string]*TaskObject = make(map[string]*TaskObject)
 // Prepare an array for the tasks that were run (in run order)
 var taskRun []*TaskObject
 
+// The task object of the currently running task
+var currentRunningTask *TaskObject
+
 // Execute is the entry point of gotaskr.
 func Execute() int {
 	log.Initialize(HasArgument("verbose") || HasArgument("v"))
@@ -124,6 +127,7 @@ func HasArgument(argName string) bool {
 // RunTarget runs the given task and all the needed dependencies.
 func RunTarget(target string) error {
 	var currentTask = taskMap[target]
+	currentRunningTask = currentTask
 	// Early exit if the target does not exist
 	if currentTask == nil {
 		err := fmt.Errorf("target does not exist: %s", target)
@@ -145,6 +149,7 @@ func RunTarget(target string) error {
 			}
 		}
 	}
+	currentRunningTask = currentTask
 	// Run the task itself
 	printTaskHeader(target)
 	start := time.Now()
@@ -269,6 +274,11 @@ func (taskObject *TaskObject) Description(description string) *TaskObject {
 	return taskObject
 }
 
+// AddFollowupTask allows to add one or more tasks that should run after the current finished.
+func AddFollowupTask(taskName ...string) {
+	currentRunningTask.Then(taskName...)
+}
+
 func printTasks() {
 	log.Information("Please specify one of the following targets:")
 	var sb strings.Builder
@@ -309,7 +319,8 @@ func printTaskHeader(taskName string) {
 
 func printTaskFooter(task *TaskObject) {
 	log.Information(strings.Repeat("-", 50))
-	log.Informationf("Finished task: %s", formatDuration(task.duration))
+	log.Informationf("%s finished", task.name)
+	log.Informationf("Duration: %s", formatDuration(task.duration))
 	printTaskError(task, false)
 	log.Information(strings.Repeat("-", 50))
 }
