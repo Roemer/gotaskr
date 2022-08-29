@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/roemer/gotaskr/log"
 )
@@ -43,4 +44,15 @@ func RunCommand(cmd *exec.Cmd) error {
 		}
 	}
 	return err
+}
+
+// SplitArgumentString splits the given string by spaces (preserving quotes)
+func SplitArgumentString(s string) []string {
+	quoted := false
+	return strings.FieldsFunc(s, func(r rune) bool {
+		if r == '"' {
+			quoted = !quoted
+		}
+		return !quoted && r == ' '
+	})
 }
