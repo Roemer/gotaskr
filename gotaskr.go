@@ -335,6 +335,9 @@ func printTaskError(task *TaskObject, withTaskName bool) {
 }
 
 func printTaskRuns() {
+	if len(taskRun) == 0 {
+		return
+	}
 	color.Set(color.FgGreen)
 	defer color.Unset()
 	log.Informationf("%-40s%-20s", "Task", "Duration")
