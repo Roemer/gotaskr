@@ -2,21 +2,14 @@
 package execr
 
 import (
-	"fmt"
+	"bytes"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/roemer/gotaskr/log"
 )
-
-// CmdError is an error which is returned when a command failed to execute.
-type CmdError struct {
-	msg      string // Contains the error message
-	ExitCode int    // Contains the exit code of the command
-}
-
-func (e *CmdError) Error() string { return e.msg }
 
 // Run runs an executable with the given arguments.
 func Run(executable string, arguments ...string) error {
@@ -26,24 +19,32 @@ func Run(executable string, arguments ...string) error {
 
 // RunCommand runs a command and writes the stdout and stderr into the console in realtime.
 func RunCommand(cmd *exec.Cmd) error {
+	logArguments(cmd)
+
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-
-	log.Debugf("Executing '%s' with arguments: %s", cmd.Path, cmd.Args[1:])
-
 	err := cmd.Start()
 	if err != nil {
 		return err
 	}
-
 	err = cmd.Wait()
-	if err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			exitCode := exitError.ExitCode()
-			return &CmdError{msg: fmt.Sprintf("cmd failed with exit code %d", exitCode), ExitCode: exitCode}
-		}
-	}
 	return err
+}
+
+func RunCommandGetOutput(cmd *exec.Cmd, alsoOutputToOs bool) (string, string, error) {
+	logArguments(cmd)
+
+	var stdoutBuf, stderrBuf bytes.Buffer
+	if alsoOutputToOs {
+		cmd.Stdout = io.MultiWriter(os.Stdout, &stdoutBuf)
+		cmd.Stderr = io.MultiWriter(os.Stderr, &stderrBuf)
+	} else {
+		cmd.Stdout = &stdoutBuf
+		cmd.Stderr = &stderrBuf
+	}
+	err := cmd.Run()
+	outStr, errStr := stdoutBuf.String(), stderrBuf.String()
+	return outStr, errStr, err
 }
 
 // SplitArgumentString splits the given string by spaces (preserving quotes)
@@ -55,4 +56,8 @@ func SplitArgumentString(s string) []string {
 		}
 		return !quoted && r == ' '
 	})
+}
+
+func logArguments(cmd *exec.Cmd) {
+	log.Debugf("Executing '%s' with arguments: %s", cmd.Path, cmd.Args[1:])
 }

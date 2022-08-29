@@ -104,8 +104,24 @@ func WriteJsonToFile(object any, outputFilePath string, indented bool) error {
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(outputFilePath, data, 0755); err != nil {
+	if err := os.WriteFile(outputFilePath, data, os.ModePerm); err != nil {
 		return err
 	}
 	return nil
+}
+
+// EnvExists checks if the given environment variable exists or not.
+func EnvExists(key string) bool {
+	if _, ok := os.LookupEnv(key); ok {
+		return true
+	}
+	return false
+}
+
+// GetEnvOrDefault returns the value if the environment variable exists or the default otherwise.
+func GetEnvOrDefault(key string, defaultValue string) (string, bool) {
+	if _, ok := os.LookupEnv(key); ok {
+		return key, true
+	}
+	return defaultValue, false
 }

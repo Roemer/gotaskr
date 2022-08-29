@@ -10,7 +10,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/roemer/gotaskr/argparse"
-	"github.com/roemer/gotaskr/execr"
 	"github.com/roemer/gotaskr/goext"
 	"github.com/roemer/gotaskr/log"
 )
@@ -84,10 +83,7 @@ func Execute() int {
 	}
 	log.Information(strings.Repeat("-", 50))
 	if err != nil {
-		if ierr, ok := err.(*execr.CmdError); ok {
-			// Custom exit code form CmdErrors
-			exitCode = ierr.ExitCode
-		} else if ierr, ok := err.(*exec.ExitError); ok {
+		if ierr, ok := err.(*exec.ExitError); ok {
 			// Exit code from exec
 			exitCode = ierr.ExitCode()
 		} else {
