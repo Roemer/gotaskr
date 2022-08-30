@@ -19,7 +19,7 @@ func Login(settings *LoginSettings) error {
 	}
 	args = append(args, "--username", settings.Username)
 	args = append(args, "--password", settings.Password)
-	goext.AddIf(args, settings.Registry != "", settings.Registry)
+	args = goext.AddIf(args, settings.Registry != "", settings.Registry)
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	return execr.RunCommand(cmd)
@@ -33,7 +33,7 @@ func Logout(settings *LogoutSettings) error {
 	args := []string{
 		"logout",
 	}
-	goext.AddIf(args, settings.Registry != "", settings.Registry)
+	args = goext.AddIf(args, settings.Registry != "", settings.Registry)
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	return execr.RunCommand(cmd)
