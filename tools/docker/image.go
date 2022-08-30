@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 
 	"github.com/roemer/gotaskr/execr"
 	"github.com/roemer/gotaskr/goext"
@@ -89,7 +90,7 @@ type LoadSettings struct {
 	InputFile        string
 }
 
-func Load(settings *LoadSettings) error {
+func Load(settings *LoadSettings) ([]string, error) {
 	args := []string{
 		"load",
 	}
@@ -97,7 +98,18 @@ func Load(settings *LoadSettings) error {
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd)
+	stdout, _, err := execr.RunCommandGetOutput(cmd, true)
+
+	// Parse out all loaded images
+	loadedImages := []string{}
+	re := regexp.MustCompile(`Loaded image: (.*)`)
+	matched := re.FindAllStringSubmatch(stdout, -1)
+	for _, match := range matched {
+		loadedImages = append(loadedImages, match[1])
+	}
+
+	// Return the loaded images
+	return loadedImages, err
 }
 
 type PushSettings struct {
