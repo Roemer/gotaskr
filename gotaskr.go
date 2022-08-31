@@ -20,6 +20,9 @@ var argumentsMap = argparse.ParseArgs()
 // Prepare a map for all the task objects
 var taskMap map[string]*TaskObject = make(map[string]*TaskObject)
 
+// Prepare a list of the task names. Used to print the tasks in order.
+var taskList []string
+
 // Prepare an array for the tasks that were run (in run order)
 var taskRun []*TaskObject
 
@@ -199,13 +202,21 @@ func Task(name string, taskFunc func() error) *TaskObject {
 	task.name = name
 	task.taskFunc = taskFunc
 	taskMap[name] = &task
+	taskList = append(taskList, name)
 	return &task
+}
+
+type argument struct {
+	name        string
+	description string
+	optional    bool
 }
 
 // TaskObject represents a registered task.
 type TaskObject struct {
 	name            string        // The name of the task.
 	description     string        // The description of the task.
+	arguments       []argument    // The arguments of the task.
 	taskFunc        func() error  // The function of the task.
 	dependencies    []string      // A list of dependecy tasks.
 	dependees       []string      // A list of dependee tasks.
@@ -270,6 +281,17 @@ func (taskObject *TaskObject) Description(description string) *TaskObject {
 	return taskObject
 }
 
+// Argument adds a description for an argument. Will be shown when the help is displayed.
+func (taskObject *TaskObject) Argument(argumentName string, argumentDescription string, optional bool) *TaskObject {
+	argument := argument{
+		name:        argumentName,
+		description: argumentDescription,
+		optional:    optional,
+	}
+	taskObject.arguments = append(taskObject.arguments, argument)
+	return taskObject
+}
+
 // AddFollowupTask allows to add one or more tasks that should run after the current finished.
 func AddFollowupTask(taskName ...string) {
 	currentRunningTask.Then(taskName...)
@@ -278,12 +300,21 @@ func AddFollowupTask(taskName ...string) {
 func printTasks() {
 	log.Information("Please specify one of the following targets:")
 	var sb strings.Builder
-	for _, task := range taskMap {
-		fmt.Fprintf(&sb, " - %s", task.name)
-		if task.description != "" {
-			fmt.Fprintf(&sb, ": %s", task.description)
-		}
+	for _, taskName := range taskList {
+		task := taskMap[taskName]
+		fmt.Fprintf(&sb, "- %s", task.name)
 		sb.WriteString(log.Newline)
+		if task.description != "" {
+			fmt.Fprintf(&sb, "  %s", task.description)
+			sb.WriteString(log.Newline)
+		}
+		if len(task.arguments) > 0 {
+			fmt.Fprintln(&sb, "  Arguments:")
+			for _, arg := range task.arguments {
+				fmt.Fprintf(&sb, "    %s: %s%s", arg.name, arg.description, goext.Ternary(arg.optional, " (optional)", ""))
+				sb.WriteString(log.Newline)
+			}
+		}
 	}
 	log.Information(sb.String())
 }
