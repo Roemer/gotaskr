@@ -16,27 +16,24 @@ func ParseArgString(args []string) map[string]string {
 	var argsMap map[string]string = make(map[string]string)
 
 	var lastKey = ""
-	var nextIsValue = false
 	var nextCanBeValue = false
 	for _, arg := range args {
-		// The current value must be a value to a previous key
-		if nextIsValue {
-			nextIsValue = false
-			argsMap[lastKey] = arg
-			continue
-		}
-
 		// Long Options
 		if strings.HasPrefix(arg, "--") {
 			if strings.Contains(arg, "=") {
+				// Key with value
 				parts := strings.SplitN(arg, "=", 2)
 				keyPart := parts[0]
 				valuePart := parts[1]
 				key := keyPart[2:]
 				argsMap[key] = valuePart
+				lastKey = ""
 			} else {
-				lastKey = arg[2:]
-				nextIsValue = true
+				// Key only
+				key := arg[2:]
+				lastKey = key
+				nextCanBeValue = true
+				argsMap[key] = ""
 			}
 			continue
 		}
@@ -49,16 +46,19 @@ func ParseArgString(args []string) map[string]string {
 				for _, c := range optionChars {
 					argsMap[string(c)] = ""
 				}
+				lastKey = ""
 			} else {
 				// Only one flag, so the next might be a value
-				lastKey = optionChars
+				key := optionChars
+				lastKey = key
 				nextCanBeValue = true
+				argsMap[key] = ""
 			}
 			continue
 		}
 
 		// The current value is no key so it seems to be a value to a previous key
-		if nextCanBeValue {
+		if nextCanBeValue && len(lastKey) > 0 {
 			nextCanBeValue = false
 			argsMap[lastKey] = arg
 			continue
@@ -66,7 +66,7 @@ func ParseArgString(args []string) map[string]string {
 	}
 
 	// Make sure to add the last key when no value was provided
-	if nextIsValue || nextCanBeValue {
+	if nextCanBeValue && len(lastKey) > 0 {
 		argsMap[lastKey] = ""
 	}
 

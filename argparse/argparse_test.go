@@ -78,3 +78,51 @@ func TestComplex(t *testing.T) {
 	assert.Empty(argsMap["c"])
 	assert.Empty(argsMap["f"])
 }
+
+func TestComplex2(t *testing.T) {
+	assert := assert.New(t)
+
+	argsMap := ParseArgString(strings.Fields("--dry-run --environment t1"))
+
+	assert.Equal(2, len(argsMap))
+	assert.Contains(argsMap, "dry-run")
+	assert.Contains(argsMap, "environment")
+	assert.Empty(argsMap["dry-run"])
+	assert.Equal("t1", argsMap["environment"])
+}
+
+func TestComplex3(t *testing.T) {
+	assert := assert.New(t)
+
+	argsMap := ParseArgString(strings.Fields("--dry-run -ac --environment t1 -d -b 1"))
+
+	assert.Equal(6, len(argsMap))
+	assert.Contains(argsMap, "dry-run")
+	assert.Contains(argsMap, "environment")
+	assert.Empty(argsMap["dry-run"])
+	assert.Equal("t1", argsMap["environment"])
+	assert.Contains(argsMap, "a")
+	assert.Contains(argsMap, "b")
+	assert.Contains(argsMap, "c")
+	assert.Contains(argsMap, "d")
+	assert.Empty(argsMap["a"])
+	assert.Equal("1", argsMap["b"])
+	assert.Empty(argsMap["c"])
+	assert.Empty(argsMap["d"])
+}
+
+func TestComplex4(t *testing.T) {
+	assert := assert.New(t)
+
+	argsMap := ParseArgString(strings.Fields("-d -ab 1 -c"))
+
+	assert.Equal(4, len(argsMap))
+	assert.Contains(argsMap, "a")
+	assert.Contains(argsMap, "b")
+	assert.Contains(argsMap, "c")
+	assert.Contains(argsMap, "d")
+	assert.Empty(argsMap["a"])
+	assert.Empty(argsMap["b"])
+	assert.Empty(argsMap["c"])
+	assert.Empty(argsMap["d"])
+}
