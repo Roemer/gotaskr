@@ -117,7 +117,7 @@ func GetArgumentOrDefault(argName string, defaultValue string) (string, bool) {
 	return defaultValue, false
 }
 
-// HasArgument returns true if an arument was set and false otherwise.
+// HasArgument returns true if an arument was set and false otherwise, regardless of the value.
 func HasArgument(argName string) bool {
 	_, exist := GetArgument(argName)
 	return exist

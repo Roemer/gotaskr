@@ -3,6 +3,7 @@ package goext
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -124,4 +125,16 @@ func GetEnvOrDefault(key string, defaultValue string) (string, bool) {
 		return key, true
 	}
 	return defaultValue, false
+}
+
+// FileExists checks if a file exists (and it is not a directory).
+func FileExists(filePath string) (bool, error) {
+	info, err := os.Stat(filePath)
+	if err == nil {
+		return !info.IsDir(), nil
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	return false, err
 }
