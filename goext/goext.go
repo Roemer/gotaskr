@@ -138,3 +138,9 @@ func FileExists(filePath string) (bool, error) {
 	}
 	return false, err
 }
+
+// Pass is a no-op function that can be used to set variables to used.
+// Usefull during development but must be removed afterwards!
+func Pass(i ...interface{}) {
+	// No-Op
+}
