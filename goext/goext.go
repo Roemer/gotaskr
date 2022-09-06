@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // AddIf adds the given values to a slice if the condition is fulfilled.
@@ -143,4 +144,22 @@ func FileExists(filePath string) (bool, error) {
 // Usefull during development but must be removed afterwards!
 func Pass(i ...interface{}) {
 	// No-Op
+}
+
+func TrimAllPrefix(s, prefix string) string {
+	for strings.HasPrefix(s, prefix) {
+		s = s[len(prefix):]
+	}
+	return s
+}
+
+func TrimAllSuffix(s, suffix string) string {
+	for strings.HasSuffix(s, suffix) {
+		s = s[:len(s)-len(suffix)]
+	}
+	return s
+}
+
+func TrimNewlineSuffix(v string) string {
+	return TrimAllSuffix(TrimAllSuffix(v, "\r\n"), "\n")
 }
