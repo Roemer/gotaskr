@@ -63,9 +63,9 @@ func RunInDirectory(path string, f func() error) (err error) {
 	}
 	// Make sure to reset to the previous folder
 	defer func() {
-		err = os.Chdir(pwd)
-		if err != nil {
-			err = fmt.Errorf("cannot change back to directory %s: %v", strconv.Quote(pwd), err)
+		// Set the error only if the main error is not yet set
+		if tempErr := os.Chdir(pwd); tempErr != nil && err == nil {
+			err = fmt.Errorf("cannot change back to directory %s: %v", strconv.Quote(pwd), tempErr)
 		}
 	}()
 	// Change the path
