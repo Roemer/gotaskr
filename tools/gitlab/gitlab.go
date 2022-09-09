@@ -6,6 +6,11 @@ import (
 	"github.com/roemer/gotaskr/tools/eslint"
 )
 
+// IsRunningOnGitLab returns a flag, if we are currenlty running on gitlab
+func IsRunningOnGitLab() bool {
+	return goext.EnvExists("GITLAB_CI")
+}
+
 // GitLabReport defines the data for the quality report for GitLab.
 // See https://docs.gitlab.com/ee/ci/testing/code_quality.html#implementing-a-custom-tool for details
 type GitLabReport struct {
