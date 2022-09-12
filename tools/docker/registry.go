@@ -13,7 +13,7 @@ type LoginSettings struct {
 	Password string
 }
 
-func Login(settings *LoginSettings) error {
+func Login(settings *LoginSettings, outputToConsole bool) error {
 	args := []string{
 		"login",
 	}
@@ -22,19 +22,19 @@ func Login(settings *LoginSettings) error {
 	args = goext.AddIf(args, settings.Registry != "", settings.Registry)
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
-	return execr.RunCommand(cmd)
+	return execr.RunCommand(cmd, outputToConsole)
 }
 
 type LogoutSettings struct {
 	Registry string
 }
 
-func Logout(settings *LogoutSettings) error {
+func Logout(settings *LogoutSettings, outputToConsole bool) error {
 	args := []string{
 		"logout",
 	}
 	args = goext.AddIf(args, settings.Registry != "", settings.Registry)
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
-	return execr.RunCommand(cmd)
+	return execr.RunCommand(cmd, outputToConsole)
 }

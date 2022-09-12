@@ -2,30 +2,40 @@ package mvn
 
 import (
 	"os/exec"
+	"strings"
 
 	"github.com/roemer/gotaskr/execr"
+	"github.com/roemer/gotaskr/goext"
 )
 
-type MvnSettings struct {
-	WorkingDirectory string
+type MvnRunSettings struct {
+	WorkingDirectory   string
+	Phases             []string
+	Projects           []string
+	AlsoMake           bool
+	BatchMode          bool
+	Debug              bool
+	NoTransferProgress bool
+	Offline            bool
+	Quiet              bool
+	Version            bool
+	ShowVersion        bool
 }
 
-type CleanInstallSettings struct {
-	MvnSettings
-	Project string
-}
+func Run(settings MvnRunSettings, outputToConsole bool) error {
+	args := []string{}
+	args = append(args, settings.Phases...)
+	args = append(args, "--projects", strings.Join(settings.Projects, ","))
+	args = goext.AddIf(args, settings.AlsoMake, "--also-make")
+	args = goext.AddIf(args, settings.BatchMode, "--batch-mode")
+	args = goext.AddIf(args, settings.Debug, "--debug")
+	args = goext.AddIf(args, settings.NoTransferProgress, "--no-transfer-progress")
+	args = goext.AddIf(args, settings.Offline, "--offline")
+	args = goext.AddIf(args, settings.Quiet, "--quiet")
+	args = goext.AddIf(args, settings.Version, "--version")
+	args = goext.AddIf(args, settings.ShowVersion, "--show-version")
 
-func CleanInstall(settings CleanInstallSettings) error {
-	args := []string{
-		"clean",
-		"install",
-		"--projects",
-		settings.Project,
-		"--also-make",
-		"--no-transfer-progress",
-		"--batch-mode",
-	}
 	cmd := exec.Command("mvn", args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd)
+	return execr.RunCommand(cmd, outputToConsole)
 }

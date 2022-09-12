@@ -40,7 +40,7 @@ func (settings *BuildSettings) AddBuildArgs(buildArgs ...string) *BuildSettings 
 	return settings
 }
 
-func Build(settings *BuildSettings) error {
+func Build(settings *BuildSettings, outputToConsole bool) error {
 	args := []string{
 		"build",
 	}
@@ -59,7 +59,7 @@ func Build(settings *BuildSettings) error {
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
 	cmd.Stdin = os.Stdin
-	return execr.RunCommand(cmd)
+	return execr.RunCommand(cmd, outputToConsole)
 }
 
 type SaveSettings struct {
@@ -68,7 +68,7 @@ type SaveSettings struct {
 	ImageReference   string
 }
 
-func Save(settings *SaveSettings) error {
+func Save(settings *SaveSettings, outputToConsole bool) error {
 	args := []string{
 		"save",
 	}
@@ -82,7 +82,7 @@ func Save(settings *SaveSettings) error {
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd)
+	return execr.RunCommand(cmd, outputToConsole)
 }
 
 type LoadSettings struct {
@@ -90,7 +90,7 @@ type LoadSettings struct {
 	InputFile        string
 }
 
-func Load(settings *LoadSettings) ([]string, error) {
+func Load(settings *LoadSettings, outputToConsole bool) ([]string, error) {
 	args := []string{
 		"load",
 	}
@@ -98,7 +98,7 @@ func Load(settings *LoadSettings) ([]string, error) {
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	stdout, _, err := execr.RunCommandGetOutput(cmd, true)
+	stdout, _, err := execr.RunCommandGetOutput(cmd, outputToConsole)
 
 	// Parse out all loaded images
 	loadedImages := []string{}
@@ -117,7 +117,7 @@ type PushSettings struct {
 	ImageReference   string
 }
 
-func Push(settings *PushSettings) error {
+func Push(settings *PushSettings, outputToConsole bool) error {
 	args := []string{
 		"push",
 	}
@@ -125,5 +125,5 @@ func Push(settings *PushSettings) error {
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd)
+	return execr.RunCommand(cmd, outputToConsole)
 }

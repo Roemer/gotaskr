@@ -11,7 +11,7 @@ type InitSettings struct {
 	WorkingDirectory string
 }
 
-func Init(settings *InitSettings) error {
+func Init(settings *InitSettings, outputToConsole bool) error {
 	if settings == nil {
 		settings = &InitSettings{}
 	}
@@ -21,7 +21,7 @@ func Init(settings *InitSettings) error {
 	}
 	cmd := exec.Command("npm", args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd)
+	return execr.RunCommand(cmd, outputToConsole)
 }
 
 type RunSettings struct {
@@ -29,7 +29,7 @@ type RunSettings struct {
 	Script           string
 }
 
-func Run(settings *RunSettings) error {
+func Run(settings *RunSettings, outputToConsole bool) error {
 	if settings == nil {
 		settings = &RunSettings{}
 	}
@@ -39,11 +39,11 @@ func Run(settings *RunSettings) error {
 	}
 	cmd := exec.Command("npm", args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd)
+	return execr.RunCommand(cmd, outputToConsole)
 }
 
-func RunScript(script string) error {
-	return Run(&RunSettings{Script: script})
+func RunScript(script string, outputToConsole bool) error {
+	return Run(&RunSettings{Script: script}, outputToConsole)
 }
 
 type CleanInstallSettings struct {
@@ -53,7 +53,7 @@ type CleanInstallSettings struct {
 	PreferOffline    bool
 }
 
-func CleanInstall(settings *CleanInstallSettings) error {
+func CleanInstall(settings *CleanInstallSettings, outputToConsole bool) error {
 	if settings == nil {
 		settings = &CleanInstallSettings{}
 	}
@@ -65,7 +65,7 @@ func CleanInstall(settings *CleanInstallSettings) error {
 	args = addCache(args, settings.CacheDir)
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd)
+	return execr.RunCommand(cmd, outputToConsole)
 }
 
 type InstallSettings struct {
@@ -80,7 +80,7 @@ type InstallSettings struct {
 	SaveExact        bool
 }
 
-func Install(settings *InstallSettings) error {
+func Install(settings *InstallSettings, outputToConsole bool) error {
 	if settings == nil {
 		settings = &InstallSettings{}
 	}
@@ -97,7 +97,7 @@ func Install(settings *InstallSettings) error {
 	args = addCache(args, settings.CacheDir)
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd)
+	return execr.RunCommand(cmd, outputToConsole)
 }
 
 func addCache(args []string, cacheDir string) []string {

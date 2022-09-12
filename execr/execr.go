@@ -12,29 +12,31 @@ import (
 )
 
 // Run runs an executable with the given arguments.
-func Run(executable string, arguments ...string) error {
+func Run(executable string, outputToConsole bool, arguments ...string) error {
 	cmd := exec.Command(executable, arguments...)
-	return RunCommand(cmd)
+	return RunCommand(cmd, outputToConsole)
 }
 
 // Run runs an executable with the given arguments and returns the output.
-func RunGetOutput(executable string, arguments ...string) (string, string, error) {
+func RunGetOutput(executable string, outputToConsole bool, arguments ...string) (string, string, error) {
 	cmd := exec.Command(executable, arguments...)
-	return RunCommandGetOutput(cmd, false)
+	return RunCommandGetOutput(cmd, outputToConsole)
 }
 
 // Run runs an executable with the given arguments and returns the output.
-func RunGetCombinedOutput(executable string, arguments ...string) (string, error) {
+func RunGetCombinedOutput(executable string, outputToConsole bool, arguments ...string) (string, error) {
 	cmd := exec.Command(executable, arguments...)
-	return RunCommandGetCombinedOutput(cmd, false)
+	return RunCommandGetCombinedOutput(cmd, outputToConsole)
 }
 
 // RunCommand runs a command and writes the stdout and stderr into the console in realtime.
-func RunCommand(cmd *exec.Cmd) error {
+func RunCommand(cmd *exec.Cmd, outputToConsole bool) error {
 	logArguments(cmd)
 
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	if outputToConsole {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 	err := cmd.Start()
 	if err != nil {
 		return err
@@ -43,11 +45,11 @@ func RunCommand(cmd *exec.Cmd) error {
 	return err
 }
 
-func RunCommandGetOutput(cmd *exec.Cmd, alsoOutputToOs bool) (string, string, error) {
+func RunCommandGetOutput(cmd *exec.Cmd, outputToConsole bool) (string, string, error) {
 	logArguments(cmd)
 
 	var stdoutBuf, stderrBuf bytes.Buffer
-	if alsoOutputToOs {
+	if outputToConsole {
 		cmd.Stdout = io.MultiWriter(os.Stdout, &stdoutBuf)
 		cmd.Stderr = io.MultiWriter(os.Stderr, &stderrBuf)
 	} else {
@@ -59,11 +61,11 @@ func RunCommandGetOutput(cmd *exec.Cmd, alsoOutputToOs bool) (string, string, er
 	return outStr, errStr, err
 }
 
-func RunCommandGetCombinedOutput(cmd *exec.Cmd, alsoOutputToOs bool) (string, error) {
+func RunCommandGetCombinedOutput(cmd *exec.Cmd, outputToConsole bool) (string, error) {
 	logArguments(cmd)
 
 	var outBuf bytes.Buffer
-	if alsoOutputToOs {
+	if outputToConsole {
 		cmd.Stdout = io.MultiWriter(os.Stdout, &outBuf)
 		cmd.Stderr = io.MultiWriter(os.Stderr, &outBuf)
 	} else {
@@ -75,7 +77,7 @@ func RunCommandGetCombinedOutput(cmd *exec.Cmd, alsoOutputToOs bool) (string, er
 	return outStr, err
 }
 
-// SplitArgumentString splits the given string by spaces (preserving quotes)
+// SplitArgumentString splits the given string by spaces (preserving quotes).
 func SplitArgumentString(s string) []string {
 	quoted := false
 	return strings.FieldsFunc(s, func(r rune) bool {
@@ -86,6 +88,7 @@ func SplitArgumentString(s string) []string {
 	})
 }
 
+// SplitByNewLine splits the given value by newlines.
 func SplitByNewLine(value string) []string {
 	return strings.Split(strings.ReplaceAll(value, "\r\n", "\n"), "\n")
 }
