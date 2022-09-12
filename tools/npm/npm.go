@@ -42,7 +42,7 @@ func Run(outputToConsole bool, settings *RunSettings) error {
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
-func RunScript(script string, outputToConsole bool) error {
+func RunScript(outputToConsole bool, script string) error {
 	return Run(outputToConsole, &RunSettings{Script: script})
 }
 
