@@ -73,7 +73,6 @@ func Execute() int {
 	// Run the target
 	err := RunTarget(target)
 	// Run finished
-	log.Information()
 	log.Information(strings.Repeat("-", 50))
 	log.Information("Finished running")
 	exitCode := 0
@@ -169,10 +168,10 @@ func RunTarget(target string) error {
 	currentTask.err = err
 	taskRun = append(taskRun, currentTask)
 	printTaskFooter(currentTask)
+	log.Information()
 	if err != nil {
 		return err
 	}
-	log.Information()
 	// Run followup tasks
 	if !exclusive && len(currentTask.followups) > 0 {
 		for _, followup := range currentTask.followups {
