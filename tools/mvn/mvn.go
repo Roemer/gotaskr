@@ -22,7 +22,7 @@ type MvnRunSettings struct {
 	ShowVersion        bool
 }
 
-func Run(settings MvnRunSettings, outputToConsole bool) error {
+func Run(outputToConsole bool, settings MvnRunSettings) error {
 	args := []string{}
 	args = append(args, settings.Phases...)
 	args = append(args, "--projects", strings.Join(settings.Projects, ","))
@@ -37,5 +37,5 @@ func Run(settings MvnRunSettings, outputToConsole bool) error {
 
 	cmd := exec.Command("mvn", args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd, outputToConsole)
+	return execr.RunCommand(outputToConsole, cmd)
 }

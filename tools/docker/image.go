@@ -40,7 +40,7 @@ func (settings *BuildSettings) AddBuildArgs(buildArgs ...string) *BuildSettings 
 	return settings
 }
 
-func Build(settings *BuildSettings, outputToConsole bool) error {
+func Build(outputToConsole bool, settings *BuildSettings) error {
 	args := []string{
 		"build",
 	}
@@ -59,7 +59,7 @@ func Build(settings *BuildSettings, outputToConsole bool) error {
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
 	cmd.Stdin = os.Stdin
-	return execr.RunCommand(cmd, outputToConsole)
+	return execr.RunCommand(outputToConsole, cmd)
 }
 
 type SaveSettings struct {
@@ -68,7 +68,7 @@ type SaveSettings struct {
 	ImageReference   string
 }
 
-func Save(settings *SaveSettings, outputToConsole bool) error {
+func Save(outputToConsole bool, settings *SaveSettings) error {
 	args := []string{
 		"save",
 	}
@@ -82,7 +82,7 @@ func Save(settings *SaveSettings, outputToConsole bool) error {
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd, outputToConsole)
+	return execr.RunCommand(outputToConsole, cmd)
 }
 
 type LoadSettings struct {
@@ -90,7 +90,7 @@ type LoadSettings struct {
 	InputFile        string
 }
 
-func Load(settings *LoadSettings, outputToConsole bool) ([]string, error) {
+func Load(outputToConsole bool, settings *LoadSettings) ([]string, error) {
 	args := []string{
 		"load",
 	}
@@ -98,7 +98,7 @@ func Load(settings *LoadSettings, outputToConsole bool) ([]string, error) {
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	stdout, _, err := execr.RunCommandGetOutput(cmd, outputToConsole)
+	stdout, _, err := execr.RunCommandGetOutput(outputToConsole, cmd)
 
 	// Parse out all loaded images
 	loadedImages := []string{}
@@ -117,7 +117,7 @@ type PushSettings struct {
 	ImageReference   string
 }
 
-func Push(settings *PushSettings, outputToConsole bool) error {
+func Push(outputToConsole bool, settings *PushSettings) error {
 	args := []string{
 		"push",
 	}
@@ -125,5 +125,5 @@ func Push(settings *PushSettings, outputToConsole bool) error {
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd, outputToConsole)
+	return execr.RunCommand(outputToConsole, cmd)
 }

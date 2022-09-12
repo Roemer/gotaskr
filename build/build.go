@@ -20,10 +20,10 @@ func init() {
 }
 
 func UpdateDependencies() error {
-	if err := execr.Run("go", true, "get", "-u"); err != nil {
+	if err := execr.Run(true, "go", "get", "-u"); err != nil {
 		return err
 	}
-	if err := execr.Run("go", true, "mod", "tidy"); err != nil {
+	if err := execr.Run(true, "go", "mod", "tidy"); err != nil {
 		return err
 	}
 	return nil

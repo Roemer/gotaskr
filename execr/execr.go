@@ -12,25 +12,25 @@ import (
 )
 
 // Run runs an executable with the given arguments.
-func Run(executable string, outputToConsole bool, arguments ...string) error {
+func Run(outputToConsole bool, executable string, arguments ...string) error {
 	cmd := exec.Command(executable, arguments...)
-	return RunCommand(cmd, outputToConsole)
+	return RunCommand(outputToConsole, cmd)
 }
 
 // Run runs an executable with the given arguments and returns the output.
-func RunGetOutput(executable string, outputToConsole bool, arguments ...string) (string, string, error) {
+func RunGetOutput(outputToConsole bool, executable string, arguments ...string) (string, string, error) {
 	cmd := exec.Command(executable, arguments...)
-	return RunCommandGetOutput(cmd, outputToConsole)
+	return RunCommandGetOutput(outputToConsole, cmd)
 }
 
 // Run runs an executable with the given arguments and returns the output.
-func RunGetCombinedOutput(executable string, outputToConsole bool, arguments ...string) (string, error) {
+func RunGetCombinedOutput(outputToConsole bool, executable string, arguments ...string) (string, error) {
 	cmd := exec.Command(executable, arguments...)
-	return RunCommandGetCombinedOutput(cmd, outputToConsole)
+	return RunCommandGetCombinedOutput(outputToConsole, cmd)
 }
 
 // RunCommand runs a command and writes the stdout and stderr into the console in realtime.
-func RunCommand(cmd *exec.Cmd, outputToConsole bool) error {
+func RunCommand(outputToConsole bool, cmd *exec.Cmd) error {
 	logArguments(cmd)
 
 	if outputToConsole {
@@ -45,7 +45,7 @@ func RunCommand(cmd *exec.Cmd, outputToConsole bool) error {
 	return err
 }
 
-func RunCommandGetOutput(cmd *exec.Cmd, outputToConsole bool) (string, string, error) {
+func RunCommandGetOutput(outputToConsole bool, cmd *exec.Cmd) (string, string, error) {
 	logArguments(cmd)
 
 	var stdoutBuf, stderrBuf bytes.Buffer
@@ -61,7 +61,7 @@ func RunCommandGetOutput(cmd *exec.Cmd, outputToConsole bool) (string, string, e
 	return outStr, errStr, err
 }
 
-func RunCommandGetCombinedOutput(cmd *exec.Cmd, outputToConsole bool) (string, error) {
+func RunCommandGetCombinedOutput(outputToConsole bool, cmd *exec.Cmd) (string, error) {
 	logArguments(cmd)
 
 	var outBuf bytes.Buffer
