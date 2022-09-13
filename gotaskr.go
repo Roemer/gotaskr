@@ -40,9 +40,9 @@ func Execute() int {
 	}
 
 	// Log start
-	log.Information(strings.Repeat("-", 50))
+	log.Information(strings.Repeat("-", 60))
 	log.Information("Running gotaskr")
-	log.Information(strings.Repeat("-", 50))
+	log.Information(strings.Repeat("-", 60))
 	printArguments()
 	log.Information()
 	// Validate dependencies and convert dependees to dependencies
@@ -70,30 +70,20 @@ func Execute() int {
 			dependeeTask.DependsOn(task.name)
 		}
 	}
-	// Run the target
+	// Run the main target
 	err := RunTarget(target)
 	// Run finished
-	log.Information(strings.Repeat("-", 50))
+	log.Information(strings.Repeat("-", 60))
 	log.Information("Finished running")
-	exitCode := 0
+	exitCode := getExitCodeFromError(err)
 	// Print errors and check the defered errors
 	for _, run := range taskRun {
 		printTaskError(run, true)
-		if run.deferedErr != nil {
-			exitCode = 1
+		if exitCode == 0 {
+			exitCode = getExitCodeFromTaskRun(run)
 		}
 	}
-	log.Information(strings.Repeat("-", 50))
-	if err != nil {
-		if ierr, ok := err.(*exec.ExitError); ok {
-			// Exit code from exec
-			exitCode = ierr.ExitCode()
-		} else {
-			// Any other error
-			exitCode = 1
-		}
-
-	}
+	log.Information(strings.Repeat("-", 60))
 	log.Information()
 	printTaskRuns()
 	return exitCode
@@ -143,7 +133,12 @@ func RunTarget(target string) error {
 		for _, dependency := range currentTask.dependencies {
 			err := RunTarget(dependency)
 			if err != nil {
-				return err
+				if currentTask.deferOnError {
+					// Handle deferred errors
+					currentTask.deferedErr = err
+				} else {
+					return err
+				}
 			}
 		}
 	}
@@ -170,6 +165,7 @@ func RunTarget(target string) error {
 	printTaskFooter(currentTask)
 	log.Information()
 	if err != nil {
+		// Abort execution
 		return err
 	}
 	// Run followup tasks
@@ -177,11 +173,22 @@ func RunTarget(target string) error {
 		for _, followup := range currentTask.followups {
 			err := RunTarget(followup)
 			if err != nil {
-				return err
+				if currentTask.deferOnError {
+					// Handle deferred errors
+					currentTask.deferedErr = err
+				} else {
+					return err
+				}
 			}
 		}
 	}
-	return err
+	if err != nil {
+		return err
+	}
+	if currentTask.deferedErr != nil {
+		return currentTask.deferedErr
+	}
+	return nil
 }
 
 func runTaskFunc(currentTask *TaskObject) (err error) {
@@ -338,17 +345,17 @@ func printArguments() {
 }
 
 func printTaskHeader(taskName string) {
-	log.Information(strings.Repeat("=", 50))
+	log.Information(strings.Repeat("=", 60))
 	log.Informationf("%s", taskName)
-	log.Information(strings.Repeat("=", 50))
+	log.Information(strings.Repeat("=", 60))
 }
 
 func printTaskFooter(task *TaskObject) {
-	log.Information(strings.Repeat("-", 50))
-	log.Informationf("%s finished", task.name)
+	log.Information(strings.Repeat("-", 60))
+	log.Informationf("/%s", task.name)
 	log.Informationf("Duration: %s", formatDuration(task.duration))
 	printTaskError(task, false)
-	log.Information(strings.Repeat("-", 50))
+	log.Information(strings.Repeat("-", 60))
 }
 
 func printTaskError(task *TaskObject, withTaskName bool) {
@@ -370,11 +377,11 @@ func printTaskRuns() {
 	}
 	color.Set(color.FgGreen)
 	defer color.Unset()
-	log.Informationf("%-40s%-20s", "Task", "Duration")
-	log.Information(strings.Repeat("-", 60))
+	log.Informationf("%-50s%-13s%-17s", "Task", "Exit Code", "Duration")
+	log.Information(strings.Repeat("-", 80))
 	totalDuration := time.Duration(0)
 	for _, run := range taskRun {
-		text := fmt.Sprintf("%-40s%-20s", run.name, formatDuration(run.duration))
+		text := fmt.Sprintf("%-50s%-13d%-17s", run.name, getExitCodeFromTaskRun(run), formatDuration(run.duration))
 		if run.err != nil || run.deferedErr != nil {
 			color.Red(text)
 			color.Set(color.FgGreen)
@@ -383,8 +390,8 @@ func printTaskRuns() {
 		}
 		totalDuration += run.duration
 	}
-	log.Information(strings.Repeat("-", 60))
-	log.Informationf("%-40s%-20s", "Total", formatDuration(totalDuration))
+	log.Information(strings.Repeat("-", 80))
+	log.Informationf("%-63s%-18s", "Total", formatDuration(totalDuration))
 }
 
 func formatDuration(duration time.Duration) string {
@@ -393,4 +400,35 @@ func formatDuration(duration time.Duration) string {
 	second := int(duration.Seconds()) % 60
 	micro := duration.Microseconds() - (int64(duration.Seconds()) * 1000000)
 	return fmt.Sprintf("%02d:%02d:%02d.%06d", hour, minute, second, micro)
+}
+
+func getExitCodeFromTaskRun(run *TaskObject) int {
+	if ec := getExitCodeFromError(run.err); ec != 0 {
+		return ec
+	}
+	if ec := getExitCodeFromError(run.deferedErr); ec != 0 {
+		return ec
+	}
+	// No Error
+	return 0
+}
+
+func getExitCodeFromError(err error) int {
+	if err != nil {
+		if ierr, ok := err.(*exec.ExitError); ok {
+			// Exit code from exec
+			return ierr.ExitCode()
+		} else {
+			// Any other error
+			return 1
+		}
+	}
+	// No Error
+	return 0
+}
+
+func clear() {
+	taskMap = map[string]*TaskObject{}
+	taskList = []string{}
+	taskRun = []*TaskObject{}
 }
