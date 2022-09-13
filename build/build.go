@@ -41,7 +41,9 @@ func UpdateDependencies() error {
 }
 
 func RunTests() error {
-	os.Mkdir(reportPath, os.ModePerm)
+	if err := os.Mkdir(reportPath, os.ModePerm); err != nil {
+		return err
+	}
 	goTestReport := path.Join(reportPath, "go-test-report.txt")
 	junitTestReport := path.Join(reportPath, "junit-test-report.xml")
 	if err := execr.Run(true, "go", "install", "github.com/jstemmer/go-junit-report/v2@latest"); err != nil {
