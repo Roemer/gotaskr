@@ -12,28 +12,29 @@ var Debugf = logNoopf
 
 func Initialize(verbose bool) {
 	if verbose {
-		Debug = func(a ...any) (n int, err error) {
+		Debug = func(a ...any) int {
 			return logWrite(a...)
 		}
-		Debugf = func(format string, a ...any) (n int, err error) {
+		Debugf = func(format string, a ...any) int {
 			return logWritef(format, a...)
 		}
 	}
 }
 
-func logNoop(a ...any) (n int, err error) {
-	return 0, nil
+func logNoop(a ...any) int {
+	return 0
 }
 
-func logNoopf(format string, a ...any) (n int, err error) {
-	return 0, nil
+func logNoopf(format string, a ...any) int {
+	return 0
 }
 
-func logWrite(a ...any) (n int, err error) {
-	return fmt.Println(a...)
+func logWrite(a ...any) int {
+	n, _ := fmt.Println(a...)
+	return n
 }
 
-func logWritef(format string, a ...any) (n int, err error) {
+func logWritef(format string, a ...any) int {
 	text := fmt.Sprintf(format, a...)
 	return logWrite(text)
 }

@@ -77,7 +77,9 @@ func Save(outputToConsole bool, settings *SaveSettings) error {
 
 	// Make sure the directory exists
 	if settings.OutputFile != "" {
-		os.MkdirAll(filepath.Dir(settings.OutputFile), os.ModePerm)
+		if err := os.MkdirAll(filepath.Dir(settings.OutputFile), os.ModePerm); err != nil {
+			return err
+		}
 	}
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
