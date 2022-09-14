@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/roemer/gotaskr/goext"
 	"github.com/roemer/gotaskr/log"
 )
 
@@ -57,7 +58,7 @@ func RunCommandGetOutput(outputToConsole bool, cmd *exec.Cmd) (string, string, e
 		cmd.Stderr = &stderrBuf
 	}
 	err := cmd.Run()
-	outStr, errStr := stdoutBuf.String(), stderrBuf.String()
+	outStr, errStr := processOutputString(stdoutBuf.String()), processOutputString(stderrBuf.String())
 	return outStr, errStr, err
 }
 
@@ -73,7 +74,7 @@ func RunCommandGetCombinedOutput(outputToConsole bool, cmd *exec.Cmd) (string, e
 		cmd.Stderr = &outBuf
 	}
 	err := cmd.Run()
-	outStr := outBuf.String()
+	outStr := processOutputString(outBuf.String())
 	return outStr, err
 }
 
@@ -95,4 +96,8 @@ func SplitByNewLine(value string) []string {
 
 func logArguments(cmd *exec.Cmd) {
 	log.Debugf("Executing '%s' with arguments: %s", cmd.Path, cmd.Args[1:])
+}
+
+func processOutputString(value string) string {
+	return goext.TrimNewlineSuffix(value)
 }
