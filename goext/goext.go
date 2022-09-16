@@ -163,3 +163,8 @@ func TrimAllSuffix(s, suffix string) string {
 func TrimNewlineSuffix(v string) string {
 	return TrimAllSuffix(TrimAllSuffix(v, "\r\n"), "\n")
 }
+
+// SplitByNewLine splits the given value by newlines.
+func SplitByNewLine(value string) []string {
+	return strings.Split(strings.ReplaceAll(value, "\r\n", "\n"), "\n")
+}

@@ -89,11 +89,6 @@ func SplitArgumentString(s string) []string {
 	})
 }
 
-// SplitByNewLine splits the given value by newlines.
-func SplitByNewLine(value string) []string {
-	return strings.Split(strings.ReplaceAll(value, "\r\n", "\n"), "\n")
-}
-
 func logArguments(cmd *exec.Cmd) {
 	log.Debugf("Executing '%s' with arguments: %s", cmd.Path, cmd.Args[1:])
 }
