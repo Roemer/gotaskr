@@ -311,8 +311,11 @@ func printTasks() {
 		fmt.Fprintf(&sb, "- %s", task.name)
 		sb.WriteString(log.Newline)
 		if task.description != "" {
-			fmt.Fprintf(&sb, "  %s", task.description)
-			sb.WriteString(log.Newline)
+			lines := goext.SplitByNewLine(task.description)
+			for _, line := range lines {
+				fmt.Fprintf(&sb, "  %s", line)
+				sb.WriteString(log.Newline)
+			}
 		}
 		if len(task.arguments) > 0 {
 			fmt.Fprintln(&sb, "  Arguments:")

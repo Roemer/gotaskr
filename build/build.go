@@ -6,6 +6,7 @@ import (
 
 	"github.com/roemer/gotaskr"
 	"github.com/roemer/gotaskr/execr"
+	"github.com/roemer/gotaskr/log"
 )
 
 func main() {
@@ -22,7 +23,8 @@ var reportPath = "reports"
 ////////////////////////////////////////////////////////////
 
 func init() {
-	gotaskr.Task("Maintenance:Update-Dependencies", UpdateDependencies).Description("Updates the dependencies")
+	gotaskr.Task("Maintenance:Update-Dependencies", UpdateDependencies).
+		Description("Updates the dependencies" + log.Newline + "Updates and tidies")
 	gotaskr.Task("Run-Tests", RunTests)
 }
 
