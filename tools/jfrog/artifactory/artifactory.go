@@ -9,24 +9,40 @@ import (
 	"github.com/jfrog/jfrog-client-go/artifactory/services"
 	"github.com/jfrog/jfrog-client-go/config"
 	"github.com/jfrog/jfrog-client-go/utils/io/content"
+	"golang.org/x/exp/slices"
 )
 
-// ArtifactorySearchResult represents a search result item.
-type ArtifactorySearchResult struct {
-	Repo       string                `json:"repo"`
-	Path       string                `json:"path"`
-	Name       string                `json:"name"`
-	Created    time.Time             `json:"created"`
-	Modified   time.Time             `json:"modified"`
-	Type       string                `json:"type"`
-	Size       int                   `json:"size"`
-	Properties []ArtifactoryProperty `json:"properties"`
+// SearchResultItem represents a search result item.
+type SearchResultItem struct {
+	Repo       string                 `json:"repo"`
+	Path       string                 `json:"path"`
+	Name       string                 `json:"name"`
+	Created    time.Time              `json:"created"`
+	Modified   time.Time              `json:"modified"`
+	Type       string                 `json:"type"`
+	Size       int                    `json:"size"`
+	Properties []SearchResultProperty `json:"properties"`
 }
 
-// ArtifactoryProperty represents a property of a search result item.
-type ArtifactoryProperty struct {
+// SearchResultProperty represents a property of a search result item.
+type SearchResultProperty struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+// GetProperty returns the value of the property with the given key and a bool, if the property exists or not.
+func (searchResult *SearchResultItem) GetProperty(key string) (string, bool) {
+	index := slices.IndexFunc(searchResult.Properties, func(p SearchResultProperty) bool { return p.Key == key })
+	if index >= 0 {
+		return searchResult.Properties[index].Value, true
+	}
+	return "", false
+}
+
+// HasProperty returns a bool if the property with the given key exists or not.
+func (searchResult *SearchResultItem) HasProperty(key string) bool {
+	_, hasProperty := searchResult.GetProperty(key)
+	return hasProperty
 }
 
 // CreateManager creates a basic manager to interact with artifactory.
@@ -46,7 +62,7 @@ func CreateManager(baseUrl string, apiKey string) (artifactory.ArtifactoryServic
 	return artifactoryManager, err
 }
 
-// HasSearchResults performs the given search and returns a boolean if the search contains any items or not.
+// HasSearchResults performs the given search and returns a bool if the search contains any items or not.
 func HasSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager, searchParams services.SearchParams) (bool, error) {
 	reader, err := artifactoryManager.SearchFiles(searchParams)
 	if err != nil {
@@ -58,8 +74,8 @@ func HasSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager,
 }
 
 // GetSearchResults performs the given search and returns the found items.
-func GetSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager, searchParams services.SearchParams) ([]ArtifactorySearchResult, error) {
-	searchResultItems := []ArtifactorySearchResult{}
+func GetSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager, searchParams services.SearchParams) ([]SearchResultItem, error) {
+	searchResultItems := []SearchResultItem{}
 
 	reader, err := artifactoryManager.SearchFiles(searchParams)
 	if err != nil {
@@ -73,10 +89,10 @@ func GetSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager,
 }
 
 // GetResultItemsFromReader is a helper method that converts the search results into typed search result items.
-func GetResultItemsFromReader(reader *content.ContentReader) []ArtifactorySearchResult {
-	searchResultItems := []ArtifactorySearchResult{}
+func GetResultItemsFromReader(reader *content.ContentReader) []SearchResultItem {
+	searchResultItems := []SearchResultItem{}
 	if reader != nil {
-		for searchResultItem := new(ArtifactorySearchResult); reader.NextRecord(searchResultItem) == nil; searchResultItem = new(ArtifactorySearchResult) {
+		for searchResultItem := new(SearchResultItem); reader.NextRecord(searchResultItem) == nil; searchResultItem = new(SearchResultItem) {
 			searchResultItems = append(searchResultItems, *searchResultItem)
 		}
 	}
