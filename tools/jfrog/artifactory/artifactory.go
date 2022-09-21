@@ -1,6 +1,7 @@
 package artifactory
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -74,8 +75,8 @@ func HasSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager,
 }
 
 // GetSearchResults performs the given search and returns the found items.
-func GetSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager, searchParams services.SearchParams) ([]SearchResultItem, error) {
-	searchResultItems := []SearchResultItem{}
+func GetSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager, searchParams services.SearchParams) ([]*SearchResultItem, error) {
+	searchResultItems := []*SearchResultItem{}
 
 	reader, err := artifactoryManager.SearchFiles(searchParams)
 	if err != nil {
@@ -88,12 +89,26 @@ func GetSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager,
 	return searchResultItems, nil
 }
 
+// GetSingleSearchResult returns a single result or nil if none is found and an error, if multiple were found.
+func GetSingleSearchResult(artifactoryManager artifactory.ArtifactoryServicesManager, searchParams services.SearchParams) (*SearchResultItem, error) {
+	searchResultItems, err := GetSearchResults(artifactoryManager, searchParams)
+	if err != nil {
+		return nil, err
+	}
+	if len(searchResultItems) > 1 {
+		return nil, fmt.Errorf("got more than one item: %d", len(searchResultItems))
+	} else if len(searchResultItems) == 1 {
+		return searchResultItems[0], nil
+	}
+	return nil, nil
+}
+
 // GetResultItemsFromReader is a helper method that converts the search results into typed search result items.
-func GetResultItemsFromReader(reader *content.ContentReader) []SearchResultItem {
-	searchResultItems := []SearchResultItem{}
+func GetResultItemsFromReader(reader *content.ContentReader) []*SearchResultItem {
+	searchResultItems := []*SearchResultItem{}
 	if reader != nil {
 		for searchResultItem := new(SearchResultItem); reader.NextRecord(searchResultItem) == nil; searchResultItem = new(SearchResultItem) {
-			searchResultItems = append(searchResultItems, *searchResultItem)
+			searchResultItems = append(searchResultItems, searchResultItem)
 		}
 	}
 	return searchResultItems
