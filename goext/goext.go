@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -167,4 +168,26 @@ func TrimNewlineSuffix(v string) string {
 // SplitByNewLine splits the given value by newlines.
 func SplitByNewLine(value string) []string {
 	return strings.Split(strings.ReplaceAll(value, "\r\n", "\n"), "\n")
+}
+
+// ProcessMapSorted calls the given function on all entries of the map, sorted by their key value (by string).
+func ProcessMapSorted[TK comparable, TV any](m map[TK]TV, pf func(TK, TV) error) error {
+	// Get all keys
+	keys := make([]TK, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+
+	// Sort the keys alphanumeric
+	sort.Slice(keys, func(i, j int) bool {
+		return fmt.Sprint(keys[i]) < fmt.Sprint(keys[j])
+	})
+
+	// Call the method for each function
+	for _, k := range keys {
+		if err := pf(k, m[k]); err != nil {
+			return err
+		}
+	}
+	return nil
 }
