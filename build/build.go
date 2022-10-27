@@ -25,6 +25,7 @@ var reportPath = "reports"
 func init() {
 	gotaskr.Task("Maintenance:Update-Dependencies", UpdateDependencies).
 		Description("Updates the dependencies" + log.Newline + "Updates and tidies")
+
 	gotaskr.Task("Run-Tests", RunTests)
 }
 
