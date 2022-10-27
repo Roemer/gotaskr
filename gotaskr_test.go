@@ -65,7 +65,7 @@ func TestDependencyErrorWithDefer(t *testing.T) {
 	assert.Equal(desiredExitCode, exitCode)
 	assert.Equal(4, len(taskRun))
 	assertExitError(assert, task2.err, desiredExitCode)
-	assertExitError(assert, taskAll.deferedErr, desiredExitCode)
+	assertExitError(assert, taskAll.deferredErr, desiredExitCode)
 }
 
 func TestDependencyErrorWithoutDefer(t *testing.T) {
@@ -107,7 +107,7 @@ func TestDependencyErrorWithDeferOnTask(t *testing.T) {
 	// Validate
 	assert.Equal(desiredExitCode, exitCode)
 	assert.Equal(2, len(taskRun))
-	assertExitError(assert, task2.deferedErr, desiredExitCode)
+	assertExitError(assert, task2.deferredErr, desiredExitCode)
 }
 
 ////////////////////
