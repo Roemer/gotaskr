@@ -20,7 +20,7 @@ var argumentsMap = argparse.ParseArgs()
 // Prepare a map for all the task objects
 var taskMap map[string]*TaskObject = make(map[string]*TaskObject)
 
-// Prepare a list of the task names. Used to print the tasks in order.
+// Prepare a list of the task names. Used to print the tasks in order
 var taskList []string
 
 // Prepare an array for the tasks that were run (in run order)
@@ -28,6 +28,9 @@ var taskRun []*TaskObject
 
 // The task object of the currently running task
 var currentRunningTask *TaskObject
+
+// A context for the current gotaskr run
+var context gotaskrContext = gotaskrContext{}
 
 // Execute is the entry point of gotaskr.
 func Execute() int {
@@ -70,13 +73,23 @@ func Execute() int {
 			dependeeTask.DependsOn(task.name)
 		}
 	}
+
+	// Run the setup method
+	runLifetimeFunc("Setup", context.SetupFunc)
+
 	// Run the main target
 	err := RunTarget(target)
+
+	// Run the teardown method
+	runLifetimeFunc("Teardown", context.TeardownFunc)
+
 	// Run finished
+	log.Information()
 	log.Information(strings.Repeat("-", 60))
-	log.Information("Finished running")
+	log.Information("Finished running all tasks")
 	exitCode := getExitCodeFromError(err)
-	// Print errors and check the defered errors
+
+	// Print errors and check the deferred errors
 	for _, run := range taskRun {
 		printTaskError(run, true)
 		if exitCode == 0 {
@@ -135,22 +148,26 @@ func RunTarget(target string) error {
 			if err != nil {
 				if currentTask.deferOnError {
 					// Handle deferred errors
-					currentTask.deferedErr = err
+					currentTask.deferredErr = err
 				} else {
 					return err
 				}
 			}
 		}
 	}
-	currentRunningTask = currentTask
+
+	// Run the task setup method
+	runLifetimeFunc("TaskSetup", context.TaskSetupFunc)
+
 	// Run the task itself
+	currentRunningTask = currentTask
 	printTaskHeader(target)
 	start := time.Now()
 	err := runTaskFunc(currentTask)
 	elapsed := time.Since(start)
 	// Handle error deferring
 	if err != nil && currentTask.deferOnError {
-		currentTask.deferedErr = err
+		currentTask.deferredErr = err
 		err = nil
 	}
 	// Handle error skipping
@@ -163,9 +180,12 @@ func RunTarget(target string) error {
 	currentTask.err = err
 	taskRun = append(taskRun, currentTask)
 	printTaskFooter(currentTask)
-	log.Information()
+
+	// Run the task teardown method
+	runLifetimeFunc("TaskTeardown", context.TaskTeardownFunc)
+
+	// Abort execution if the task failed
 	if err != nil {
-		// Abort execution
 		return err
 	}
 	// Run followup tasks
@@ -175,7 +195,7 @@ func RunTarget(target string) error {
 			if err != nil {
 				if currentTask.deferOnError {
 					// Handle deferred errors
-					currentTask.deferedErr = err
+					currentTask.deferredErr = err
 				} else {
 					return err
 				}
@@ -185,20 +205,34 @@ func RunTarget(target string) error {
 	if err != nil {
 		return err
 	}
-	if currentTask.deferedErr != nil {
-		return currentTask.deferedErr
+	if currentTask.deferredErr != nil {
+		return currentTask.deferredErr
 	}
 	return nil
 }
 
+func runLifetimeFunc(lifetimeStage string, function func() error) {
+	if function == nil {
+		return
+	}
+	log.Informationf("--- %s %s", lifetimeStage, strings.Repeat("-", 60-5-len(lifetimeStage)))
+	err := runFuncRecover(function)
+	if err != nil {
+		log.Informationf("Finished with error: %v", err)
+	}
+}
+
 func runTaskFunc(currentTask *TaskObject) (err error) {
+	return runFuncRecover(currentTask.taskFunc)
+}
+
+func runFuncRecover(function func() error) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("task panicked: %v", r)
-			log.Information(err)
 		}
 	}()
-	err = currentTask.taskFunc()
+	err = function()
 	return err
 }
 
@@ -212,10 +246,33 @@ func Task(name string, taskFunc func() error) *TaskObject {
 	return &task
 }
 
+func Setup(setupFunc func() error) {
+	context.SetupFunc = setupFunc
+}
+
+func Teardown(taskFunc func() error) {
+	context.TeardownFunc = taskFunc
+}
+
+func TaskSetup(taskFunc func() error) {
+	context.TaskSetupFunc = taskFunc
+}
+
+func TaskTeardown(taskFunc func() error) {
+	context.TaskTeardownFunc = taskFunc
+}
+
 type argument struct {
 	name        string
 	description string
 	optional    bool
+}
+
+type gotaskrContext struct {
+	SetupFunc        func() error
+	TeardownFunc     func() error
+	TaskSetupFunc    func() error
+	TaskTeardownFunc func() error
 }
 
 // TaskObject represents a registered task.
@@ -233,7 +290,7 @@ type TaskObject struct {
 	duration        time.Duration // A runtime duration of the task if it ran already.
 	err             error         // The error (if any) of the task when it ran.
 	ignoredErr      error         // The error (if any) which is ignored.
-	deferedErr      error         // The deferred error (if any) of the task when it ran.
+	deferredErr     error         // The deferred error (if any) of the task when it ran.
 }
 
 // DependsOn adds dependencies in the given order. Duplicate dependencies are removed.
@@ -348,17 +405,13 @@ func printArguments() {
 }
 
 func printTaskHeader(taskName string) {
-	log.Information(strings.Repeat("=", 60))
-	log.Informationf("%s", taskName)
-	log.Information(strings.Repeat("=", 60))
+	log.Informationf("=== %s %s", taskName, strings.Repeat("=", 60-5-len(taskName)))
 }
 
 func printTaskFooter(task *TaskObject) {
-	log.Information(strings.Repeat("-", 60))
-	log.Informationf("/%s", task.name)
+	log.Informationf("=== /%s %s", task.name, strings.Repeat("=", 60-5-1-len(task.name)))
 	log.Informationf("Duration: %s", formatDuration(task.duration))
 	printTaskError(task, false)
-	log.Information(strings.Repeat("-", 60))
 }
 
 func printTaskError(task *TaskObject, withTaskName bool) {
@@ -369,8 +422,8 @@ func printTaskError(task *TaskObject, withTaskName bool) {
 	if task.ignoredErr != nil {
 		color.Red("Ignored error%s: %v", taskString, task.ignoredErr)
 	}
-	if task.deferedErr != nil {
-		color.Red("Defered error%s: %v", taskString, task.deferedErr)
+	if task.deferredErr != nil {
+		color.Red("Deferred error%s: %v", taskString, task.deferredErr)
 	}
 }
 
@@ -385,7 +438,7 @@ func printTaskRuns() {
 	totalDuration := time.Duration(0)
 	for _, run := range taskRun {
 		text := fmt.Sprintf("%-50s%-13d%-17s", run.name, getExitCodeFromTaskRun(run), formatDuration(run.duration))
-		if run.err != nil || run.deferedErr != nil {
+		if run.err != nil || run.deferredErr != nil {
 			color.Red(text)
 			color.Set(color.FgGreen)
 		} else {
@@ -409,7 +462,7 @@ func getExitCodeFromTaskRun(run *TaskObject) int {
 	if ec := getExitCodeFromError(run.err); ec != 0 {
 		return ec
 	}
-	if ec := getExitCodeFromError(run.deferedErr); ec != 0 {
+	if ec := getExitCodeFromError(run.deferredErr); ec != 0 {
 		return ec
 	}
 	// No Error
