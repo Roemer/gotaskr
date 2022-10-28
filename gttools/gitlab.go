@@ -1,14 +1,15 @@
-// Package gitlab contains helper methods to work with GitLab.
-package gitlab
+package gttools
 
 import (
 	"github.com/roemer/gotaskr/goext"
-	"github.com/roemer/gotaskr/tools/eslint"
 )
 
-// IsRunningOnGitLab returns a flag, if we are currenlty running on gitlab
-func IsRunningOnGitLab() bool {
-	return goext.EnvExists("GITLAB_CI")
+// GitLabTool provides access to the helper methods for GitLab.
+type GitLabTool struct {
+}
+
+func CreateGitLabTool() *GitLabTool {
+	return &GitLabTool{}
 }
 
 // GitLabReport defines the data for the quality report for GitLab.
@@ -34,8 +35,13 @@ type GitLabCodeQualityLines struct {
 	End   int64 `json:"end"`
 }
 
-// ConvertEsLintReportToGitLabReport converts the given eslint.EsLintReport to a GitLabReport.
-func ConvertEsLintReportToGitLabReport(esLintReport *eslint.EsLintReport) *GitLabReport {
+// IsRunningOnGitLab returns a flag, if we are currently running on gitlab
+func (tool *GitLabTool) IsRunningOnGitLab() bool {
+	return goext.EnvExists("GITLAB_CI")
+}
+
+// ConvertEsLintReportToGitLabReport converts the given EsLintReport to a GitLabReport.
+func (tool *GitLabTool) ConvertEsLintReportToGitLabReport(esLintReport *EsLintReport) *GitLabReport {
 	gitLabReport := &GitLabReport{
 		Entries: []*GitLabCodeQualityEntry{},
 	}
@@ -60,7 +66,7 @@ func ConvertEsLintReportToGitLabReport(esLintReport *eslint.EsLintReport) *GitLa
 }
 
 // MergeGitLabReports merges the given GitLabReports to a single GitLabReport.
-func MergeGitLabReports(gitLabReports []*GitLabReport) *GitLabReport {
+func (tool *GitLabTool) MergeGitLabReports(gitLabReports []*GitLabReport) *GitLabReport {
 	gitLabReport := &GitLabReport{
 		Entries: []*GitLabCodeQualityEntry{},
 	}
@@ -71,6 +77,6 @@ func MergeGitLabReports(gitLabReports []*GitLabReport) *GitLabReport {
 }
 
 // WriteGitLabReport writes the GitLabReport into a json file.
-func WriteGitLabReport(gitLabReport *GitLabReport, outputFilePath string) error {
+func (tool *GitLabTool) WriteGitLabReport(gitLabReport *GitLabReport, outputFilePath string) error {
 	return goext.WriteJsonToFile(gitLabReport.Entries, outputFilePath, true)
 }

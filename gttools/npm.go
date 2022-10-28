@@ -1,4 +1,4 @@
-package npm
+package gttools
 
 import (
 	"os/exec"
@@ -7,13 +7,21 @@ import (
 	"github.com/roemer/gotaskr/goext"
 )
 
-type InitSettings struct {
+// NpmTool provides access to the helper methods for npm.
+type NpmTool struct {
+}
+
+func CreateNpmTool() *NpmTool {
+	return &NpmTool{}
+}
+
+type NpmInitSettings struct {
 	WorkingDirectory string
 }
 
-func Init(outputToConsole bool, settings *InitSettings) error {
+func (tool *NpmTool) Init(outputToConsole bool, settings *NpmInitSettings) error {
 	if settings == nil {
-		settings = &InitSettings{}
+		settings = &NpmInitSettings{}
 	}
 	args := []string{
 		"init",
@@ -24,14 +32,14 @@ func Init(outputToConsole bool, settings *InitSettings) error {
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
-type RunSettings struct {
+type NpmRunSettings struct {
 	WorkingDirectory string
 	Script           string
 }
 
-func Run(outputToConsole bool, settings *RunSettings) error {
+func (tool *NpmTool) Run(outputToConsole bool, settings *NpmRunSettings) error {
 	if settings == nil {
-		settings = &RunSettings{}
+		settings = &NpmRunSettings{}
 	}
 	args := []string{
 		"run",
@@ -42,33 +50,33 @@ func Run(outputToConsole bool, settings *RunSettings) error {
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
-func RunScript(outputToConsole bool, script string) error {
-	return Run(outputToConsole, &RunSettings{Script: script})
+func (tool *NpmTool) RunScript(outputToConsole bool, script string) error {
+	return tool.Run(outputToConsole, &NpmRunSettings{Script: script})
 }
 
-type CleanInstallSettings struct {
+type NpmCleanInstallSettings struct {
 	WorkingDirectory string
 	CacheDir         string
 	NoAudit          bool
 	PreferOffline    bool
 }
 
-func CleanInstall(outputToConsole bool, settings *CleanInstallSettings) error {
+func (tool *NpmTool) CleanInstall(outputToConsole bool, settings *NpmCleanInstallSettings) error {
 	if settings == nil {
-		settings = &CleanInstallSettings{}
+		settings = &NpmCleanInstallSettings{}
 	}
 	args := []string{
 		"ci",
 	}
 	args = goext.AddIf(args, settings.NoAudit, "--no-audit")
 	args = goext.AddIf(args, settings.PreferOffline, "--prefer-offline")
-	args = addCache(args, settings.CacheDir)
+	args = tool.addCache(args, settings.CacheDir)
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
-type InstallSettings struct {
+type NpmInstallSettings struct {
 	WorkingDirectory string
 	CacheDir         string
 	PackageSpec      string
@@ -80,9 +88,9 @@ type InstallSettings struct {
 	SaveExact        bool
 }
 
-func Install(outputToConsole bool, settings *InstallSettings) error {
+func (tool *NpmTool) Install(outputToConsole bool, settings *NpmInstallSettings) error {
 	if settings == nil {
-		settings = &InstallSettings{}
+		settings = &NpmInstallSettings{}
 	}
 	args := []string{
 		"install",
@@ -94,12 +102,12 @@ func Install(outputToConsole bool, settings *InstallSettings) error {
 	args = goext.AddIf(args, settings.SaveExact, "--save-exact")
 	args = goext.AddIf(args, settings.NoAudit, "--no-audit")
 	args = goext.AddIf(args, settings.PreferOffline, "--prefer-offline")
-	args = addCache(args, settings.CacheDir)
+	args = tool.addCache(args, settings.CacheDir)
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
-func addCache(args []string, cacheDir string) []string {
+func (tool *NpmTool) addCache(args []string, cacheDir string) []string {
 	return goext.AddIf(args, cacheDir != "", "--cache", cacheDir)
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/roemer/gotaskr/argparse"
 	"github.com/roemer/gotaskr/goext"
+	"github.com/roemer/gotaskr/gttools"
 	"github.com/roemer/gotaskr/log"
 )
 
@@ -31,6 +32,9 @@ var currentRunningTask *TaskObject
 
 // A context for the current gotaskr run
 var context gotaskrContext = gotaskrContext{}
+
+// Tools provides typed access to the various tools supported.
+var Tools *gttools.ToolsClient = gttools.CreateToolsClient()
 
 // Execute is the entry point of gotaskr.
 func Execute() int {

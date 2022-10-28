@@ -1,4 +1,4 @@
-package artifactory
+package gttools
 
 import (
 	"fmt"
@@ -13,27 +13,31 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// SearchResultItem represents a search result item.
-type SearchResultItem struct {
-	Repo       string                 `json:"repo"`
-	Path       string                 `json:"path"`
-	Name       string                 `json:"name"`
-	Created    time.Time              `json:"created"`
-	Modified   time.Time              `json:"modified"`
-	Type       string                 `json:"type"`
-	Size       int                    `json:"size"`
-	Properties []SearchResultProperty `json:"properties"`
+// ArtifactoryTool provides access to the helper methods for Artifactory.
+type ArtifactoryTool struct {
 }
 
-// SearchResultProperty represents a property of a search result item.
-type SearchResultProperty struct {
+// ArtifactorySearchResultItem represents a search result item.
+type ArtifactorySearchResultItem struct {
+	Repo       string                            `json:"repo"`
+	Path       string                            `json:"path"`
+	Name       string                            `json:"name"`
+	Created    time.Time                         `json:"created"`
+	Modified   time.Time                         `json:"modified"`
+	Type       string                            `json:"type"`
+	Size       int                               `json:"size"`
+	Properties []ArtifactorySearchResultProperty `json:"properties"`
+}
+
+// ArtifactorySearchResultProperty represents a property of a search result item.
+type ArtifactorySearchResultProperty struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
 // GetProperty returns the value of the property with the given key and a bool, if the property exists or not.
-func (searchResult *SearchResultItem) GetProperty(key string) (string, bool) {
-	index := slices.IndexFunc(searchResult.Properties, func(p SearchResultProperty) bool { return p.Key == key })
+func (searchResult *ArtifactorySearchResultItem) GetProperty(key string) (string, bool) {
+	index := slices.IndexFunc(searchResult.Properties, func(p ArtifactorySearchResultProperty) bool { return p.Key == key })
 	if index >= 0 {
 		return searchResult.Properties[index].Value, true
 	}
@@ -41,13 +45,13 @@ func (searchResult *SearchResultItem) GetProperty(key string) (string, bool) {
 }
 
 // HasProperty returns a bool if the property with the given key exists or not.
-func (searchResult *SearchResultItem) HasProperty(key string) bool {
+func (searchResult *ArtifactorySearchResultItem) HasProperty(key string) bool {
 	_, hasProperty := searchResult.GetProperty(key)
 	return hasProperty
 }
 
 // CreateManager creates a basic manager to interact with artifactory.
-func CreateManager(baseUrl string, apiKey string) (artifactory.ArtifactoryServicesManager, error) {
+func (tool *ArtifactoryTool) CreateManager(baseUrl string, apiKey string) (artifactory.ArtifactoryServicesManager, error) {
 	artifactoryDetails := auth.NewArtifactoryDetails()
 	artifactoryDetails.SetUrl(baseUrl)
 	artifactoryDetails.SetApiKey(apiKey)
@@ -64,7 +68,7 @@ func CreateManager(baseUrl string, apiKey string) (artifactory.ArtifactoryServic
 }
 
 // HasSearchResults performs the given search and returns a bool if the search contains any items or not.
-func HasSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager, searchParams services.SearchParams) (bool, error) {
+func (tool *ArtifactoryTool) HasSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager, searchParams services.SearchParams) (bool, error) {
 	reader, err := artifactoryManager.SearchFiles(searchParams)
 	if err != nil {
 		return false, err
@@ -75,8 +79,8 @@ func HasSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager,
 }
 
 // GetSearchResults performs the given search and returns the found items.
-func GetSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager, searchParams services.SearchParams) ([]*SearchResultItem, error) {
-	searchResultItems := []*SearchResultItem{}
+func (tool *ArtifactoryTool) GetSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager, searchParams services.SearchParams) ([]*ArtifactorySearchResultItem, error) {
+	searchResultItems := []*ArtifactorySearchResultItem{}
 
 	reader, err := artifactoryManager.SearchFiles(searchParams)
 	if err != nil {
@@ -84,14 +88,14 @@ func GetSearchResults(artifactoryManager artifactory.ArtifactoryServicesManager,
 	}
 	defer reader.Close()
 
-	searchResultItems = GetResultItemsFromReader(reader)
+	searchResultItems = tool.GetResultItemsFromReader(reader)
 
 	return searchResultItems, nil
 }
 
 // GetSingleSearchResult returns a single result or nil if none is found and an error, if multiple were found.
-func GetSingleSearchResult(artifactoryManager artifactory.ArtifactoryServicesManager, searchParams services.SearchParams) (*SearchResultItem, error) {
-	searchResultItems, err := GetSearchResults(artifactoryManager, searchParams)
+func (tool *ArtifactoryTool) GetSingleSearchResult(artifactoryManager artifactory.ArtifactoryServicesManager, searchParams services.SearchParams) (*ArtifactorySearchResultItem, error) {
+	searchResultItems, err := tool.GetSearchResults(artifactoryManager, searchParams)
 	if err != nil {
 		return nil, err
 	}
@@ -104,10 +108,10 @@ func GetSingleSearchResult(artifactoryManager artifactory.ArtifactoryServicesMan
 }
 
 // GetResultItemsFromReader is a helper method that converts the search results into typed search result items.
-func GetResultItemsFromReader(reader *content.ContentReader) []*SearchResultItem {
-	searchResultItems := []*SearchResultItem{}
+func (tool *ArtifactoryTool) GetResultItemsFromReader(reader *content.ContentReader) []*ArtifactorySearchResultItem {
+	searchResultItems := []*ArtifactorySearchResultItem{}
 	if reader != nil {
-		for searchResultItem := new(SearchResultItem); reader.NextRecord(searchResultItem) == nil; searchResultItem = new(SearchResultItem) {
+		for searchResultItem := new(ArtifactorySearchResultItem); reader.NextRecord(searchResultItem) == nil; searchResultItem = new(ArtifactorySearchResultItem) {
 			searchResultItems = append(searchResultItems, searchResultItem)
 		}
 	}
@@ -115,7 +119,7 @@ func GetResultItemsFromReader(reader *content.ContentReader) []*SearchResultItem
 }
 
 // GetContentFromReader is a debug method that returns the raw content of the reader.
-func GetContentFromReader(reader *content.ContentReader) string {
+func (tool *ArtifactoryTool) GetContentFromReader(reader *content.ContentReader) string {
 	if reader == nil {
 		return ""
 	}
