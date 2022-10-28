@@ -1,4 +1,4 @@
-package docker
+package gttools
 
 import (
 	"os/exec"
@@ -7,13 +7,17 @@ import (
 	"github.com/roemer/gotaskr/goext"
 )
 
-type LoginSettings struct {
+// DockerRegistryTool provides access to the helper methods for Docker Registries.
+type DockerRegistryTool struct {
+}
+
+type DockerLoginSettings struct {
 	Registry string
 	Username string
 	Password string
 }
 
-func Login(outputToConsole bool, settings *LoginSettings) error {
+func (tool *DockerRegistryTool) Login(outputToConsole bool, settings *DockerLoginSettings) error {
 	args := []string{
 		"login",
 	}
@@ -25,11 +29,11 @@ func Login(outputToConsole bool, settings *LoginSettings) error {
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
-type LogoutSettings struct {
+type DockerLogoutSettings struct {
 	Registry string
 }
 
-func Logout(outputToConsole bool, settings *LogoutSettings) error {
+func (tool *DockerRegistryTool) Logout(outputToConsole bool, settings *DockerLogoutSettings) error {
 	args := []string{
 		"logout",
 	}

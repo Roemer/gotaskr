@@ -1,5 +1,4 @@
-// Package eslint contains helper methods to work with ES Lint.
-package eslint
+package gttools
 
 import (
 	"encoding/json"
@@ -7,6 +6,14 @@ import (
 	"io"
 	"os"
 )
+
+// EsLintTool provides access to the helper methods for ES Lint.
+type EsLintTool struct {
+}
+
+func CreateEsLintTool() *EsLintTool {
+	return &EsLintTool{}
+}
 
 type EsLintReport struct {
 	Files []*EsLintFile
@@ -28,7 +35,7 @@ type EsLintMessage struct {
 }
 
 // ParseEsLintReport parses the given eslint report (json).
-func ParseEsLintReport(esLintReportPath string) (*EsLintReport, error) {
+func (tool *EsLintTool) ParseEsLintReport(esLintReportPath string) (*EsLintReport, error) {
 	jsonFile, err := os.Open(esLintReportPath)
 	if err != nil {
 		return nil, err
@@ -53,7 +60,7 @@ func ParseEsLintReport(esLintReportPath string) (*EsLintReport, error) {
 	return esLintReport, nil
 }
 
-func SeverityToString(severity int64) string {
+func (tool *EsLintTool) SeverityToString(severity int64) string {
 	switch severity {
 	case 0:
 		return "off"

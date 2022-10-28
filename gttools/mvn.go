@@ -1,4 +1,4 @@
-package mvn
+package gttools
 
 import (
 	"os/exec"
@@ -7,6 +7,14 @@ import (
 	"github.com/roemer/gotaskr/execr"
 	"github.com/roemer/gotaskr/goext"
 )
+
+// MvnTool provides access to the helper methods for Maven.
+type MvnTool struct {
+}
+
+func CreateMvnTool() *MvnTool {
+	return &MvnTool{}
+}
 
 type MvnRunSettings struct {
 	WorkingDirectory    string
@@ -26,7 +34,7 @@ type MvnRunSettings struct {
 	AdditionalArguments []string
 }
 
-func Run(outputToConsole bool, settings MvnRunSettings) error {
+func (tool *MvnTool) Run(outputToConsole bool, settings MvnRunSettings) error {
 	args := []string{}
 	args = append(args, settings.Phases...)
 	args = append(args, "--projects", strings.Join(settings.Projects, ","))

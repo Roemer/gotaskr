@@ -1,4 +1,4 @@
-package docker
+package gttools
 
 import (
 	"os"
@@ -10,7 +10,11 @@ import (
 	"github.com/roemer/gotaskr/goext"
 )
 
-type BuildSettings struct {
+// DockerImageTool provides access to the helper methods for Docker Images.
+type DockerImageTool struct {
+}
+
+type DockerBuildSettings struct {
 	WorkingDirectory string
 	Dockerfile       string
 	ContextPath      string
@@ -19,28 +23,28 @@ type BuildSettings struct {
 	BuildArgs        []string
 }
 
-func (settings *BuildSettings) AddTags(tags ...string) *BuildSettings {
+func (settings *DockerBuildSettings) AddTags(tags ...string) *DockerBuildSettings {
 	for _, entry := range tags {
 		settings.Tags = goext.AppendIfMissing(settings.Tags, entry)
 	}
 	return settings
 }
 
-func (settings *BuildSettings) AddLabels(labels ...string) *BuildSettings {
+func (settings *DockerBuildSettings) AddLabels(labels ...string) *DockerBuildSettings {
 	for _, entry := range labels {
 		settings.Labels = goext.AppendIfMissing(settings.Labels, entry)
 	}
 	return settings
 }
 
-func (settings *BuildSettings) AddBuildArgs(buildArgs ...string) *BuildSettings {
+func (settings *DockerBuildSettings) AddBuildArgs(buildArgs ...string) *DockerBuildSettings {
 	for _, entry := range buildArgs {
 		settings.BuildArgs = goext.AppendIfMissing(settings.BuildArgs, entry)
 	}
 	return settings
 }
 
-func Build(outputToConsole bool, settings *BuildSettings) error {
+func (tool *DockerImageTool) Build(outputToConsole bool, settings *DockerBuildSettings) error {
 	args := []string{
 		"build",
 	}
@@ -62,13 +66,13 @@ func Build(outputToConsole bool, settings *BuildSettings) error {
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
-type SaveSettings struct {
+type DockerSaveSettings struct {
 	WorkingDirectory string
 	OutputFile       string
 	ImageReference   string
 }
 
-func Save(outputToConsole bool, settings *SaveSettings) error {
+func (tool *DockerImageTool) Save(outputToConsole bool, settings *DockerSaveSettings) error {
 	args := []string{
 		"save",
 	}
@@ -87,12 +91,12 @@ func Save(outputToConsole bool, settings *SaveSettings) error {
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
-type LoadSettings struct {
+type DockerLoadSettings struct {
 	WorkingDirectory string
 	InputFile        string
 }
 
-func Load(outputToConsole bool, settings *LoadSettings) ([]string, error) {
+func (tool *DockerImageTool) Load(outputToConsole bool, settings *DockerLoadSettings) ([]string, error) {
 	args := []string{
 		"load",
 	}
@@ -114,12 +118,12 @@ func Load(outputToConsole bool, settings *LoadSettings) ([]string, error) {
 	return loadedImages, err
 }
 
-type PushSettings struct {
+type DockerPushSettings struct {
 	WorkingDirectory string
 	ImageReference   string
 }
 
-func Push(outputToConsole bool, settings *PushSettings) error {
+func (tool *DockerImageTool) Push(outputToConsole bool, settings *DockerPushSettings) error {
 	args := []string{
 		"push",
 	}
