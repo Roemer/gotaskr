@@ -297,6 +297,11 @@ type TaskObject struct {
 	deferredErr     error         // The deferred error (if any) of the task when it ran.
 }
 
+// GetName gets the name of the task.
+func (taskObject *TaskObject) GetName() string {
+	return taskObject.name
+}
+
 // DependsOn adds dependencies in the given order. Duplicate dependencies are removed.
 func (taskObject *TaskObject) DependsOn(taskName ...string) *TaskObject {
 	for _, entry := range taskName {
