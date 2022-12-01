@@ -306,9 +306,22 @@ func (taskObject *TaskObject) GetName() string {
 func (taskObject *TaskObject) DependsOn(taskName ...string) *TaskObject {
 	for _, entry := range taskName {
 		if entry == taskObject.name {
+			// Skip itself
 			continue
 		}
 		taskObject.dependencies = goext.AppendIfMissing(taskObject.dependencies, entry)
+	}
+	return taskObject
+}
+
+// DependsOnTask adds dependencies in the given order. Duplicate dependencies are removed.
+func (taskObject *TaskObject) DependsOnTask(task ...*TaskObject) *TaskObject {
+	for _, entry := range task {
+		if entry.name == taskObject.name {
+			// Skip itself
+			continue
+		}
+		taskObject.dependencies = goext.AppendIfMissing(taskObject.dependencies, entry.name)
 	}
 	return taskObject
 }
@@ -317,9 +330,22 @@ func (taskObject *TaskObject) DependsOn(taskName ...string) *TaskObject {
 func (taskObject *TaskObject) DependeeOf(taskName ...string) *TaskObject {
 	for _, entry := range taskName {
 		if entry == taskObject.name {
+			// Skip itself
 			continue
 		}
 		taskObject.dependees = goext.AppendIfMissing(taskObject.dependees, entry)
+	}
+	return taskObject
+}
+
+// DependeeOfTask adds dependees in the given order. Duplicate dependees are removed.
+func (taskObject *TaskObject) DependeeOfTask(task ...*TaskObject) *TaskObject {
+	for _, entry := range task {
+		if entry.name == taskObject.name {
+			// Skip itself
+			continue
+		}
+		taskObject.dependees = goext.AppendIfMissing(taskObject.dependees, entry.name)
 	}
 	return taskObject
 }
@@ -328,9 +354,22 @@ func (taskObject *TaskObject) DependeeOf(taskName ...string) *TaskObject {
 func (taskObject *TaskObject) Then(taskName ...string) *TaskObject {
 	for _, entry := range taskName {
 		if entry == taskObject.name {
+			// Skip itself
 			continue
 		}
 		taskObject.followups = goext.AppendIfMissing(taskObject.followups, entry)
+	}
+	return taskObject
+}
+
+// Then adds followup tasks in the given order.
+func (taskObject *TaskObject) ThenTask(task ...*TaskObject) *TaskObject {
+	for _, entry := range task {
+		if entry.name == taskObject.name {
+			// Skip itself
+			continue
+		}
+		taskObject.followups = goext.AppendIfMissing(taskObject.followups, entry.name)
 	}
 	return taskObject
 }
