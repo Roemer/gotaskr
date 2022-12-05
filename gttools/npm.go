@@ -15,6 +15,7 @@ func CreateNpmTool() *NpmTool {
 	return &NpmTool{}
 }
 
+// Init
 type NpmInitSettings struct {
 	WorkingDirectory string
 }
@@ -32,6 +33,7 @@ func (tool *NpmTool) Init(outputToConsole bool, settings *NpmInitSettings) error
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
+// Run
 type NpmRunSettings struct {
 	WorkingDirectory string
 	Script           string
@@ -54,6 +56,7 @@ func (tool *NpmTool) RunScript(outputToConsole bool, script string) error {
 	return tool.Run(outputToConsole, &NpmRunSettings{Script: script})
 }
 
+// CleanInstall
 type NpmCleanInstallSettings struct {
 	WorkingDirectory string
 	CacheDir         string
@@ -76,6 +79,7 @@ func (tool *NpmTool) CleanInstall(outputToConsole bool, settings *NpmCleanInstal
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
+// Install
 type NpmInstallSettings struct {
 	WorkingDirectory string
 	CacheDir         string
@@ -108,6 +112,28 @@ func (tool *NpmTool) Install(outputToConsole bool, settings *NpmInstallSettings)
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
+// Bin
+type NpmBinSettings struct {
+	WorkingDirectory string
+	Global           bool
+}
+
+func (tool *NpmTool) Bin(settings *NpmBinSettings) (string, error) {
+	if settings == nil {
+		settings = &NpmBinSettings{}
+	}
+	args := []string{
+		"bin",
+	}
+	args = goext.AddIf(args, settings.Global, "--global")
+	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
+	cmd.Dir = settings.WorkingDirectory
+
+	stdout, _, err := execr.RunCommandGetOutput(false, cmd)
+	return stdout, err
+}
+
+// Internal Methods
 func (tool *NpmTool) addCache(args []string, cacheDir string) []string {
 	return goext.AddIf(args, cacheDir != "", "--cache", cacheDir)
 }
