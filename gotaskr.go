@@ -279,22 +279,29 @@ type gotaskrContext struct {
 	TaskTeardownFunc func() error
 }
 
+type timeMeasurement struct {
+	name      string
+	startTime time.Time
+	duration  time.Duration
+}
+
 // TaskObject represents a registered task.
 type TaskObject struct {
-	name            string        // The name of the task.
-	description     string        // The description of the task.
-	arguments       []argument    // The arguments of the task.
-	taskFunc        func() error  // The function of the task.
-	dependencies    []string      // A list of dependecy tasks.
-	dependees       []string      // A list of dependee tasks.
-	followups       []string      // A list of followup tasks.
-	continueOnError bool          // A flag to incdicate if the run should continue when an error occured.
-	deferOnError    bool          // A flag to indicate if the error should be deferred until the end.
-	didRun          bool          // A flag to indicate if the task did already run.
-	duration        time.Duration // A runtime duration of the task if it ran already.
-	err             error         // The error (if any) of the task when it ran.
-	ignoredErr      error         // The error (if any) which is ignored.
-	deferredErr     error         // The deferred error (if any) of the task when it ran.
+	name             string        // The name of the task.
+	description      string        // The description of the task.
+	arguments        []argument    // The arguments of the task.
+	taskFunc         func() error  // The function of the task.
+	dependencies     []string      // A list of dependecy tasks.
+	dependees        []string      // A list of dependee tasks.
+	followups        []string      // A list of followup tasks.
+	continueOnError  bool          // A flag to incdicate if the run should continue when an error occured.
+	deferOnError     bool          // A flag to indicate if the error should be deferred until the end.
+	didRun           bool          // A flag to indicate if the task did already run.
+	duration         time.Duration // A runtime duration of the task if it ran already.
+	err              error         // The error (if any) of the task when it ran.
+	ignoredErr       error         // The error (if any) which is ignored.
+	deferredErr      error         // The deferred error (if any) of the task when it ran.
+	timeMeasurements []*timeMeasurement
 }
 
 // GetName gets the name of the task.
@@ -408,6 +415,22 @@ func AddFollowupTask(taskName ...string) {
 	currentRunningTask.Then(taskName...)
 }
 
+func MeasureTime(measurementName string, f func() error) error {
+	// Execute the function
+	start := time.Now()
+	err := f()
+	elapsed := time.Since(start)
+
+	// Add the time measurement
+	currentRunningTask.timeMeasurements = append(currentRunningTask.timeMeasurements, &timeMeasurement{
+		name:      measurementName,
+		startTime: start,
+		duration:  elapsed,
+	})
+
+	return err
+}
+
 func printTasks() {
 	log.Information("Please specify one of the following targets:")
 	var sb strings.Builder
@@ -488,10 +511,17 @@ func printTaskRuns() {
 		text := fmt.Sprintf("%-50s%-13d%-17s", run.name, getExitCodeFromTaskRun(run), formatDuration(run.duration))
 		if run.err != nil || run.deferredErr != nil {
 			color.Red(text)
-			color.Set(color.FgGreen)
+
 		} else {
 			log.Information(text)
 		}
+		color.Set(color.FgWhite)
+		for i, measurement := range run.timeMeasurements {
+			prefix := goext.Ternary(i == len(run.timeMeasurements)-1, "└─", "├─")
+			measurementText := fmt.Sprintf("%s%-61s%-17s", prefix, measurement.name, formatDuration(measurement.duration))
+			log.Information(measurementText)
+		}
+		color.Set(color.FgGreen)
 		totalDuration += run.duration
 	}
 	log.Information(strings.Repeat("-", 80))
