@@ -518,7 +518,7 @@ func printTaskRuns() {
 		color.Set(color.FgWhite)
 		for i, measurement := range run.timeMeasurements {
 			prefix := goext.Ternary(i == len(run.timeMeasurements)-1, "└─", "├─")
-			measurementText := fmt.Sprintf("%s%-61s%-17s", prefix, measurement.name, formatDuration(measurement.duration))
+			measurementText := fmt.Sprintf("%s %-60s%-17s", prefix, measurement.name, formatDuration(measurement.duration))
 			log.Information(measurementText)
 		}
 		color.Set(color.FgGreen)
