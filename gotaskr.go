@@ -79,19 +79,26 @@ func Execute() int {
 	}
 
 	// Run the setup method
-	runLifetimeFunc("Setup", context.SetupFunc)
+	setupErr := runLifetimeFunc("Setup", context.SetupFunc)
 
-	// Run the main target
-	err := RunTarget(target)
+	// In case of a setup error, run the teardown and exit
+	if setupErr != nil {
+		// We can ignore a possible teardown error
+		runLifetimeFunc("Teardown", context.TeardownFunc)
+		return getExitCodeFromError(setupErr)
+	}
+
+	// Run the main target only if the setup succeeded
+	taskErr := RunTarget(target)
 
 	// Run the teardown method
-	runLifetimeFunc("Teardown", context.TeardownFunc)
+	teardownErr := runLifetimeFunc("Teardown", context.TeardownFunc)
 
 	// Run finished
 	log.Information()
 	log.Information(strings.Repeat("-", 60))
-	log.Information("Finished running all tasks")
-	exitCode := getExitCodeFromError(err)
+	log.Information("Finished gotaskr")
+	exitCode := getExitCodeFromError(taskErr)
 
 	// Print errors and check the deferred errors
 	for _, run := range taskRun {
@@ -103,6 +110,12 @@ func Execute() int {
 	log.Information(strings.Repeat("-", 60))
 	log.Information()
 	printTaskRuns()
+
+	// If the teardown failed but nothing else, still fail with the teardowns error
+	if teardownErr != nil && exitCode == 0 {
+		exitCode = getExitCodeFromError(teardownErr)
+	}
+
 	return exitCode
 }
 
@@ -148,66 +161,75 @@ func RunTarget(target string) error {
 	// Run dependencies
 	if !exclusive && len(currentTask.dependencies) > 0 {
 		for _, dependency := range currentTask.dependencies {
-			err := RunTarget(dependency)
-			if err != nil {
+			dependencyErr := RunTarget(dependency)
+			if dependencyErr != nil {
 				if currentTask.deferOnError {
 					// Handle deferred errors
-					currentTask.deferredErr = err
+					currentTask.deferredErr = dependencyErr
 				} else {
-					return err
+					return dependencyErr
 				}
 			}
 		}
 	}
 
 	// Run the task setup method
-	runLifetimeFunc("TaskSetup", context.TaskSetupFunc)
+	setupErr := runLifetimeFunc("TaskSetup", context.TaskSetupFunc)
+
+	// In case of a setup error, run the teardown and exit
+	if setupErr != nil {
+		// We can ignore a possible teardown error
+		runLifetimeFunc("TaskTeardown", context.TaskTeardownFunc)
+		return setupErr
+	}
 
 	// Run the task itself
 	currentRunningTask = currentTask
 	printTaskHeader(target)
 	start := time.Now()
-	err := runTaskFunc(currentTask)
+	taskErr := runTaskFunc(currentTask)
 	elapsed := time.Since(start)
 	// Handle error deferring
-	if err != nil && currentTask.deferOnError {
-		currentTask.deferredErr = err
-		err = nil
+	if taskErr != nil && currentTask.deferOnError {
+		currentTask.deferredErr = taskErr
+		taskErr = nil
 	}
 	// Handle error skipping
-	if err != nil && currentTask.continueOnError {
-		currentTask.ignoredErr = err
-		err = nil
+	if taskErr != nil && currentTask.continueOnError {
+		currentTask.ignoredErr = taskErr
+		taskErr = nil
 	}
 	currentTask.didRun = true
 	currentTask.duration = elapsed
-	currentTask.err = err
+	currentTask.err = taskErr
 	taskRun = append(taskRun, currentTask)
 	printTaskFooter(currentTask)
 
 	// Run the task teardown method
-	runLifetimeFunc("TaskTeardown", context.TaskTeardownFunc)
+	teardownErr := runLifetimeFunc("TaskTeardown", context.TaskTeardownFunc)
+
+	// If the teardown failed but nothing else, still fail with the teardowns error
+	if teardownErr != nil && taskErr == nil {
+		return teardownErr
+	}
 
 	// Abort execution if the task failed
-	if err != nil {
-		return err
+	if taskErr != nil {
+		return taskErr
 	}
 	// Run followup tasks
 	if !exclusive && len(currentTask.followups) > 0 {
 		for _, followup := range currentTask.followups {
-			err := RunTarget(followup)
-			if err != nil {
+			followupErr := RunTarget(followup)
+			if followupErr != nil {
 				if currentTask.deferOnError {
 					// Handle deferred errors
-					currentTask.deferredErr = err
+					currentTask.deferredErr = followupErr
 				} else {
-					return err
+					return followupErr
 				}
 			}
 		}
-	}
-	if err != nil {
-		return err
 	}
 	if currentTask.deferredErr != nil {
 		return currentTask.deferredErr
@@ -215,15 +237,17 @@ func RunTarget(target string) error {
 	return nil
 }
 
-func runLifetimeFunc(lifetimeStage string, function func() error) {
+func runLifetimeFunc(lifetimeStage string, function func() error) error {
 	if function == nil {
-		return
+		return nil
 	}
 	log.Informationf("--- %s %s", lifetimeStage, strings.Repeat("-", 60-5-len(lifetimeStage)))
 	err := runFuncRecover(function)
 	if err != nil {
-		log.Informationf("Finished with error: %v", err)
+		log.Informationf("Error occured: %v", err)
+		return err
 	}
+	return nil
 }
 
 func runTaskFunc(currentTask *TaskObject) (err error) {
@@ -565,4 +589,8 @@ func clear() {
 	taskMap = map[string]*TaskObject{}
 	taskList = []string{}
 	taskRun = []*TaskObject{}
+	context.SetupFunc = nil
+	context.TeardownFunc = nil
+	context.TaskSetupFunc = nil
+	context.TaskTeardownFunc = nil
 }
