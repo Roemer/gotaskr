@@ -84,7 +84,7 @@ func Execute() int {
 	// In case of a setup error, run the teardown and exit
 	if setupErr != nil {
 		// We can ignore a possible teardown error
-		runLifetimeFunc("Teardown", context.TeardownFunc)
+		_ = runLifetimeFunc("Teardown", context.TeardownFunc)
 		return getExitCodeFromError(setupErr)
 	}
 
@@ -179,7 +179,7 @@ func RunTarget(target string) error {
 	// In case of a setup error, run the teardown and exit
 	if setupErr != nil {
 		// We can ignore a possible teardown error
-		runLifetimeFunc("TaskTeardown", context.TaskTeardownFunc)
+		_ = runLifetimeFunc("TaskTeardown", context.TaskTeardownFunc)
 		return setupErr
 	}
 
