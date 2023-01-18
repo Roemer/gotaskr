@@ -16,6 +16,7 @@ func CreateMvnTool() *MvnTool {
 	return &MvnTool{}
 }
 
+// MvnRunSettings is the settings object to tell mvn what to do.
 type MvnRunSettings struct {
 	WorkingDirectory    string
 	Phases              []string
@@ -34,6 +35,7 @@ type MvnRunSettings struct {
 	AdditionalArguments []string
 }
 
+// Run runs mvn according to the settings.
 func (tool *MvnTool) Run(outputToConsole bool, settings MvnRunSettings) error {
 	args := []string{}
 	args = append(args, settings.Phases...)

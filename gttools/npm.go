@@ -15,7 +15,7 @@ func CreateNpmTool() *NpmTool {
 	return &NpmTool{}
 }
 
-// Init
+// NpmInitSettings are the settings used for Init.
 type NpmInitSettings struct {
 	WorkingDirectory string
 }
@@ -33,7 +33,7 @@ func (tool *NpmTool) Init(outputToConsole bool, settings *NpmInitSettings) error
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
-// Run
+// NpmRunSettings are the settings used for Run.
 type NpmRunSettings struct {
 	WorkingDirectory string
 	Script           string
@@ -56,7 +56,7 @@ func (tool *NpmTool) RunScript(outputToConsole bool, script string) error {
 	return tool.Run(outputToConsole, &NpmRunSettings{Script: script})
 }
 
-// CleanInstall
+// NpmCleanInstallSettings are the settings used for CleanInstall.
 type NpmCleanInstallSettings struct {
 	WorkingDirectory string
 	CacheDir         string
@@ -79,7 +79,7 @@ func (tool *NpmTool) CleanInstall(outputToConsole bool, settings *NpmCleanInstal
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
-// Install
+// NpmInstallInstall are the settings used for Install.
 type NpmInstallSettings struct {
 	WorkingDirectory string
 	CacheDir         string
@@ -112,7 +112,7 @@ func (tool *NpmTool) Install(outputToConsole bool, settings *NpmInstallSettings)
 	return execr.RunCommand(outputToConsole, cmd)
 }
 
-// Bin
+// NpmBinSettings are the settings used for Bin.
 type NpmBinSettings struct {
 	WorkingDirectory string
 	Global           bool
@@ -133,7 +133,10 @@ func (tool *NpmTool) Bin(settings *NpmBinSettings) (string, error) {
 	return stdout, err
 }
 
+////////////////////////////////////////////////////////////
 // Internal Methods
+////////////////////////////////////////////////////////////
+
 func (tool *NpmTool) addCache(args []string, cacheDir string) []string {
 	return goext.AddIf(args, cacheDir != "", "--cache", cacheDir)
 }

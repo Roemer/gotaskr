@@ -53,11 +53,13 @@ type CypressRunSettings struct {
 	OutputToConsole  bool   // flag to define if the output should be written into the console or not.
 }
 
+// AddEnv adds an environment value to the Cypress settings.
 func (settings *CypressRunSettings) AddEnv(key string, value string) *CypressRunSettings {
 	settings.Env[key] = value
 	return settings
 }
 
+// AddSpecs adds one or more specs to run to the Cypress settings.
 func (settings *CypressRunSettings) AddSpecs(specs ...string) *CypressRunSettings {
 	for _, entry := range specs {
 		settings.Specs = goext.AppendIfMissing(settings.Specs, entry)
@@ -65,12 +67,47 @@ func (settings *CypressRunSettings) AddSpecs(specs ...string) *CypressRunSetting
 	return settings
 }
 
+// AddTags adds one or more tagst to the Cypress settings.
 func (settings *CypressRunSettings) AddTags(tags ...string) *CypressRunSettings {
 	for _, entry := range tags {
 		settings.Tags = goext.AppendIfMissing(settings.Tags, entry)
 	}
 	return settings
 }
+
+// CypressRun allows you to run Cypress with a defined binary. Usefull for example when using cy2.
+func (tool *CypressTool) CypressRun(cypressBinPath string, settings *CypressRunSettings) error {
+	args := settings.buildCliArguments()
+	cmd := exec.Command(cypressBinPath, goext.RemoveEmpty(args)...)
+	cmd.Dir = settings.WorkingDirectory
+	return execr.RunCommand(settings.OutputToConsole, cmd)
+}
+
+// CypressRunWithNpx runs Cypress with npx.
+func (tool *CypressTool) CypressRunWithNpx(settings *CypressRunSettings) error {
+	args := []string{
+		"cypress",
+	}
+	args = append(args, settings.buildCliArguments()...)
+	cmd := exec.Command("npx", goext.RemoveEmpty(args)...)
+	cmd.Dir = settings.WorkingDirectory
+	return execr.RunCommand(settings.OutputToConsole, cmd)
+}
+
+// CypressRunWitYarn runs Cypress with Yarn.
+func (tool *CypressTool) CypressRunWitYarn(settings *CypressRunSettings) error {
+	args := []string{
+		"cypress",
+	}
+	args = append(args, settings.buildCliArguments()...)
+	cmd := exec.Command("yarn", goext.RemoveEmpty(args)...)
+	cmd.Dir = settings.WorkingDirectory
+	return execr.RunCommand(settings.OutputToConsole, cmd)
+}
+
+////////////////////////////////////////////////////////////
+// Internal Methods
+////////////////////////////////////////////////////////////
 
 func (settings *CypressRunSettings) buildCliArguments() []string {
 	args := []string{
@@ -98,31 +135,4 @@ func (settings *CypressRunSettings) buildCliArguments() []string {
 	args = goext.AddIf(args, len(settings.Specs) > 0, "--spec", strings.Join(settings.Specs, ","))
 	args = goext.AddIf(args, len(settings.Tags) > 0, "--tag", strings.Join(settings.Tags, ","))
 	return args
-}
-
-func (tool *CypressTool) CypressRun(cypressBinPath string, settings *CypressRunSettings) error {
-	args := settings.buildCliArguments()
-	cmd := exec.Command(cypressBinPath, goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
-}
-
-func (tool *CypressTool) CypressRunWithNpx(settings *CypressRunSettings) error {
-	args := []string{
-		"cypress",
-	}
-	args = append(args, settings.buildCliArguments()...)
-	cmd := exec.Command("npx", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
-}
-
-func (tool *CypressTool) CypressRunWitYarn(settings *CypressRunSettings) error {
-	args := []string{
-		"cypress",
-	}
-	args = append(args, settings.buildCliArguments()...)
-	cmd := exec.Command("yarn", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
 }
