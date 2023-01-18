@@ -10,21 +10,21 @@ gotaskr (Go-Task-Runner) is a generic task runner which is invoked via CLI.
 The tasks are written in plan Go and can easily be called from the CLI.
 This is especially usefull for tasks in the CI.
 
-The tasks can be chained and in the end, there is a small statistic about
+The tasks can be chained and in the end, there is a statistic about
 the tasks that were executed and their runtime.
 
-There are some inbuilt helpers for often used tasks for various DevOps tasks.
+There are some inbuilt helpers for often used things for various DevOps tasks.
 
 ## Features
-- Compileable or directly runnable with go run
-- Fanzy statistics after the execution
-- Output from subprocesses directly visible
-- Tasks are written in plain Go
-- Each task can have custom arguments
-- Arguments are named (non-positional) and can be optional
-- Chainable tasks
-- Inbuilt helpers for various DevOps tasks
+- Compilable or directly runnable with `go run`
+- Tasks are written in plain Go and everything from Go can be used
 - Small footprint and easily extendable
+- Fanzy statistics after the execution
+- [Custom Arguments](../wiki/Arguments) which are named (non-positional) and can be optional
+- [Chainable tasks](../wiki/Dependencies)
+- [Setup and Teardown methods](../wiki/Lifetime-Methods)
+- Output from subprocesses directly visible
+- [Inbuilt helpers](../wiki/Tools) for various DevOps tasks
 
 ## Quick-Start
 Create a new go project:
