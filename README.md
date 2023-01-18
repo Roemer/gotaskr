@@ -20,11 +20,11 @@ There are some inbuilt helpers for often used things for various DevOps tasks.
 - Tasks are written in plain Go and everything from Go can be used
 - Small footprint and easily extendable
 - Fanzy statistics after the execution
-- [Custom Arguments](../wiki/Arguments) which are named (non-positional) and can be optional
-- [Chainable tasks](../wiki/Dependencies)
-- [Setup and Teardown methods](../wiki/Lifetime-Methods)
+- [Custom Arguments](../../wiki/Arguments) which are named (non-positional) and can be optional
+- [Chainable tasks](../../wiki/Dependencies)
+- [Setup and Teardown methods](../../wiki/Lifetime-Methods)
 - Output from subprocesses directly visible
-- [Inbuilt helpers](../wiki/Tools) for various DevOps tasks
+- [Inbuilt helpers](../../wiki/Tools) for various DevOps tasks
 
 ## Quick-Start
 Create a new go project:
