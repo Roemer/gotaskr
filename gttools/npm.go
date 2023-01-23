@@ -169,7 +169,7 @@ type NpmPublishSettings struct {
 	Tag         string
 }
 
-func (tool *NpmTool) Publish(settings *NpmPublishSettings) (string, error) {
+func (tool *NpmTool) Publish(settings *NpmPublishSettings) error {
 	if settings == nil {
 		settings = &NpmPublishSettings{}
 	}
@@ -183,9 +183,7 @@ func (tool *NpmTool) Publish(settings *NpmPublishSettings) (string, error) {
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
 
-	stdout, _, err := execr.RunCommandGetOutput(settings.OutputToConsole, cmd)
-
-	return stdout, err
+	return execr.RunCommand(settings.OutputToConsole, cmd)
 }
 
 ////////////////////////////////////////////////////////////
