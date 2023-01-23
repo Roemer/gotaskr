@@ -15,9 +15,23 @@ func CreateNpmTool() *NpmTool {
 	return &NpmTool{}
 }
 
+// NpmCommonSettings are common settings used for all commands.
+type NpmCommonSettings struct {
+	WorkingDirectory string
+	OutputToConsole  bool
+	CustomArguments  []string
+}
+
+// Customize adds a custom argument to the settings object.
+func (s *NpmCommonSettings) Customize(setting string) *NpmCommonSettings {
+	s.CustomArguments = append(s.CustomArguments, setting)
+	return s
+}
+
 // NpmInitSettings are the settings used for Init.
 type NpmInitSettings struct {
-	WorkingDirectory string
+	NpmCommonSettings
+	PackageSpec string
 }
 
 func (tool *NpmTool) Init(outputToConsole bool, settings *NpmInitSettings) error {
@@ -26,20 +40,23 @@ func (tool *NpmTool) Init(outputToConsole bool, settings *NpmInitSettings) error
 	}
 	args := []string{
 		"init",
+		settings.PackageSpec,
 		"-y",
 	}
+	args = append(args, settings.CustomArguments...)
+
 	cmd := exec.Command("npm", args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(outputToConsole, cmd)
+	return execr.RunCommand(settings.OutputToConsole, cmd)
 }
 
 // NpmRunSettings are the settings used for Run.
 type NpmRunSettings struct {
-	WorkingDirectory string
-	Script           string
+	NpmCommonSettings
+	Script string
 }
 
-func (tool *NpmTool) Run(outputToConsole bool, settings *NpmRunSettings) error {
+func (tool *NpmTool) Run(settings *NpmRunSettings) error {
 	if settings == nil {
 		settings = &NpmRunSettings{}
 	}
@@ -47,21 +64,28 @@ func (tool *NpmTool) Run(outputToConsole bool, settings *NpmRunSettings) error {
 		"run",
 		settings.Script,
 	}
+	args = append(args, settings.CustomArguments...)
+
 	cmd := exec.Command("npm", args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(outputToConsole, cmd)
+	return execr.RunCommand(settings.OutputToConsole, cmd)
 }
 
 func (tool *NpmTool) RunScript(outputToConsole bool, script string) error {
-	return tool.Run(outputToConsole, &NpmRunSettings{Script: script})
+	return tool.Run(&NpmRunSettings{
+		NpmCommonSettings: NpmCommonSettings{
+			OutputToConsole: outputToConsole,
+		},
+		Script: script,
+	})
 }
 
 // NpmCleanInstallSettings are the settings used for CleanInstall.
 type NpmCleanInstallSettings struct {
-	WorkingDirectory string
-	CacheDir         string
-	NoAudit          bool
-	PreferOffline    bool
+	NpmCommonSettings
+	CacheDir      string
+	NoAudit       bool
+	PreferOffline bool
 }
 
 func (tool *NpmTool) CleanInstall(outputToConsole bool, settings *NpmCleanInstallSettings) error {
@@ -74,22 +98,24 @@ func (tool *NpmTool) CleanInstall(outputToConsole bool, settings *NpmCleanInstal
 	args = goext.AddIf(args, settings.NoAudit, "--no-audit")
 	args = goext.AddIf(args, settings.PreferOffline, "--prefer-offline")
 	args = tool.addCache(args, settings.CacheDir)
+	args = append(args, settings.CustomArguments...)
+
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(outputToConsole, cmd)
+	return execr.RunCommand(settings.OutputToConsole, cmd)
 }
 
-// NpmInstallInstall are the settings used for Install.
+// NpmInstallSettings are the settings used for Install.
 type NpmInstallSettings struct {
-	WorkingDirectory string
-	CacheDir         string
-	PackageSpec      string
-	NoAudit          bool
-	PreferOffline    bool
-	SaveProd         bool
-	SaveDev          bool
-	SaveOptional     bool
-	SaveExact        bool
+	NpmCommonSettings
+	CacheDir      string
+	PackageSpec   string
+	NoAudit       bool
+	PreferOffline bool
+	SaveProd      bool
+	SaveDev       bool
+	SaveOptional  bool
+	SaveExact     bool
 }
 
 func (tool *NpmTool) Install(outputToConsole bool, settings *NpmInstallSettings) error {
@@ -107,15 +133,17 @@ func (tool *NpmTool) Install(outputToConsole bool, settings *NpmInstallSettings)
 	args = goext.AddIf(args, settings.NoAudit, "--no-audit")
 	args = goext.AddIf(args, settings.PreferOffline, "--prefer-offline")
 	args = tool.addCache(args, settings.CacheDir)
+	args = append(args, settings.CustomArguments...)
+
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(outputToConsole, cmd)
+	return execr.RunCommand(settings.OutputToConsole, cmd)
 }
 
 // NpmBinSettings are the settings used for Bin.
 type NpmBinSettings struct {
-	WorkingDirectory string
-	Global           bool
+	NpmCommonSettings
+	Global bool
 }
 
 func (tool *NpmTool) Bin(settings *NpmBinSettings) (string, error) {
@@ -126,10 +154,37 @@ func (tool *NpmTool) Bin(settings *NpmBinSettings) (string, error) {
 		"bin",
 	}
 	args = goext.AddIf(args, settings.Global, "--global")
+	args = append(args, settings.CustomArguments...)
+
+	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
+	cmd.Dir = settings.WorkingDirectory
+	stdout, _, err := execr.RunCommandGetOutput(settings.OutputToConsole, cmd)
+	return stdout, err
+}
+
+// NpmPublishSettings are the settings used for Publish.
+type NpmPublishSettings struct {
+	NpmCommonSettings
+	PackageSpec string
+	Tag         string
+}
+
+func (tool *NpmTool) Publish(settings *NpmPublishSettings) (string, error) {
+	if settings == nil {
+		settings = &NpmPublishSettings{}
+	}
+	args := []string{
+		"publish",
+		settings.PackageSpec,
+	}
+	args = goext.AddIf(args, len(settings.Tag) > 0, "--tag", settings.Tag)
+	args = append(args, settings.CustomArguments...)
+
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
 
-	stdout, _, err := execr.RunCommandGetOutput(false, cmd)
+	stdout, _, err := execr.RunCommandGetOutput(settings.OutputToConsole, cmd)
+
 	return stdout, err
 }
 
@@ -138,5 +193,5 @@ func (tool *NpmTool) Bin(settings *NpmBinSettings) (string, error) {
 ////////////////////////////////////////////////////////////
 
 func (tool *NpmTool) addCache(args []string, cacheDir string) []string {
-	return goext.AddIf(args, cacheDir != "", "--cache", cacheDir)
+	return goext.AddIf(args, len(cacheDir) > 0, "--cache", cacheDir)
 }
