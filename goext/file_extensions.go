@@ -35,3 +35,18 @@ func FileExists(filePath string) (bool, error) {
 	}
 	return false, err
 }
+
+// CopyFile is a simple file copy from source to destination.
+func CopyFile(src string, dst string) (int64, error) {
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return -1, err
+	}
+	defer srcFile.Close()
+	dstFile, err := os.Create(dst)
+	if err != nil {
+		return -1, err
+	}
+	defer dstFile.Close()
+	return dstFile.ReadFrom(srcFile)
+}
