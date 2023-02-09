@@ -24,3 +24,16 @@ func CreateToolsClient() *ToolsClient {
 		Npm:     CreateNpmTool(),
 	}
 }
+
+// ToolSettingsBase are common settings usefull for all tools that run executables.
+type ToolSettingsBase struct {
+	WorkingDirectory string   // the path to use as working directory when running the tool
+	OutputToConsole  bool     // flag to define if the output of the tool should be written into the console or not.
+	CustomArguments  []string // list with custom arguments passed to the tool
+}
+
+// Customize adds a custom argument to the settings object.
+func (s *ToolSettingsBase) Customize(setting string) *ToolSettingsBase {
+	s.CustomArguments = append(s.CustomArguments, setting)
+	return s
+}

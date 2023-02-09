@@ -15,26 +15,13 @@ func CreateNpmTool() *NpmTool {
 	return &NpmTool{}
 }
 
-// NpmCommonSettings are common settings used for all commands.
-type NpmCommonSettings struct {
-	WorkingDirectory string
-	OutputToConsole  bool
-	CustomArguments  []string
-}
-
-// Customize adds a custom argument to the settings object.
-func (s *NpmCommonSettings) Customize(setting string) *NpmCommonSettings {
-	s.CustomArguments = append(s.CustomArguments, setting)
-	return s
-}
-
 // NpmInitSettings are the settings used for Init.
 type NpmInitSettings struct {
-	NpmCommonSettings
+	ToolSettingsBase
 	PackageSpec string
 }
 
-func (tool *NpmTool) Init(outputToConsole bool, settings *NpmInitSettings) error {
+func (tool *NpmTool) Init(settings *NpmInitSettings) error {
 	if settings == nil {
 		settings = &NpmInitSettings{}
 	}
@@ -52,7 +39,7 @@ func (tool *NpmTool) Init(outputToConsole bool, settings *NpmInitSettings) error
 
 // NpmRunSettings are the settings used for Run.
 type NpmRunSettings struct {
-	NpmCommonSettings
+	ToolSettingsBase
 	Script string
 }
 
@@ -73,7 +60,7 @@ func (tool *NpmTool) Run(settings *NpmRunSettings) error {
 
 func (tool *NpmTool) RunScript(outputToConsole bool, script string) error {
 	return tool.Run(&NpmRunSettings{
-		NpmCommonSettings: NpmCommonSettings{
+		ToolSettingsBase: ToolSettingsBase{
 			OutputToConsole: outputToConsole,
 		},
 		Script: script,
@@ -82,13 +69,13 @@ func (tool *NpmTool) RunScript(outputToConsole bool, script string) error {
 
 // NpmCleanInstallSettings are the settings used for CleanInstall.
 type NpmCleanInstallSettings struct {
-	NpmCommonSettings
+	ToolSettingsBase
 	CacheDir      string
 	NoAudit       bool
 	PreferOffline bool
 }
 
-func (tool *NpmTool) CleanInstall(outputToConsole bool, settings *NpmCleanInstallSettings) error {
+func (tool *NpmTool) CleanInstall(settings *NpmCleanInstallSettings) error {
 	if settings == nil {
 		settings = &NpmCleanInstallSettings{}
 	}
@@ -107,7 +94,7 @@ func (tool *NpmTool) CleanInstall(outputToConsole bool, settings *NpmCleanInstal
 
 // NpmInstallSettings are the settings used for Install.
 type NpmInstallSettings struct {
-	NpmCommonSettings
+	ToolSettingsBase
 	CacheDir      string
 	PackageSpec   string
 	NoAudit       bool
@@ -118,7 +105,7 @@ type NpmInstallSettings struct {
 	SaveExact     bool
 }
 
-func (tool *NpmTool) Install(outputToConsole bool, settings *NpmInstallSettings) error {
+func (tool *NpmTool) Install(settings *NpmInstallSettings) error {
 	if settings == nil {
 		settings = &NpmInstallSettings{}
 	}
@@ -142,7 +129,7 @@ func (tool *NpmTool) Install(outputToConsole bool, settings *NpmInstallSettings)
 
 // NpmBinSettings are the settings used for Bin.
 type NpmBinSettings struct {
-	NpmCommonSettings
+	ToolSettingsBase
 	Global bool
 }
 
@@ -164,7 +151,7 @@ func (tool *NpmTool) Bin(settings *NpmBinSettings) (string, error) {
 
 // NpmPublishSettings are the settings used for Publish.
 type NpmPublishSettings struct {
-	NpmCommonSettings
+	ToolSettingsBase
 	PackageSpec string
 	Tag         string
 }

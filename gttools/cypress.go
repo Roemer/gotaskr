@@ -27,6 +27,7 @@ const (
 // CypressRunSettings defines the settings to use for running Cypress.
 // Also see https://docs.cypress.io/guides/guides/command-line#cypress-run
 type CypressRunSettings struct {
+	ToolSettingsBase
 	Browser         string            // defines the browser to launch like chrome, chromium, edge, electron, firefox. Alternatively a path to an executable.
 	CiBuildId       string            // the unique id to group tests together.
 	Component       bool              // flag to define if component tests should run.
@@ -48,9 +49,6 @@ type CypressRunSettings struct {
 	ReporterOptions string            // specify the reporter options to use as key value pairs, comma separated. Can also be a stringified json object.
 	Specs           []string          // define the spec file(s) to run.
 	Tags            []string          // add tags to identify a run.
-
-	WorkingDirectory string // the working directory to use.
-	OutputToConsole  bool   // flag to define if the output should be written into the console or not.
 }
 
 // AddEnv adds an environment value to the Cypress settings.
@@ -134,5 +132,6 @@ func (settings *CypressRunSettings) buildCliArguments() []string {
 	args = goext.AddIf(args, settings.ReporterOptions != "", "--reporter-options", settings.ReporterOptions)
 	args = goext.AddIf(args, len(settings.Specs) > 0, "--spec", strings.Join(settings.Specs, ","))
 	args = goext.AddIf(args, len(settings.Tags) > 0, "--tag", strings.Join(settings.Tags, ","))
+	args = append(args, settings.CustomArguments...)
 	return args
 }

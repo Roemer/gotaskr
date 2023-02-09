@@ -15,12 +15,12 @@ type DockerImageTool struct {
 }
 
 type DockerBuildSettings struct {
-	WorkingDirectory string
-	Dockerfile       string
-	ContextPath      string
-	Tags             []string
-	Labels           []string
-	BuildArgs        []string
+	ToolSettingsBase
+	Dockerfile  string
+	ContextPath string
+	Tags        []string
+	Labels      []string
+	BuildArgs   []string
 }
 
 func (settings *DockerBuildSettings) AddTags(tags ...string) *DockerBuildSettings {
@@ -44,7 +44,7 @@ func (settings *DockerBuildSettings) AddBuildArgs(buildArgs ...string) *DockerBu
 	return settings
 }
 
-func (tool *DockerImageTool) Build(outputToConsole bool, settings *DockerBuildSettings) error {
+func (tool *DockerImageTool) Build(settings *DockerBuildSettings) error {
 	args := []string{
 		"build",
 	}
@@ -58,25 +58,27 @@ func (tool *DockerImageTool) Build(outputToConsole bool, settings *DockerBuildSe
 	for _, entry := range settings.BuildArgs {
 		args = append(args, "--build-arg", entry)
 	}
+	args = append(args, settings.CustomArguments...)
 	args = append(args, goext.Ternary(settings.ContextPath == "", ".", settings.ContextPath))
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
 	cmd.Stdin = os.Stdin
-	return execr.RunCommand(outputToConsole, cmd)
+	return execr.RunCommand(settings.OutputToConsole, cmd)
 }
 
 type DockerSaveSettings struct {
-	WorkingDirectory string
-	OutputFile       string
-	ImageReference   string
+	ToolSettingsBase
+	OutputFile     string
+	ImageReference string
 }
 
-func (tool *DockerImageTool) Save(outputToConsole bool, settings *DockerSaveSettings) error {
+func (tool *DockerImageTool) Save(settings *DockerSaveSettings) error {
 	args := []string{
 		"save",
 	}
 	args = goext.AddIf(args, settings.OutputFile != "", "--output", settings.OutputFile)
+	args = append(args, settings.CustomArguments...)
 	args = append(args, settings.ImageReference)
 
 	// Make sure the directory exists
@@ -88,23 +90,24 @@ func (tool *DockerImageTool) Save(outputToConsole bool, settings *DockerSaveSett
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(outputToConsole, cmd)
+	return execr.RunCommand(settings.OutputToConsole, cmd)
 }
 
 type DockerLoadSettings struct {
-	WorkingDirectory string
-	InputFile        string
+	ToolSettingsBase
+	InputFile string
 }
 
-func (tool *DockerImageTool) Load(outputToConsole bool, settings *DockerLoadSettings) ([]string, error) {
+func (tool *DockerImageTool) Load(settings *DockerLoadSettings) ([]string, error) {
 	args := []string{
 		"load",
 	}
 	args = goext.AddIf(args, settings.InputFile != "", "--input", settings.InputFile)
+	args = append(args, settings.CustomArguments...)
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	stdout, _, err := execr.RunCommandGetOutput(outputToConsole, cmd)
+	stdout, _, err := execr.RunCommandGetOutput(settings.OutputToConsole, cmd)
 
 	// Parse out all loaded images
 	loadedImages := []string{}
@@ -119,17 +122,20 @@ func (tool *DockerImageTool) Load(outputToConsole bool, settings *DockerLoadSett
 }
 
 type DockerPushSettings struct {
-	WorkingDirectory string
-	ImageReference   string
+	ToolSettingsBase
+	AllTags        bool
+	ImageReference string
 }
 
-func (tool *DockerImageTool) Push(outputToConsole bool, settings *DockerPushSettings) error {
+func (tool *DockerImageTool) Push(settings *DockerPushSettings) error {
 	args := []string{
 		"push",
 	}
+	args = goext.AddIf(args, settings.AllTags, "--all-tags")
+	args = append(args, settings.CustomArguments...)
 	args = append(args, settings.ImageReference)
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(outputToConsole, cmd)
+	return execr.RunCommand(settings.OutputToConsole, cmd)
 }

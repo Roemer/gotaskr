@@ -18,25 +18,24 @@ func CreateMvnTool() *MvnTool {
 
 // MvnRunSettings is the settings object to tell mvn what to do.
 type MvnRunSettings struct {
-	WorkingDirectory    string
-	Phases              []string
-	Projects            []string
-	ActivateProfiles    []string
-	AlsoMake            bool
-	BatchMode           bool
-	Debug               bool
-	Help                bool
-	NoTransferProgress  bool
-	Offline             bool
-	Quiet               bool
-	Settings            string
-	Version             bool
-	ShowVersion         bool
-	AdditionalArguments []string
+	ToolSettingsBase
+	Phases             []string
+	Projects           []string
+	ActivateProfiles   []string
+	AlsoMake           bool
+	BatchMode          bool
+	Debug              bool
+	Help               bool
+	NoTransferProgress bool
+	Offline            bool
+	Quiet              bool
+	Settings           string
+	Version            bool
+	ShowVersion        bool
 }
 
 // Run runs mvn according to the settings.
-func (tool *MvnTool) Run(outputToConsole bool, settings MvnRunSettings) error {
+func (tool *MvnTool) Run(settings MvnRunSettings) error {
 	args := []string{}
 	args = append(args, settings.Phases...)
 	args = append(args, "--projects", strings.Join(settings.Projects, ","))
@@ -51,9 +50,9 @@ func (tool *MvnTool) Run(outputToConsole bool, settings MvnRunSettings) error {
 	args = goext.AddIf(args, settings.Settings != "", "--settings", settings.Settings)
 	args = goext.AddIf(args, settings.Version, "--version")
 	args = goext.AddIf(args, settings.ShowVersion, "--show-version")
-	args = append(args, settings.AdditionalArguments...)
+	args = append(args, settings.CustomArguments...)
 
 	cmd := exec.Command("mvn", args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(outputToConsole, cmd)
+	return execr.RunCommand(settings.OutputToConsole, cmd)
 }
