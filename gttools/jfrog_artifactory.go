@@ -75,7 +75,12 @@ func (tool *ArtifactoryTool) HasSearchResults(artifactoryManager artifactory.Art
 	}
 	defer reader.Close()
 
-	return !reader.IsEmpty(), nil
+	length, err := reader.Length()
+	if err != nil {
+		return false, err
+	}
+
+	return length > 0, nil
 }
 
 // GetSearchResults performs the given search and returns the found items.
