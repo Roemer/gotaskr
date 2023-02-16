@@ -97,7 +97,7 @@ func Execute() int {
 	// Run finished
 	log.Information()
 	log.Information(strings.Repeat("-", 60))
-	log.Information("Finished gotaskr")
+	log.Informationf("Finished gotaskr at %s", time.Now().Format("2006-01-02 15:04:05.000"))
 	exitCode := getExitCodeFromError(taskErr)
 
 	// Print errors and check the deferred errors
@@ -425,12 +425,12 @@ func (taskObject *TaskObject) Description(description string) *TaskObject {
 
 // Argument adds a description for an argument. Will be shown when the help is displayed.
 func (taskObject *TaskObject) Argument(argumentName string, argumentDescription string, optional bool) *TaskObject {
-	argument := argument{
+	newArgument := argument{
 		name:        argumentName,
 		description: argumentDescription,
 		optional:    optional,
 	}
-	taskObject.arguments = append(taskObject.arguments, argument)
+	taskObject.arguments = append(taskObject.arguments, newArgument)
 	return taskObject
 }
 

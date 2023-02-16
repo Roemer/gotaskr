@@ -44,7 +44,7 @@ func UpdateDependencies() error {
 }
 
 func RunTests() error {
-	if err := os.Mkdir(reportPath, os.ModePerm); err != nil {
+	if err := os.MkdirAll(reportPath, os.ModePerm); err != nil {
 		return err
 	}
 	goTestReport := path.Join(reportPath, "go-test-report.txt")
