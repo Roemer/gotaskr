@@ -5,6 +5,7 @@ package gttools
 type ToolsClient struct {
 	Cypress *CypressTool
 	Docker  *DockerTool
+	DotNet  *DotNetTool
 	EsLint  *EsLintTool
 	GitLab  *GitLabTool
 	JFrog   *JFrogTool
@@ -17,6 +18,7 @@ func CreateToolsClient() *ToolsClient {
 	return &ToolsClient{
 		Cypress: CreateCypressTool(),
 		Docker:  CreateDockerTool(),
+		DotNet:  CreateDotNetTool(),
 		EsLint:  CreateEsLintTool(),
 		GitLab:  CreateGitLabTool(),
 		JFrog:   CreateJFrogTool(),
