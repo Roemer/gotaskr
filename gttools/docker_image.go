@@ -48,7 +48,7 @@ func (tool *DockerImageTool) Build(settings *DockerBuildSettings) error {
 	args := []string{
 		"build",
 	}
-	args = goext.AddIf(args, settings.Dockerfile != "", "--file", settings.Dockerfile)
+	args = goext.AppendIf(args, settings.Dockerfile != "", "--file", settings.Dockerfile)
 	for _, entry := range settings.Tags {
 		args = append(args, "--tag", entry)
 	}
@@ -77,7 +77,7 @@ func (tool *DockerImageTool) Save(settings *DockerSaveSettings) error {
 	args := []string{
 		"save",
 	}
-	args = goext.AddIf(args, settings.OutputFile != "", "--output", settings.OutputFile)
+	args = goext.AppendIf(args, settings.OutputFile != "", "--output", settings.OutputFile)
 	args = append(args, settings.CustomArguments...)
 	args = append(args, settings.ImageReference)
 
@@ -102,7 +102,7 @@ func (tool *DockerImageTool) Load(settings *DockerLoadSettings) ([]string, error
 	args := []string{
 		"load",
 	}
-	args = goext.AddIf(args, settings.InputFile != "", "--input", settings.InputFile)
+	args = goext.AppendIf(args, settings.InputFile != "", "--input", settings.InputFile)
 	args = append(args, settings.CustomArguments...)
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
@@ -131,7 +131,7 @@ func (tool *DockerImageTool) Push(settings *DockerPushSettings) error {
 	args := []string{
 		"push",
 	}
-	args = goext.AddIf(args, settings.AllTags, "--all-tags")
+	args = goext.AppendIf(args, settings.AllTags, "--all-tags")
 	args = append(args, settings.CustomArguments...)
 	args = append(args, settings.ImageReference)
 

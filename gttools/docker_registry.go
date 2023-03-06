@@ -25,7 +25,7 @@ func (tool *DockerRegistryTool) Login(settings *DockerLoginSettings) error {
 	args = append(args, "--username", settings.Username)
 	args = append(args, "--password", settings.Password)
 	args = append(args, settings.CustomArguments...)
-	args = goext.AddIf(args, settings.Registry != "", settings.Registry)
+	args = goext.AppendIf(args, settings.Registry != "", settings.Registry)
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	return execr.RunCommand(settings.OutputToConsole, cmd)
@@ -41,7 +41,7 @@ func (tool *DockerRegistryTool) Logout(settings *DockerLogoutSettings) error {
 		"logout",
 	}
 	args = append(args, settings.CustomArguments...)
-	args = goext.AddIf(args, settings.Registry != "", settings.Registry)
+	args = goext.AppendIf(args, settings.Registry != "", settings.Registry)
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	return execr.RunCommand(settings.OutputToConsole, cmd)

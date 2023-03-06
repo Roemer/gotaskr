@@ -82,8 +82,8 @@ func (tool *NpmTool) CleanInstall(settings *NpmCleanInstallSettings) error {
 	args := []string{
 		"ci",
 	}
-	args = goext.AddIf(args, settings.NoAudit, "--no-audit")
-	args = goext.AddIf(args, settings.PreferOffline, "--prefer-offline")
+	args = goext.AppendIf(args, settings.NoAudit, "--no-audit")
+	args = goext.AppendIf(args, settings.PreferOffline, "--prefer-offline")
 	args = tool.addCache(args, settings.CacheDir)
 	args = append(args, settings.CustomArguments...)
 
@@ -113,12 +113,12 @@ func (tool *NpmTool) Install(settings *NpmInstallSettings) error {
 		"install",
 		settings.PackageSpec,
 	}
-	args = goext.AddIf(args, settings.SaveProd, "--save-prod")
-	args = goext.AddIf(args, settings.SaveDev, "--save-dev")
-	args = goext.AddIf(args, settings.SaveOptional, "--save-optional")
-	args = goext.AddIf(args, settings.SaveExact, "--save-exact")
-	args = goext.AddIf(args, settings.NoAudit, "--no-audit")
-	args = goext.AddIf(args, settings.PreferOffline, "--prefer-offline")
+	args = goext.AppendIf(args, settings.SaveProd, "--save-prod")
+	args = goext.AppendIf(args, settings.SaveDev, "--save-dev")
+	args = goext.AppendIf(args, settings.SaveOptional, "--save-optional")
+	args = goext.AppendIf(args, settings.SaveExact, "--save-exact")
+	args = goext.AppendIf(args, settings.NoAudit, "--no-audit")
+	args = goext.AppendIf(args, settings.PreferOffline, "--prefer-offline")
 	args = tool.addCache(args, settings.CacheDir)
 	args = append(args, settings.CustomArguments...)
 
@@ -140,7 +140,7 @@ func (tool *NpmTool) Bin(settings *NpmBinSettings) (string, error) {
 	args := []string{
 		"bin",
 	}
-	args = goext.AddIf(args, settings.Global, "--global")
+	args = goext.AppendIf(args, settings.Global, "--global")
 	args = append(args, settings.CustomArguments...)
 
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
@@ -164,7 +164,7 @@ func (tool *NpmTool) Publish(settings *NpmPublishSettings) error {
 		"publish",
 		settings.PackageSpec,
 	}
-	args = goext.AddIf(args, len(settings.Tag) > 0, "--tag", settings.Tag)
+	args = goext.AppendIf(args, len(settings.Tag) > 0, "--tag", settings.Tag)
 	args = append(args, settings.CustomArguments...)
 
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
@@ -178,5 +178,5 @@ func (tool *NpmTool) Publish(settings *NpmPublishSettings) error {
 ////////////////////////////////////////////////////////////
 
 func (tool *NpmTool) addCache(args []string, cacheDir string) []string {
-	return goext.AddIf(args, len(cacheDir) > 0, "--cache", cacheDir)
+	return goext.AppendIf(args, len(cacheDir) > 0, "--cache", cacheDir)
 }

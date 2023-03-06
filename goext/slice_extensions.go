@@ -1,7 +1,7 @@
 package goext
 
-// AddIf adds the given values to a slice if the condition is fulfilled.
-func AddIf[T any](slice []T, cond bool, values ...T) []T {
+// AppendIf adds the given values to a slice if the condition is fulfilled.
+func AppendIf[T any](slice []T, cond bool, values ...T) []T {
 	if cond {
 		return append(slice, values...)
 	}
