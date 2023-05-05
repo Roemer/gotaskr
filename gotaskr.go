@@ -48,7 +48,7 @@ func Execute() int {
 
 	// Log start
 	log.Information(strings.Repeat("-", 60))
-	log.Information("Running gotaskr at %s", time.Now().Format("2006-01-02 15:04:05.000"))
+	log.Informationf("Running gotaskr at %s", time.Now().Format("2006-01-02 15:04:05.000"))
 	log.Information(strings.Repeat("-", 60))
 	printArguments()
 	log.Information()
