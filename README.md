@@ -28,6 +28,15 @@ There are some inbuilt helpers for often used things for various DevOps tasks.
 - [VSCode Plugin](https://marketplace.visualstudio.com/items?itemName=Roemer.gotaskr-vscode) to easily run tasks with a single click
 - Even works in existing go repositories (see [build](build) from this repository as an example)
 
+## Visual Studio Code Extension
+gotaskr has a corresponding Visual Studio Code extension that allows easily running or even debugging tasks directly from Visual Studio Code. It also allows to add arguments when running or debugging them.
+
+Example:
+
+![image](https://github.com/Roemer/gotaskr/assets/393641/d22fecb9-84cd-4b70-aed3-a2ecca4ce7ac)
+
+See https://marketplace.visualstudio.com/items?itemName=Roemer.gotaskr-vscode for details.
+
 ## Quick-Start
 Create a new go project:
 ```
