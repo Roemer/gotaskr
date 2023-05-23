@@ -49,6 +49,36 @@ func RunInDirectory(path string, f func() error) (err error) {
 	return
 }
 
+func RunInDirectory1P[P1 any](path string, f func() (P1, error)) (P1, error) {
+	var p1 P1
+	return p1, RunInDirectory(path, func() error {
+		var err error
+		p1, err = f()
+		return err
+	})
+}
+
+func RunInDirectory2P[P1 any, P2 any](path string, f func() (P1, P2, error)) (P1, P2, error) {
+	var p1 P1
+	var p2 P2
+	return p1, p2, RunInDirectory(path, func() error {
+		var err error
+		p1, p2, err = f()
+		return err
+	})
+}
+
+func RunInDirectory3P[P1 any, P2 any, P3 any](path string, f func() (P1, P2, P3, error)) (P1, P2, P3, error) {
+	var p1 P1
+	var p2 P2
+	var p3 P3
+	return p1, p2, p3, RunInDirectory(path, func() error {
+		var err error
+		p1, p2, p3, err = f()
+		return err
+	})
+}
+
 // PanicOnError panics if the given error is set.
 func PanicOnError(err error) {
 	if err != nil {
