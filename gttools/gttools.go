@@ -35,7 +35,7 @@ type ToolSettingsBase struct {
 }
 
 // Customize adds a custom argument to the settings object.
-func (s *ToolSettingsBase) Customize(setting string) *ToolSettingsBase {
-	s.CustomArguments = append(s.CustomArguments, setting)
+func (s *ToolSettingsBase) Customize(setting ...string) *ToolSettingsBase {
+	s.CustomArguments = append(s.CustomArguments, setting...)
 	return s
 }
