@@ -303,7 +303,7 @@ type gotaskrContext struct {
 	TaskTeardownFunc func() error
 }
 
-type timeMeasurement struct {
+type TimeMeasurement struct {
 	name      string
 	startTime time.Time
 	duration  time.Duration
@@ -325,7 +325,7 @@ type TaskObject struct {
 	err              error         // The error (if any) of the task when it ran.
 	ignoredErr       error         // The error (if any) which is ignored.
 	deferredErr      error         // The deferred error (if any) of the task when it ran.
-	timeMeasurements []*timeMeasurement
+	timeMeasurements []*TimeMeasurement
 }
 
 // GetName gets the name of the task.
@@ -446,13 +446,30 @@ func MeasureTime(measurementName string, f func() error) error {
 	elapsed := time.Since(start)
 
 	// Add the time measurement
-	currentRunningTask.timeMeasurements = append(currentRunningTask.timeMeasurements, &timeMeasurement{
+	currentRunningTask.timeMeasurements = append(currentRunningTask.timeMeasurements, &TimeMeasurement{
 		name:      measurementName,
 		startTime: start,
 		duration:  elapsed,
 	})
 
 	return err
+}
+
+func StartTimeMeasurement(measurementName string) *TimeMeasurement {
+	newItem := &TimeMeasurement{
+		name:      measurementName,
+		startTime: time.Now(),
+	}
+	currentRunningTask.timeMeasurements = append(currentRunningTask.timeMeasurements, newItem)
+	return newItem
+}
+
+func FinishTimeMeasurement(timeMeasurement *TimeMeasurement) {
+	timeMeasurement.Finish()
+}
+
+func (t *TimeMeasurement) Finish() {
+	t.duration = time.Since(t.startTime)
 }
 
 func printTasks() {
