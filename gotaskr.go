@@ -472,6 +472,14 @@ func (t *TimeMeasurement) Finish() {
 	t.duration = time.Since(t.startTime)
 }
 
+func (t *TimeMeasurement) StartTime() time.Time {
+	return t.startTime
+}
+
+func (t *TimeMeasurement) Duration() time.Duration {
+	return t.duration
+}
+
 func printTasks() {
 	log.Information("Please specify one of the following targets:")
 	var sb strings.Builder
