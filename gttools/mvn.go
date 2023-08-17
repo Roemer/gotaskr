@@ -38,8 +38,8 @@ type MvnRunSettings struct {
 func (tool *MvnTool) Run(settings MvnRunSettings) error {
 	args := []string{}
 	args = append(args, settings.Phases...)
-	args = append(args, "--projects", strings.Join(settings.Projects, ","))
-	args = append(args, "--activate-profiles", strings.Join(settings.ActivateProfiles, ","))
+	args = goext.AppendIf(args, len(settings.Projects) > 0, "--projects", strings.Join(settings.Projects, ","))
+	args = goext.AppendIf(args, len(settings.ActivateProfiles) > 0, "--activate-profiles", strings.Join(settings.ActivateProfiles, ","))
 	args = goext.AppendIf(args, settings.AlsoMake, "--also-make")
 	args = goext.AppendIf(args, settings.BatchMode, "--batch-mode")
 	args = goext.AppendIf(args, settings.Debug, "--debug")
