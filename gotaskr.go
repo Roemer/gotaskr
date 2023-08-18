@@ -42,8 +42,14 @@ func Execute() int {
 
 	target, hasTarget := GetArgument("target")
 	if !hasTarget {
-		printTasks()
-		return 0
+		if taskMap["default"] != nil {
+			target = "default"
+		} else if taskMap["Default"] != nil {
+			target = "Default"
+		} else {
+			printTasks()
+			return 0
+		}
 	}
 
 	// Log start
