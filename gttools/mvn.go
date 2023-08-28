@@ -32,6 +32,10 @@ type MvnRunSettings struct {
 	Settings           string
 	Version            bool
 	ShowVersion        bool
+	// skips executing the tests
+	SkipTests          bool
+	// skips compiling the tests
+	MavenTestSkip      bool
 }
 
 // Run runs mvn according to the settings.
@@ -50,6 +54,8 @@ func (tool *MvnTool) Run(settings MvnRunSettings) error {
 	args = goext.AppendIf(args, settings.Settings != "", "--settings", settings.Settings)
 	args = goext.AppendIf(args, settings.Version, "--version")
 	args = goext.AppendIf(args, settings.ShowVersion, "--show-version")
+	args = goext.AppendIf(args, settings.SkipTests, "-DskipTests")
+	args = goext.AppendIf(args, settings.MavenTestSkip, "-Dmaven.test.skip")
 	args = append(args, settings.CustomArguments...)
 
 	cmd := exec.Command("mvn", args...)
