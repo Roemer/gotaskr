@@ -1,0 +1,17 @@
+{
+	"name": "gotaskr",
+	"dockerFile": "Dockerfile",
+	"customizations": {
+		"vscode": {
+			"settings": {
+			},
+			"extensions": [
+				"golang.go",
+				"roemer.gotaskr-vscode",
+				"ms-azuretools.vscode-docker",
+				"GitHub.vscode-github-actions"
+			]
+		}
+	},
+	"remoteUser": "vscode"
+}
