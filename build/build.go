@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go/build"
 	"os"
 	"path"
 
@@ -13,9 +14,10 @@ func main() {
 	os.Exit(gotaskr.Execute())
 }
 
-// //////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // Variables
-// //////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+
 var reportPath = "reports"
 
 ////////////////////////////////////////////////////////////
@@ -61,7 +63,7 @@ func RunTests() error {
 		return err
 	}
 
-	if err := execr.Run(true, "go-junit-report", "-in", goTestReport, "-set-exit-code", "-out", junitTestReport); err != nil {
+	if err := execr.Run(true, path.Join(build.Default.GOPATH, "bin/go-junit-report"), "-in", goTestReport, "-set-exit-code", "-out", junitTestReport); err != nil {
 		return err
 	}
 	return nil
