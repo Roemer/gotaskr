@@ -28,3 +28,16 @@ func RemoveEmpty(slice []string) []string {
 	}
 	return r
 }
+
+// ChunkBy creates chunks of the given size from the given array and returns them.
+func ChunkBy[T any](items []T, chunkSize int) (chunks [][]T) {
+	for chunkSize < len(items) {
+		items, chunks = items[chunkSize:], append(chunks, items[0:chunkSize:chunkSize])
+	}
+	return append(chunks, items)
+}
+
+// Prepend prepends the given elements to the given array
+func Prepend[T any](slice []T, elems ...T) []T {
+	return append(elems, slice...)
+}
