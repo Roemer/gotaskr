@@ -11,6 +11,7 @@ type ToolsClient struct {
 	JFrog   *JFrogTool
 	Mvn     *MvnTool
 	Npm     *NpmTool
+	Nx      *NxTool
 }
 
 // CreateToolsClient creates a new client to access the different tools.
@@ -24,6 +25,7 @@ func CreateToolsClient() *ToolsClient {
 		JFrog:   CreateJFrogTool(),
 		Mvn:     CreateMvnTool(),
 		Npm:     CreateNpmTool(),
+		Nx:      CreateNxTool(),
 	}
 }
 
