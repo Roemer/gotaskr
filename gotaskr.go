@@ -5,6 +5,7 @@ package gotaskr
 import (
 	"fmt"
 	"os/exec"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -263,7 +264,7 @@ func runTaskFunc(currentTask *TaskObject) (err error) {
 func runFuncRecover(function func() error) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("task panicked: %v", r)
+			err = fmt.Errorf("task panicked: %v\nStack:\n%s", r, debug.Stack())
 		}
 	}()
 	err = function()
