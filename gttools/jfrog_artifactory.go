@@ -26,6 +26,9 @@ type ArtifactorySearchResultItem struct {
 	Modified   time.Time                         `json:"modified"`
 	Type       string                            `json:"type"`
 	Size       int                               `json:"size"`
+	Md5        string                            `json:"actual_md5"`
+	Sha1       string                            `json:"actual_sha1"`
+	Sha256     string                            `json:"sha256"`
 	Properties []ArtifactorySearchResultProperty `json:"properties"`
 }
 
