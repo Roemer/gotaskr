@@ -21,6 +21,72 @@ func Printfln(format string, a ...any) (n int, err error) {
 	return fmt.Println(text)
 }
 
+// RunWithEnv runs a given function with the given environment variables
+// and resets them to the previous state afterwards.
+func RunWithEnv(envVariables map[string]string, f func() error) error {
+	origEnvVariables := map[string]string{}
+	// Read and store original values
+	for name := range envVariables {
+		if originalValue, ok := os.LookupEnv(name); ok {
+			origEnvVariables[name] = originalValue
+		}
+	}
+	// Make sure to reset to the previous values
+	defer func() {
+		for name := range envVariables {
+			origValue, ok := origEnvVariables[name]
+			if ok {
+				_ = os.Setenv(name, origValue)
+			} else {
+				_ = os.Unsetenv(name)
+			}
+		}
+	}()
+
+	// Change the values
+	for name, value := range envVariables {
+		// Set the new value
+		_ = os.Setenv(name, value)
+	}
+
+	// Execute the function
+	err := f()
+	if err != nil {
+		return fmt.Errorf("inner method failed: %v", err)
+	}
+	return nil
+}
+
+func RunWithEnv1P[P1 any](envVariables map[string]string, f func() (P1, error)) (P1, error) {
+	var p1 P1
+	return p1, RunWithEnv(envVariables, func() error {
+		var err error
+		p1, err = f()
+		return err
+	})
+}
+
+func RunWithEnv2P[P1 any, P2 any](envVariables map[string]string, f func() (P1, P2, error)) (P1, P2, error) {
+	var p1 P1
+	var p2 P2
+	return p1, p2, RunWithEnv(envVariables, func() error {
+		var err error
+		p1, p2, err = f()
+		return err
+	})
+}
+
+func RunWithEnv3P[P1 any, P2 any, P3 any](envVariables map[string]string, f func() (P1, P2, P3, error)) (P1, P2, P3, error) {
+	var p1 P1
+	var p2 P2
+	var p3 P3
+	return p1, p2, p3, RunWithEnv(envVariables, func() error {
+		var err error
+		p1, p2, p3, err = f()
+		return err
+	})
+}
+
 // RunInDirectory runs a given function inside the passed directory as working directory.
 // It resets to the previous directory when finished (or an error occured).
 func RunInDirectory(path string, f func() error) (err error) {
