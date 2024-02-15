@@ -17,17 +17,17 @@ func TestRunWithEnv(t *testing.T) {
 	assertEnvIsUnset(assert, "VAR_1")
 	assertEnvIsUnset(assert, "VAR_2")
 
-	err := RunWithEnv(map[string]string{
-		"VAR_1":     "foo",
-		"VAR_2":     "bar",
-		"PRE_VAR_2": "world",
-	}, func() error {
+	err := RunWithOptions(func() error {
 		assertEnvEquals(assert, "PRE_VAR_1", "baz")
 		assertEnvEquals(assert, "PRE_VAR_2", "world")
 		assertEnvEquals(assert, "VAR_1", "foo")
 		assertEnvEquals(assert, "VAR_2", "bar")
 		return nil
-	})
+	}, RunOptionWithEnvs(map[string]string{
+		"VAR_1":     "foo",
+		"VAR_2":     "bar",
+		"PRE_VAR_2": "world",
+	}))
 
 	assert.NoError(err)
 	assertEnvEquals(assert, "PRE_VAR_1", "baz")
