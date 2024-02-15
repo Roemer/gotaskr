@@ -32,14 +32,14 @@ type MvnRunSettings struct {
 	Settings           string
 	Version            bool
 	ShowVersion        bool
-	// skips executing the tests
-	SkipTests          bool
-	// skips compiling the tests
-	MavenTestSkip      bool
+	// Skips executing the tests
+	SkipTests bool
+	// Skips compiling the tests
+	MavenTestSkip bool
 }
 
 // Run runs mvn according to the settings.
-func (tool *MvnTool) Run(settings MvnRunSettings) error {
+func (tool *MvnTool) Run(settings *MvnRunSettings) error {
 	args := []string{}
 	args = append(args, settings.Phases...)
 	args = goext.AppendIf(args, len(settings.Projects) > 0, "--projects", strings.Join(settings.Projects, ","))
