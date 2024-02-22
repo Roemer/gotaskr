@@ -7,6 +7,7 @@ type ToolsClient struct {
 	Docker  *DockerTool
 	DotNet  *DotNetTool
 	EsLint  *EsLintTool
+	Flyway  *FlywayTool
 	GitLab  *GitLabTool
 	JFrog   *JFrogTool
 	Mvn     *MvnTool
@@ -21,6 +22,7 @@ func CreateToolsClient() *ToolsClient {
 		Docker:  CreateDockerTool(),
 		DotNet:  CreateDotNetTool(),
 		EsLint:  CreateEsLintTool(),
+		Flyway:  CreateFlywayTool(),
 		GitLab:  CreateGitLabTool(),
 		JFrog:   CreateJFrogTool(),
 		Mvn:     CreateMvnTool(),
@@ -40,4 +42,9 @@ type ToolSettingsBase struct {
 func (s *ToolSettingsBase) Customize(setting ...string) *ToolSettingsBase {
 	s.CustomArguments = append(s.CustomArguments, setting...)
 	return s
+}
+
+// Ptr is a helper returns a pointer to v.
+func Ptr[T any](v T) *T {
+	return &v
 }
