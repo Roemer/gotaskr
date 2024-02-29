@@ -3,7 +3,6 @@ package gttools
 import (
 	"fmt"
 	"os/exec"
-	"strings"
 
 	"github.com/roemer/gotaskr/execr"
 	"github.com/roemer/gotaskr/goext"
@@ -204,109 +203,79 @@ func (tool *FlywayTool) Validate(settings *FlywaySettings) error {
 }
 
 func (tool *FlywayTool) buildArguments(settings *FlywaySettings) []string {
-	arguments := []string{}
+	args := []string{}
 
 	// Connection
-	arguments = tool.addString(arguments, settings.Url, "-url=%s")
-	arguments = tool.addString(arguments, settings.User, "-user=%s")
-	arguments = tool.addString(arguments, settings.Password, "-password=%s")
-	arguments = tool.addString(arguments, settings.Driver, "-driver=%s")
-	arguments = tool.addInt(arguments, settings.ConnectRetries, "-connectRetries=%d")
-	arguments = tool.addInt(arguments, settings.ConnectRetriesInterval, "-connectRetriesInterval=%d")
-	arguments = tool.addString(arguments, settings.InitSql, "-initSql=%s")
+	args = addString(args, settings.Url, addSettings{prefix: "-url="})
+	args = addString(args, settings.User, addSettings{prefix: "-user="})
+	args = addString(args, settings.Password, addSettings{prefix: "-password="})
+	args = addString(args, settings.Driver, addSettings{prefix: "-driver="})
+	args = addInt(args, settings.ConnectRetries, addSettings{prefix: "-connectRetries="})
+	args = addInt(args, settings.ConnectRetriesInterval, addSettings{prefix: "-connectRetriesInterval="})
+	args = addString(args, settings.InitSql, addSettings{prefix: "-initSql="})
 
 	// General
-	arguments = tool.addStringList(arguments, settings.Callbacks, "-callbacks=%s")
-	arguments = tool.addStringList(arguments, settings.ConfigFiles, "-configFiles=%s")
-	arguments = goext.AppendIf(arguments, len(settings.Encoding) > 0, fmt.Sprintf("-encoding=%s", settings.Encoding))
-	arguments = tool.addString(arguments, settings.Environment, "-environment=%s")
-	arguments = tool.addBoolean(arguments, settings.ExecuteInTransaction, "-executeInTransaction=%t")
-	arguments = tool.addBoolean(arguments, settings.Group, "-group=%t")
-	arguments = tool.addString(arguments, settings.InstalledBy, "-installedBy=%s")
-	arguments = tool.addStringList(arguments, settings.JarDirs, "-jarDirs=%s")
-	arguments = tool.addStringList(arguments, settings.Locations, "-locations=%s")
-	arguments = tool.addBoolean(arguments, settings.FailOnMissingLocations, "-failOnMissingLocations=%t")
-	arguments = tool.addInt(arguments, settings.LockRetryCount, "-lockRetryCount=%d")
-	arguments = goext.AppendIf(arguments, len(settings.Loggers) > 0, fmt.Sprintf("-loggers=%s", goext.StringsJoinAny(settings.Loggers, ",")))
-	arguments = tool.addBoolean(arguments, settings.Mixed, "-mixed=%t")
-	arguments = tool.addBoolean(arguments, settings.OutOfOrder, "-outOfOrder=%t")
-	arguments = tool.addString(arguments, settings.ReportFilename, "-reportFilename=%s")
-	arguments = tool.addBoolean(arguments, settings.SkipDefaultCallbacks, "-skipDefaultCallbacks=%t")
-	arguments = tool.addBoolean(arguments, settings.SkipDefaultResolvers, "-skipDefaultResolvers=%t")
-	arguments = tool.addString(arguments, settings.Table, "-table=%s")
-	arguments = tool.addBoolean(arguments, settings.ValidateMigrationNaming, "-validateMigrationNaming=%t")
-	arguments = tool.addBoolean(arguments, settings.ValidateOnMigrate, "-validateOnMigrate=%t")
-	arguments = tool.addString(arguments, settings.WorkingDirectory, "-workingDirectory=%s")
+	args = addStringList(args, settings.Callbacks, ",", addSettings{prefix: "-callbacks="})
+	args = addStringList(args, settings.ConfigFiles, ",", addSettings{prefix: "-configFiles="})
+	args = goext.AppendIf(args, len(settings.Encoding) > 0, fmt.Sprintf("-encoding=%s", settings.Encoding))
+	args = addString(args, settings.Environment, addSettings{prefix: "-environment="})
+	args = addBoolean(args, settings.ExecuteInTransaction, addSettings{prefix: "-executeInTransaction="})
+	args = addBoolean(args, settings.Group, addSettings{prefix: "-group="})
+	args = addString(args, settings.InstalledBy, addSettings{prefix: "-installedBy="})
+	args = addStringList(args, settings.JarDirs, ",", addSettings{prefix: "-jarDirs="})
+	args = addStringList(args, settings.Locations, ",", addSettings{prefix: "-locations="})
+	args = addBoolean(args, settings.FailOnMissingLocations, addSettings{prefix: "-failOnMissingLocations="})
+	args = addInt(args, settings.LockRetryCount, addSettings{prefix: "-lockRetryCount="})
+	args = goext.AppendIf(args, len(settings.Loggers) > 0, fmt.Sprintf("-loggers=%s", goext.StringsJoinAny(settings.Loggers, ",")))
+	args = addBoolean(args, settings.Mixed, addSettings{prefix: "-mixed="})
+	args = addBoolean(args, settings.OutOfOrder, addSettings{prefix: "-outOfOrder="})
+	args = addString(args, settings.ReportFilename, addSettings{prefix: "-reportFilename="})
+	args = addBoolean(args, settings.SkipDefaultCallbacks, addSettings{prefix: "-skipDefaultCallbacks="})
+	args = addBoolean(args, settings.SkipDefaultResolvers, addSettings{prefix: "-skipDefaultResolvers="})
+	args = addString(args, settings.Table, addSettings{prefix: "-table="})
+	args = addBoolean(args, settings.ValidateMigrationNaming, addSettings{prefix: "-validateMigrationNaming="})
+	args = addBoolean(args, settings.ValidateOnMigrate, addSettings{prefix: "-validateOnMigrate="})
+	args = addString(args, settings.WorkingDirectory, addSettings{prefix: "-workingDirectory="})
 
 	// Schema
-	arguments = tool.addBoolean(arguments, settings.CreateSchemas, "-createSchemas=%t")
-	arguments = tool.addString(arguments, settings.DefaultSchema, "-defaultSchema=%s")
-	arguments = tool.addStringList(arguments, settings.Schemas, "-schemas=%s")
+	args = addBoolean(args, settings.CreateSchemas, addSettings{prefix: "-createSchemas="})
+	args = addString(args, settings.DefaultSchema, addSettings{prefix: "-defaultSchema="})
+	args = addStringList(args, settings.Schemas, ",", addSettings{prefix: "-schemas="})
 
 	// Baseline
-	arguments = tool.addString(arguments, settings.BaselineDescription, "-baselineDescription=%s")
-	arguments = tool.addBoolean(arguments, settings.BaselineOnMigrate, "-baselineOnMigrate=%t")
-	arguments = tool.addString(arguments, settings.BaselineVersion, "-baselineVersion=%s")
+	args = addString(args, settings.BaselineDescription, addSettings{prefix: "-baselineDescription="})
+	args = addBoolean(args, settings.BaselineOnMigrate, addSettings{prefix: "-baselineOnMigrate="})
+	args = addString(args, settings.BaselineVersion, addSettings{prefix: "-baselineVersion="})
 
 	// Clean
-	arguments = tool.addBoolean(arguments, settings.CleanDisabled, "-cleanDisabled=%t")
-	arguments = tool.addBoolean(arguments, settings.CleanOnValidationError, "-cleanOnValidationError=%t")
+	args = addBoolean(args, settings.CleanDisabled, addSettings{prefix: "-cleanDisabled="})
+	args = addBoolean(args, settings.CleanOnValidationError, addSettings{prefix: "-cleanOnValidationError="})
 
 	// Validate
-	arguments = tool.addStringList(arguments, settings.IgnoreMigrationPatterns, "-ignoreMigrationPatterns=%s")
+	args = addStringList(args, settings.IgnoreMigrationPatterns, ",", addSettings{prefix: "-ignoreMigrationPatterns="})
 
 	// Migrations
-	arguments = tool.addString(arguments, settings.RepeatableSqlMigrationPrefix, "-repeatableSqlMigrationPrefix=%s")
-	arguments = tool.addStringList(arguments, settings.Resolvers, "-resolvers=%s")
-	arguments = tool.addString(arguments, settings.SqlMigrationPrefix, "-sqlMigrationPrefix=%s")
-	arguments = tool.addString(arguments, settings.SqlMigrationSeparator, "-sqlMigrationSeparator=%s")
-	arguments = tool.addStringList(arguments, settings.SqlMigrationSuffixes, "-sqlMigrationSuffixes=%s")
+	args = addString(args, settings.RepeatableSqlMigrationPrefix, addSettings{prefix: "-repeatableSqlMigrationPrefix="})
+	args = addStringList(args, settings.Resolvers, ",", addSettings{prefix: "-resolvers="})
+	args = addString(args, settings.SqlMigrationPrefix, addSettings{prefix: "-sqlMigrationPrefix="})
+	args = addString(args, settings.SqlMigrationSeparator, addSettings{prefix: "-sqlMigrationSeparator="})
+	args = addStringList(args, settings.SqlMigrationSuffixes, ",", addSettings{prefix: "-sqlMigrationSuffixes="})
 
 	// Placeholders
-	arguments = tool.addString(arguments, settings.PlaceholderPrefix, "-placeholderPrefix=%s")
-	arguments = tool.addBoolean(arguments, settings.PlaceholderReplacement, "-placeholderReplacement=%t")
-	arguments = tool.addStringList(arguments, settings.Placeholders, "-placeholders=%s")
-	arguments = tool.addString(arguments, settings.PlaceholderSeparator, "-placeholderSeparator=%s")
-	arguments = tool.addString(arguments, settings.PlaceholderSuffix, "-placeholderSuffix=%s")
+	args = addString(args, settings.PlaceholderPrefix, addSettings{prefix: "-placeholderPrefix="})
+	args = addBoolean(args, settings.PlaceholderReplacement, addSettings{prefix: "-placeholderReplacement="})
+	args = addStringList(args, settings.Placeholders, ",", addSettings{prefix: "-placeholders="})
+	args = addString(args, settings.PlaceholderSeparator, addSettings{prefix: "-placeholderSeparator="})
+	args = addString(args, settings.PlaceholderSuffix, addSettings{prefix: "-placeholderSuffix="})
 
 	// Command Line
-	arguments = goext.AppendIf(arguments, len(settings.Color) > 0, fmt.Sprintf("-color=%s", settings.Color))
-	arguments = goext.AppendIf(arguments, len(settings.OutputType) > 0, fmt.Sprintf("-outputType=%s", settings.OutputType))
+	args = addString(args, string(settings.Color), addSettings{prefix: "-color="})
+	args = addString(args, string(settings.OutputType), addSettings{prefix: "-outputType="})
 
 	// PostgreSQL
-	arguments = tool.addBoolean(arguments, settings.PostgresqlTransactionalLock, "-postgresqlTransactionalLock=%t")
+	args = addBoolean(args, settings.PostgresqlTransactionalLock, addSettings{prefix: "-postgresqlTransactionalLock="})
 
-	return arguments
-}
-
-////////// Helpers
-
-func (tool *FlywayTool) addString(slice []string, value string, format string) []string {
-	if len(value) > 0 {
-		slice = append(slice, fmt.Sprintf(format, value))
-	}
-	return slice
-}
-
-func (tool *FlywayTool) addStringList(slice []string, values []string, format string) []string {
-	if len(values) > 0 {
-		slice = append(slice, fmt.Sprintf(format, strings.Join(values, ",")))
-	}
-	return slice
-}
-
-func (tool *FlywayTool) addBoolean(slice []string, value *bool, format string) []string {
-	if value != nil {
-		slice = append(slice, fmt.Sprintf(format, *value))
-	}
-	return slice
-}
-
-func (tool *FlywayTool) addInt(slice []string, value *int, format string) []string {
-	if value != nil {
-		slice = append(slice, fmt.Sprintf(format, *value))
-	}
-	return slice
+	return args
 }
 
 ////////// Types
