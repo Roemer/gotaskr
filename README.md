@@ -7,7 +7,7 @@
 ## Introduction
 gotaskr (Go-Task-Runner) is a generic task runner which is invoked via CLI.
 
-The tasks are written in plan Go and can easily be called from the CLI.
+The tasks are written in plain Go and can easily be called from the CLI.
 This is especially usefull for tasks in the CI.
 
 The tasks can be chained and in the end, there is a statistic about
