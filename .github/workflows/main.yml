@@ -10,28 +10,29 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
           go-version: 1.21
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v6
         with:
           version: latest
           args: "--out-${NO_FUTURE}format colored-line-number"
+
   test:
     runs-on: ubuntu-latest
     permissions:
       checks: write
     steps:
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
           go-version: 1.21
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Test
         run: |
           go run ./build/build.go --target Run-Tests
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
           name: test-report
