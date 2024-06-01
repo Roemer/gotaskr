@@ -13,7 +13,7 @@ type RunOption interface {
 	revert() error
 }
 
-// Runs a given method with addiitional options.
+// Runs a given method with additional options.
 func RunWithOptions(f func() error, options ...RunOption) (err error) {
 	// Apply the options
 	for _, option := range options {
@@ -34,7 +34,7 @@ func RunWithOptions(f func() error, options ...RunOption) (err error) {
 	return
 }
 
-// Runs a given method with returns one parameter with addiitional options.
+// Runs a given method with returns one parameter with additional options.
 func RunWithOptions1P[P1 any](f func() (P1, error), options ...RunOption) (P1, error) {
 	var p1 P1
 	return p1, RunWithOptions(func() error {
@@ -44,7 +44,7 @@ func RunWithOptions1P[P1 any](f func() (P1, error), options ...RunOption) (P1, e
 	}, options...)
 }
 
-// Runs a given method with returns two parameters with addiitional options.
+// Runs a given method with returns two parameters with additional options.
 func RunWithOptions2P[P1 any, P2 any](f func() (P1, P2, error), options ...RunOption) (P1, P2, error) {
 	var p1 P1
 	var p2 P2
@@ -55,7 +55,7 @@ func RunWithOptions2P[P1 any, P2 any](f func() (P1, P2, error), options ...RunOp
 	}, options...)
 }
 
-// Runs a given method with returns three parameters with addiitional options.
+// Runs a given method with returns three parameters with additional options.
 func RunWithOptions3P[P1 any, P2 any, P3 any](f func() (P1, P2, P3, error), options ...RunOption) (P1, P2, P3, error) {
 	var p1 P1
 	var p2 P2

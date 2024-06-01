@@ -38,7 +38,7 @@ func CreateToolsClient() *ToolsClient {
 	}
 }
 
-// ToolSettingsBase are common settings usefull for all tools that run executables.
+// ToolSettingsBase are common settings useful for all tools that run executables.
 type ToolSettingsBase struct {
 	WorkingDirectory string   // the path to use as working directory when running the tool
 	OutputToConsole  bool     // flag to define if the output of the tool should be written into the console or not.

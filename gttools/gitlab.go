@@ -13,7 +13,7 @@ func CreateGitLabTool() *GitLabTool {
 }
 
 // GitLabReport defines the data for the quality report for GitLab.
-// See https://docs.gitlab.com/ee/ci/testing/code_quality.html#implementing-a-custom-tool for details
+// See https://docs.gitlab.com/ee/ci/testing/code_quality.html#implementing-a-custom-tool for details.
 type GitLabReport struct {
 	Entries []*GitLabCodeQualityEntry
 }

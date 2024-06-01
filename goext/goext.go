@@ -13,7 +13,7 @@ func Ternary[T any](cond bool, vtrue, vfalse T) T {
 	return vfalse
 }
 
-// Printfln allows to use Printf and Println in one call.
+// Printfln allows using Printf and Println in one call.
 func Printfln(format string, a ...any) (n int, err error) {
 	text := fmt.Sprintf(format, a...)
 	return fmt.Println(text)
@@ -33,7 +33,7 @@ func Noop() error {
 }
 
 // Pass is a no-op function that can be used to set variables to used.
-// Usefull during development but must be removed afterwards!
+// Useful during development but must be removed afterwards!
 func Pass(i ...interface{}) {
 	// No-Op
 }

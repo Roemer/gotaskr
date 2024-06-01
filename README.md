@@ -8,7 +8,7 @@
 gotaskr (Go-Task-Runner) is a generic task runner which is invoked via CLI.
 
 The tasks are written in plain Go and can easily be called from the CLI.
-This is especially usefull for tasks in the CI.
+This is especially useful for tasks in the CI.
 
 The tasks can be chained and in the end, there is a statistic about
 the tasks that were executed and their runtime.
@@ -29,7 +29,7 @@ There are some inbuilt helpers for often used things for various DevOps tasks.
 - Even works in existing go repositories (see [build](build) from this repository as an example)
 
 ## Visual Studio Code Extension
-gotaskr has a corresponding Visual Studio Code extension that allows easily running or even debugging tasks directly from Visual Studio Code. It also allows to add arguments when running or debugging them.
+gotaskr has a corresponding Visual Studio Code extension that allows easily running or even debugging tasks directly from Visual Studio Code. It also allows adding arguments when running or debugging them.
 
 Example:
 
