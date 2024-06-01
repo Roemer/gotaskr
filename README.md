@@ -25,7 +25,7 @@ There are some inbuilt helpers for often used things for various DevOps tasks.
 - [Setup and Teardown methods](../../wiki/Lifetime-Methods)
 - Output from subprocesses directly visible
 - [Inbuilt helpers](../../wiki/Tools) for various DevOps tasks
-- [VSCode Plugin](https://marketplace.visualstudio.com/items?itemName=Roemer.gotaskr-vscode) to easily run tasks with a single click
+- [VS Code Plugin](https://marketplace.visualstudio.com/items?itemName=Roemer.gotaskr-vscode) to easily run tasks with a single click
 - Even works in existing go repositories (see [build](build) from this repository as an example)
 
 ## Visual Studio Code Extension

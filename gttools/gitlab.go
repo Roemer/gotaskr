@@ -35,7 +35,7 @@ type GitLabCodeQualityLines struct {
 	End   int64 `json:"end"`
 }
 
-// IsRunningOnGitLab returns a flag, if we are currently running on gitlab
+// IsRunningOnGitLab returns a flag, if we are currently running on GitLab.
 func (tool *GitLabTool) IsRunningOnGitLab() bool {
 	return goext.EnvExists("GITLAB_CI")
 }
@@ -76,7 +76,7 @@ func (tool *GitLabTool) MergeGitLabReports(gitLabReports []*GitLabReport) *GitLa
 	return gitLabReport
 }
 
-// WriteGitLabReport writes the GitLabReport into a json file.
+// WriteGitLabReport writes the GitLabReport into a JSON file.
 func (tool *GitLabTool) WriteGitLabReport(gitLabReport *GitLabReport, outputFilePath string) error {
 	return goext.WriteJsonToFile(gitLabReport.Entries, outputFilePath, true)
 }

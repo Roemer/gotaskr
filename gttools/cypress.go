@@ -28,10 +28,10 @@ const (
 // Also see https://docs.cypress.io/guides/guides/command-line#cypress-run
 type CypressRunSettings struct {
 	ToolSettingsBase
-	Browser         string            // defines the browser to launch like chrome, chromium, edge, electron, firefox. Alternatively a path to an executable.
+	Browser         string            // defines the browser to launch like Chrome, Chromium, Edge, Electron, Firefox. Alternatively a path to an executable.
 	CiBuildId       string            // the unique id to group tests together.
 	Component       bool              // flag to define if component tests should run.
-	Config          string            // specify the config to use. Defined as key value pairs, comma separated. Can also be a stringified json object.
+	Config          string            // specify the config to use. Defined as key value pairs, comma separated. Can also be a stringified JSON object.
 	ConfigFile      string            // the path to a config file to use.
 	E2e             bool              // flag to define if end to end tests should run (default).
 	Env             map[string]string // environment variables to use.
@@ -45,8 +45,8 @@ type CypressRunSettings struct {
 	Project         string            // the path to a specific project to run.
 	Quiet           bool              // flag to indicate the quite mode where no output is passed to stdout.
 	Record          bool              // flag to indicate if the tests should be recorded or not.
-	Reporter        string            // define the reporter to use. Can be any of the mocha, cypress or a custom reporter.
-	ReporterOptions string            // specify the reporter options to use as key value pairs, comma separated. Can also be a stringified json object.
+	Reporter        string            // define the reporter to use. Can be any of the Mocha, Cypress or a custom reporter.
+	ReporterOptions string            // specify the reporter options to use as key value pairs, comma separated. Can also be a stringified JSON object.
 	Specs           []string          // define the spec file(s) to run.
 	Tags            []string          // add tags to identify a run.
 }
@@ -55,9 +55,9 @@ type CypressRunSettings struct {
 // Also see https://docs.cypress.io/guides/guides/command-line#cypress-open
 type CypressOpenSettings struct {
 	ToolSettingsBase
-	Browser    string            // defines the browser to launch like chrome, chromium, edge, electron, firefox. Alternatively a path to an executable.
+	Browser    string            // defines the browser to launch like chrome, Chromium, Edge, Electron, Firefox. Alternatively a path to an executable.
 	Component  bool              // flag to define if component tests should run.
-	Config     string            // specify the config to use. Defined as key value pairs, comma separated. Can also be a stringified json object.
+	Config     string            // specify the config to use. Defined as key value pairs, comma separated. Can also be a stringified JSON object.
 	ConfigFile string            // the path to a config file to use.
 	Detached   bool              // flag to define if Cypress should open in detached mode.
 	E2e        bool              // flag to define if end to end tests should run (default).

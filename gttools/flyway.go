@@ -22,13 +22,13 @@ type FlywaySettings struct {
 	ToolPath string
 
 	//// Connection
-	// The jdbc url to use to connect to the database.
+	// The JDBC URL to use to connect to the database.
 	Url string
 	// The user to use to connect to the database.
 	User string
 	// The password to use to connect to the database.
 	Password string
-	// The fully qualified class name of the jdbc driver to use to connect to the database.
+	// The fully qualified class name of the JDBC driver to use to connect to the database.
 	Driver string
 	// The maximum number of retries when attempting to connect to the database.
 	ConnectRetries *int
@@ -68,9 +68,9 @@ type FlywaySettings struct {
 	OutOfOrder *bool
 	// Filename for the report file.
 	ReportFilename string
-	// Whether default built-in callbacks (sql) should be skipped.
+	// Whether default built-in callbacks (SQL) should be skipped.
 	SkipDefaultCallbacks *bool
-	// Whether default built-in resolvers (sql and jdbc) should be skipped.
+	// Whether default built-in resolvers (SQL and JDBC) should be skipped.
 	SkipDefaultResolvers *bool
 	// The name of Flyway's schema history table.
 	Table string
@@ -114,7 +114,7 @@ type FlywaySettings struct {
 	Resolvers []string
 	// The file name prefix for versioned SQL migrations.
 	SqlMigrationPrefix string
-	// The file name separator for Sql migrations.
+	// The file name separator for SQL migrations.
 	SqlMigrationSeparator string
 	// List of file name suffixes for SQL migrations.
 	SqlMigrationSuffixes []string
