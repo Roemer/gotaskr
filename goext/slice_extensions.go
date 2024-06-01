@@ -13,7 +13,7 @@ func AppendIf[T any](slice []T, cond bool, values ...T) []T {
 	return slice
 }
 
-// Appends the given value if the condition is fulfilled. Calculates the value to add only if the condition is fulfulled.
+// Appends the given value if the condition is fulfilled. Calculates the value to add only if the condition is fulfilled.
 func AppendIfFunc[T any](slice []T, cond bool, f func() []T) []T {
 	if cond {
 		values := f()

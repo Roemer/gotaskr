@@ -166,7 +166,7 @@ type NxShowProjectsSettings struct {
 	WithTarget  string   // Show only projects that have a specific target.
 }
 
-// ShowProjects returns projects according to the given criterias.
+// ShowProjects returns projects according to the given criteria.
 func (tool *NxTool) ShowProjects(runType NxRunType, settings NxShowProjectsSettings) ([]string, error) {
 	args := []string{"projects"}
 	args = goext.AppendIf(args, settings.Affected, "--affected")

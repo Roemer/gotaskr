@@ -22,7 +22,7 @@ var argumentsMap = argparse.ParseArgs()
 // Prepare a map for all the task objects
 var taskMap map[string]*TaskObject = make(map[string]*TaskObject)
 
-// Prepare a list of the task names. Used to print the tasks in order
+// Prepare a list of the task names. Used to print the tasks in order.
 var taskList []string
 
 // Prepare an array for the tasks that were run (in run order)
@@ -118,7 +118,7 @@ func Execute() int {
 	log.Information()
 	printTaskRuns()
 
-	// If the teardown failed but nothing else, still fail with the teardowns error
+	// If the teardown failed but nothing else, still fail with the teardown error
 	if teardownErr != nil && exitCode == 0 {
 		exitCode = getExitCodeFromError(teardownErr)
 	}
@@ -143,7 +143,7 @@ func GetArgumentOrDefault(argName string, defaultValue string) (string, bool) {
 	return defaultValue, false
 }
 
-// HasArgument returns true if an arument was set and false otherwise, regardless of the value.
+// HasArgument returns true if an argument was set and false otherwise, regardless of the value.
 func HasArgument(argName string) bool {
 	_, exist := GetArgument(argName)
 	return exist
@@ -215,7 +215,7 @@ func RunTarget(target string) error {
 	// Run the task teardown method
 	teardownErr := runLifetimeFunc("TaskTeardown", context.TaskTeardownFunc)
 
-	// If the teardown failed but nothing else, still fail with the teardowns error
+	// If the teardown failed but nothing else, still fail with the teardown error
 	if teardownErr != nil && taskErr == nil {
 		return teardownErr
 	}
@@ -251,7 +251,7 @@ func runLifetimeFunc(lifetimeStage string, function func() error) error {
 	log.Informationf("--- %s %s", lifetimeStage, strings.Repeat("-", 60-5-len(lifetimeStage)))
 	err := runFuncRecover(function)
 	if err != nil {
-		log.Informationf("Error occured: %v", err)
+		log.Informationf("Error occurred: %v", err)
 		return err
 	}
 	return nil
@@ -322,10 +322,10 @@ type TaskObject struct {
 	description      string        // The description of the task.
 	arguments        []argument    // The arguments of the task.
 	taskFunc         func() error  // The function of the task.
-	dependencies     []string      // A list of dependecy tasks.
+	dependencies     []string      // A list of dependency tasks.
 	dependees        []string      // A list of dependee tasks.
 	followups        []string      // A list of followup tasks.
-	continueOnError  bool          // A flag to incdicate if the run should continue when an error occured.
+	continueOnError  bool          // A flag to indicate if the run should continue when an error occurred.
 	deferOnError     bool          // A flag to indicate if the error should be deferred until the end.
 	didRun           bool          // A flag to indicate if the task did already run.
 	duration         time.Duration // A runtime duration of the task if it ran already.
@@ -441,7 +441,7 @@ func (taskObject *TaskObject) Argument(argumentName string, argumentDescription 
 	return taskObject
 }
 
-// AddFollowupTask allows to add one or more tasks that should run after the current finished.
+// AddFollowupTask allows adding one or more tasks that should run after the current finished.
 func AddFollowupTask(taskName ...string) {
 	currentRunningTask.Then(taskName...)
 }

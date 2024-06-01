@@ -60,7 +60,7 @@ type FlywaySettings struct {
 	FailOnMissingLocations *bool
 	// At the start of a migration, Flyway will attempt to take a lock to prevent competing instances executing in parallel.
 	LockRetryCount *int
-	// Allows you to override Flyway's logging auto-detection and specify one or multiple loggers to use.
+	// Allows you to override Flyway's logging autodetection and specify one or multiple loggers to use.
 	Loggers []FlywayLogger
 	// Whether to allow mixing transactional and non-transactional statements within the same migration.
 	Mixed *bool
@@ -82,7 +82,7 @@ type FlywaySettings struct {
 	WorkingDirectory string
 
 	//// Schema
-	// Whether Flyway should attempt to create the schemas specified in the schemas property.
+	// Whether Flyway should attempt to create the schemas specified in the schemas' property.
 	CreateSchemas *bool
 	// The default schema managed by Flyway.
 	DefaultSchema string
@@ -138,7 +138,7 @@ type FlywaySettings struct {
 	OutputType FlywayOutputType
 
 	//// PostgreSQL
-	// Whether or not transactional advisory locks should be used with PostgreSQL.
+	// Whether transactional advisory locks should be used with PostgreSQL.
 	PostgresqlTransactionalLock *bool
 }
 

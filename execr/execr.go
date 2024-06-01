@@ -1,4 +1,4 @@
-// Package execr is a wapper to run exec commands.
+// Package execr is a wrapper to run exec commands.
 package execr
 
 import (

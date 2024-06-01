@@ -170,7 +170,7 @@ type DevContainerCliFeaturesPublishSettings struct {
 	Target string
 	// Name of the OCI registry.
 	Registry string
-	// Unique indentifier for the collection of features.
+	// Unique identifier for the collection of features.
 	Namespace string
 	// Log level.
 	LogLevel DevContainerCliLogLevel
