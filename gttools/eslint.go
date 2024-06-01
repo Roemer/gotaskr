@@ -34,7 +34,7 @@ type EsLintMessage struct {
 	EndColumn int64  `json:"endColumn"`
 }
 
-// ParseEsLintReport parses the given eslint report (json).
+// ParseEsLintReport parses the given eslint report (JSON).
 func (tool *EsLintTool) ParseEsLintReport(esLintReportPath string) (*EsLintReport, error) {
 	jsonFile, err := os.Open(esLintReportPath)
 	if err != nil {

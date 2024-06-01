@@ -16,7 +16,7 @@ import (
 	"github.com/roemer/gotaskr/log"
 )
 
-// Generate a map that holds all passed arguments from the cli
+// Generate a map that holds all passed arguments from the CLI
 var argumentsMap = argparse.ParseArgs()
 
 // Prepare a map for all the task objects
