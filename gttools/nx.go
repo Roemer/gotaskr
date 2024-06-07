@@ -232,6 +232,8 @@ func (tool *NxTool) prepareCommand(runType NxRunType, settings *ToolSettingsBase
 		args = goext.Prepend(args, "nx")
 	}
 
+	args = append(args, settings.CustomArguments...)
+
 	// Add the arguments and run the command
 	cmd := exec.Command(bin, args...)
 	cmd.Dir = settings.WorkingDirectory
