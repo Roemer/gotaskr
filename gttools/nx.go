@@ -89,13 +89,21 @@ func (tool *NxTool) Affected(runType NxRunType, settings NxAffectedSettings) err
 // Settings for run: https://nx.dev/nx-api/nx/documents/run
 type NxRunSettings struct {
 	ToolSettingsBase
+	Project       string
 	Target        string
 	Configuration string
 }
 
 // Runs a target defined for your project.
 func (tool *NxTool) Run(runType NxRunType, settings NxRunSettings) error {
-	args := []string{settings.Target}
+	args := []string{}
+	if len(settings.Project) > 0 && len(settings.Target) > 0 {
+		args = append(args, fmt.Sprintf("%s:%s", settings.Project, settings.Target))
+	} else if len(settings.Project) > 0 {
+		args = append(args, settings.Project)
+	} else if len(settings.Target) > 0 {
+		args = append(args, settings.Target)
+	}
 	args = goext.AppendIf(args, len(settings.Configuration) > 0, "--configuration="+settings.Configuration)
 	return tool.RunCommand(runType, &settings.ToolSettingsBase, "run", args...)
 }
