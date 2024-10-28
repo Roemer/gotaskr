@@ -215,15 +215,15 @@ func (tool *FlywayTool) buildArguments(settings *FlywaySettings) []string {
 	args = addString(args, settings.InitSql, addSettings{prefix: "-initSql="})
 
 	// General
-	args = addStringList(args, settings.Callbacks, ",", addSettings{prefix: "-callbacks="})
-	args = addStringList(args, settings.ConfigFiles, ",", addSettings{prefix: "-configFiles="})
+	args = addStringList(args, settings.Callbacks, addSettings{prefix: "-callbacks=", listSeparator: ","})
+	args = addStringList(args, settings.ConfigFiles, addSettings{prefix: "-configFiles=", listSeparator: ","})
 	args = goext.AppendIf(args, len(settings.Encoding) > 0, fmt.Sprintf("-encoding=%s", settings.Encoding))
 	args = addString(args, settings.Environment, addSettings{prefix: "-environment="})
 	args = addBoolean(args, settings.ExecuteInTransaction, addSettings{prefix: "-executeInTransaction="})
 	args = addBoolean(args, settings.Group, addSettings{prefix: "-group="})
 	args = addString(args, settings.InstalledBy, addSettings{prefix: "-installedBy="})
-	args = addStringList(args, settings.JarDirs, ",", addSettings{prefix: "-jarDirs="})
-	args = addStringList(args, settings.Locations, ",", addSettings{prefix: "-locations="})
+	args = addStringList(args, settings.JarDirs, addSettings{prefix: "-jarDirs=", listSeparator: ","})
+	args = addStringList(args, settings.Locations, addSettings{prefix: "-locations=", listSeparator: ","})
 	args = addBoolean(args, settings.FailOnMissingLocations, addSettings{prefix: "-failOnMissingLocations="})
 	args = addInt(args, settings.LockRetryCount, addSettings{prefix: "-lockRetryCount="})
 	args = goext.AppendIf(args, len(settings.Loggers) > 0, fmt.Sprintf("-loggers=%s", goext.StringsJoinAny(settings.Loggers, ",")))
@@ -240,7 +240,7 @@ func (tool *FlywayTool) buildArguments(settings *FlywaySettings) []string {
 	// Schema
 	args = addBoolean(args, settings.CreateSchemas, addSettings{prefix: "-createSchemas="})
 	args = addString(args, settings.DefaultSchema, addSettings{prefix: "-defaultSchema="})
-	args = addStringList(args, settings.Schemas, ",", addSettings{prefix: "-schemas="})
+	args = addStringList(args, settings.Schemas, addSettings{prefix: "-schemas=", listSeparator: ","})
 
 	// Baseline
 	args = addString(args, settings.BaselineDescription, addSettings{prefix: "-baselineDescription="})
@@ -252,19 +252,19 @@ func (tool *FlywayTool) buildArguments(settings *FlywaySettings) []string {
 	args = addBoolean(args, settings.CleanOnValidationError, addSettings{prefix: "-cleanOnValidationError="})
 
 	// Validate
-	args = addStringList(args, settings.IgnoreMigrationPatterns, ",", addSettings{prefix: "-ignoreMigrationPatterns="})
+	args = addStringList(args, settings.IgnoreMigrationPatterns, addSettings{prefix: "-ignoreMigrationPatterns=", listSeparator: ","})
 
 	// Migrations
 	args = addString(args, settings.RepeatableSqlMigrationPrefix, addSettings{prefix: "-repeatableSqlMigrationPrefix="})
-	args = addStringList(args, settings.Resolvers, ",", addSettings{prefix: "-resolvers="})
+	args = addStringList(args, settings.Resolvers, addSettings{prefix: "-resolvers=", listSeparator: ","})
 	args = addString(args, settings.SqlMigrationPrefix, addSettings{prefix: "-sqlMigrationPrefix="})
 	args = addString(args, settings.SqlMigrationSeparator, addSettings{prefix: "-sqlMigrationSeparator="})
-	args = addStringList(args, settings.SqlMigrationSuffixes, ",", addSettings{prefix: "-sqlMigrationSuffixes="})
+	args = addStringList(args, settings.SqlMigrationSuffixes, addSettings{prefix: "-sqlMigrationSuffixes=", listSeparator: ","})
 
 	// Placeholders
 	args = addString(args, settings.PlaceholderPrefix, addSettings{prefix: "-placeholderPrefix="})
 	args = addBoolean(args, settings.PlaceholderReplacement, addSettings{prefix: "-placeholderReplacement="})
-	args = addStringList(args, settings.Placeholders, ",", addSettings{prefix: "-placeholders="})
+	args = addStringList(args, settings.Placeholders, addSettings{prefix: "-placeholders=", listSeparator: ","})
 	args = addString(args, settings.PlaceholderSeparator, addSettings{prefix: "-placeholderSeparator="})
 	args = addString(args, settings.PlaceholderSuffix, addSettings{prefix: "-placeholderSuffix="})
 

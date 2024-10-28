@@ -75,18 +75,36 @@ type addSettings struct {
 	appendElements []string
 	// Elements to add before the effective value.
 	prependElements []string
+	// Separator used to merge a list of values into a single value.
+	listSeparator string
+	// A Flag to indicate if each item should be processed individually or merged and as a single item.
+	handleEachListItemSeparately bool
+}
+
+func getElementsToAdd(values []string, settings addSettings) []string {
+	newElements := []string{}
+	if len(values) > 0 {
+		if !settings.handleEachListItemSeparately {
+			// Overwrite the values with a single merged one
+			values = []string{strings.Join(values, settings.listSeparator)}
+		}
+		for _, value := range values {
+			if len(settings.prependElements) > 0 {
+				newElements = append(newElements, settings.prependElements...)
+			}
+			newElements = append(newElements, fmt.Sprintf("%s%s%s", settings.prefix, value, settings.suffix))
+			if len(settings.appendElements) > 0 {
+				newElements = append(newElements, settings.appendElements...)
+			}
+		}
+	}
+	return newElements
 }
 
 // Adds a nullable boolean to the list if it is not nil
 func addBoolean(slice []string, value *bool, settings addSettings) []string {
 	if value != nil {
-		if len(settings.prependElements) > 0 {
-			slice = append(slice, settings.prependElements...)
-		}
-		slice = append(slice, fmt.Sprintf("%s%t%s", settings.prefix, *value, settings.suffix))
-		if len(settings.appendElements) > 0 {
-			slice = append(slice, settings.appendElements...)
-		}
+		slice = append(slice, getElementsToAdd([]string{fmt.Sprintf("%t", *value)}, settings)...)
 	}
 	return slice
 }
@@ -94,13 +112,7 @@ func addBoolean(slice []string, value *bool, settings addSettings) []string {
 // Adds a nullable int to the list if it is not nil
 func addInt(slice []string, value *int, settings addSettings) []string {
 	if value != nil {
-		if len(settings.prependElements) > 0 {
-			slice = append(slice, settings.prependElements...)
-		}
-		slice = append(slice, fmt.Sprintf("%s%d%s", settings.prefix, *value, settings.suffix))
-		if len(settings.appendElements) > 0 {
-			slice = append(slice, settings.appendElements...)
-		}
+		slice = append(slice, getElementsToAdd([]string{fmt.Sprintf("%d", *value)}, settings)...)
 	}
 	return slice
 }
@@ -108,27 +120,15 @@ func addInt(slice []string, value *int, settings addSettings) []string {
 // Adds a string to the list if it has a length > 0
 func addString(slice []string, value string, settings addSettings) []string {
 	if len(value) > 0 {
-		if len(settings.prependElements) > 0 {
-			slice = append(slice, settings.prependElements...)
-		}
-		slice = append(slice, fmt.Sprintf("%s%s%s", settings.prefix, value, settings.suffix))
-		if len(settings.appendElements) > 0 {
-			slice = append(slice, settings.appendElements...)
-		}
+		slice = append(slice, getElementsToAdd([]string{value}, settings)...)
 	}
 	return slice
 }
 
 // Adds a string list to the list, separated by the separator
-func addStringList(slice []string, values []string, separator string, settings addSettings) []string {
+func addStringList(slice []string, values []string, settings addSettings) []string {
 	if len(values) > 0 {
-		if len(settings.prependElements) > 0 {
-			slice = append(slice, settings.prependElements...)
-		}
-		slice = append(slice, fmt.Sprintf("%s%s%s", settings.prefix, strings.Join(values, separator), settings.suffix))
-		if len(settings.appendElements) > 0 {
-			slice = append(slice, settings.appendElements...)
-		}
+		slice = append(slice, getElementsToAdd(values, settings)...)
 	}
 	return slice
 }
