@@ -9,16 +9,16 @@ type RunOptions struct {
 }
 
 // Appends the given arguments.
-func WithArguments(arguments ...string) func(*RunOptions) {
+func WithArgs(arguments ...string) func(*RunOptions) {
 	return func(options *RunOptions) {
 		options.arguments = append(options.arguments, arguments...)
 	}
 }
 
 // Splits the given argument string into separate arguments and appends them.
-func WithArgumentsSplitted(arguments string) func(*RunOptions) {
+func WithArgsSplitted(arguments string) func(*RunOptions) {
 	return func(options *RunOptions) {
-		options.arguments = append(options.arguments, SplitArguments(arguments)...)
+		options.arguments = append(options.arguments, SplitArgumentString(arguments)...)
 	}
 }
 

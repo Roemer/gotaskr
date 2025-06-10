@@ -149,7 +149,7 @@ func (tool *FlywayTool) Baseline(settings *FlywaySettings) error {
 
 	cmd := exec.Command(settings.ToolPath, args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 func (tool *FlywayTool) Clean(settings *FlywaySettings) error {
@@ -159,7 +159,7 @@ func (tool *FlywayTool) Clean(settings *FlywaySettings) error {
 
 	cmd := exec.Command(settings.ToolPath, args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 func (tool *FlywayTool) Info(settings *FlywaySettings) error {
@@ -169,7 +169,7 @@ func (tool *FlywayTool) Info(settings *FlywaySettings) error {
 
 	cmd := exec.Command(settings.ToolPath, args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 func (tool *FlywayTool) Migrate(settings *FlywaySettings) error {
@@ -179,7 +179,7 @@ func (tool *FlywayTool) Migrate(settings *FlywaySettings) error {
 
 	cmd := exec.Command(settings.ToolPath, args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 func (tool *FlywayTool) Repair(settings *FlywaySettings) error {
@@ -189,7 +189,7 @@ func (tool *FlywayTool) Repair(settings *FlywaySettings) error {
 
 	cmd := exec.Command(settings.ToolPath, args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 func (tool *FlywayTool) Validate(settings *FlywaySettings) error {
@@ -199,7 +199,7 @@ func (tool *FlywayTool) Validate(settings *FlywaySettings) error {
 
 	cmd := exec.Command(settings.ToolPath, args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 func (tool *FlywayTool) buildArguments(settings *FlywaySettings) []string {

@@ -60,5 +60,5 @@ func (tool *MvnTool) Run(settings *MvnRunSettings) error {
 
 	cmd := exec.Command("mvn", args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
