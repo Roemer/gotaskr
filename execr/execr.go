@@ -13,19 +13,23 @@ import (
 
 var argumentsRegex = regexp.MustCompile(`[^\s"]+|"((\\"|[^"])*)"`)
 
+// Creates a new exec.Cmd with the given executable and arguments.
 func NewCmd(executable string, arguments ...string) *exec.Cmd {
 	return exec.Command(executable, arguments...)
 }
 
+// Creates a new exec.Cmd with the given executable and the argument string splitted into separate arguments.
 func NewCmdSplitted(executable string, arguments string) *exec.Cmd {
 	return exec.Command(executable, SplitArguments(arguments)...)
 }
 
+// Runs an executable with the given arguments.
 func Run(executable string, arguments []string, options ...func(*RunOptions)) error {
 	cmd := NewCmd(executable, arguments...)
 	return RunCommand(cmd, options...)
 }
 
+// Runs a command with the given arguments.
 func RunCommand(cmd *exec.Cmd, options ...func(*RunOptions)) error {
 	runOptions := prepare(cmd, options...)
 	logArguments(cmd)
@@ -41,11 +45,13 @@ func RunCommand(cmd *exec.Cmd, options ...func(*RunOptions)) error {
 	return err
 }
 
+// Runs an executable with the given arguments and returns the separate output from stdout and stderr.
 func RunGetOutput(executable string, arguments []string, options ...func(*RunOptions)) (string, string, error) {
 	cmd := NewCmd(executable, arguments...)
 	return RunCommandGetOutput(cmd, options...)
 }
 
+// Runs a command with the given arguments and returns the separate output from stdout and stderr.
 func RunCommandGetOutput(cmd *exec.Cmd, options ...func(*RunOptions)) (string, string, error) {
 	runOptions := prepare(cmd, options...)
 	logArguments(cmd)
@@ -64,11 +70,13 @@ func RunCommandGetOutput(cmd *exec.Cmd, options ...func(*RunOptions)) (string, s
 	return processOutputString(stdoutBuf.String()), processOutputString(stderrBuf.String()), err
 }
 
+// Runs an executable with the given arguments and returns the output from stdout and stderr combined.
 func RunGetCombinedOutput(executable string, arguments []string, options ...func(*RunOptions)) (string, error) {
 	cmd := NewCmd(executable, arguments...)
 	return RunCommandGetCombinedOutput(cmd, options...)
 }
 
+// Runs a command with the given arguments and returns the output from stdout and stderr combined.
 func RunCommandGetCombinedOutput(cmd *exec.Cmd, options ...func(*RunOptions)) (string, error) {
 	runOptions := prepare(cmd, options...)
 	logArguments(cmd)
@@ -87,10 +95,12 @@ func RunCommandGetCombinedOutput(cmd *exec.Cmd, options ...func(*RunOptions)) (s
 	return processOutputString(outBuf.String()), err
 }
 
+// Splits a string of arguments into a slice of strings, handling quoted arguments correctly.
 func SplitArguments(arguments string) []string {
 	return argumentsRegex.FindAllString(arguments, -1)
 }
 
+// Returns a slice of strings containing the given arguments.
 func Arguments(arguments ...string) []string {
 	return arguments
 }
