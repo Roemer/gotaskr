@@ -64,7 +64,7 @@ func (tool *DockerImageTool) Build(settings *DockerBuildSettings) error {
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
 	cmd.Stdin = os.Stdin
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 type DockerSaveSettings struct {
@@ -90,7 +90,7 @@ func (tool *DockerImageTool) Save(settings *DockerSaveSettings) error {
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 type DockerLoadSettings struct {
@@ -107,7 +107,7 @@ func (tool *DockerImageTool) Load(settings *DockerLoadSettings) ([]string, error
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	stdout, _, err := execr.RunCommandGetOutput(settings.OutputToConsole, cmd)
+	stdout, _, err := execr.RunCommandGetOutput(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 
 	// Parse out all loaded images
 	loadedImages := []string{}
@@ -137,5 +137,5 @@ func (tool *DockerImageTool) Push(settings *DockerPushSettings) error {
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }

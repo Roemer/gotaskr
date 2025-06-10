@@ -206,13 +206,13 @@ func (tool *NxTool) ShowProjects(runType NxRunType, settings NxShowProjectsSetti
 // RunCommand is a generic runner for any Nx command.
 func (tool *NxTool) RunCommand(runType NxRunType, settings *ToolSettingsBase, command string, args ...string) error {
 	cmd := tool.prepareCommand(runType, settings, command, args...)
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 // RunCommandGetOutput is a generic runner for any Nx command which also returns the stdout and stderr.
 func (tool *NxTool) RunCommandGetOutput(runType NxRunType, settings *ToolSettingsBase, command string, args ...string) (string, string, error) {
 	cmd := tool.prepareCommand(runType, settings, command, args...)
-	return execr.RunCommandGetOutput(settings.OutputToConsole, cmd)
+	return execr.RunCommandGetOutput(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 func (tool *NxTool) prepareCommand(runType NxRunType, settings *ToolSettingsBase, command string, args ...string) *exec.Cmd {

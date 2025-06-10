@@ -86,7 +86,7 @@ func (tool *DotNetTool) DotNetBuild(project string, settings *DotNetBuildSetting
 	dotNetExe := "dotnet"
 	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////////////////////////////////////////////////////////
@@ -122,7 +122,7 @@ func (tool *DotNetTool) DotNetClean(project string, settings *DotNetCleanSetting
 	dotNetExe := "dotnet"
 	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////////////////////////////////////////////////////////
@@ -166,7 +166,7 @@ func (tool *DotNetTool) DotNetPack(project string, settings *DotNetPackSettings)
 	dotNetExe := "dotnet"
 	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////////////////////////////////////////////////////////
@@ -210,7 +210,7 @@ func (tool *DotNetTool) DotNetPublish(path string, settings *DotNetPublishSettin
 	dotNetExe := "dotnet"
 	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////////////////////////////////////////////////////////
@@ -252,7 +252,7 @@ func (tool *DotNetTool) DotNetRestore(root string, settings *DotNetRestoreSettin
 	dotNetExe := "dotnet"
 	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////////////////////////////////////////////////////////
@@ -288,7 +288,7 @@ func (tool *DotNetTool) DotNetRun(project string, settings *DotNetRunSettings) e
 	dotNetExe := "dotnet"
 	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////////////////////////////////////////////////////////
@@ -332,7 +332,7 @@ func (tool *DotNetTool) DotNeTest(project string, settings *DotNetTestSettings) 
 	dotNetExe := "dotnet"
 	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////////////////////////////////////////////////////////

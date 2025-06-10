@@ -34,7 +34,7 @@ func (tool *NpmTool) Init(settings *NpmInitSettings) error {
 
 	cmd := exec.Command("npm", args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 // NpmRunSettings are the settings used for Run.
@@ -55,7 +55,7 @@ func (tool *NpmTool) Run(settings *NpmRunSettings) error {
 
 	cmd := exec.Command("npm", args...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 func (tool *NpmTool) RunScript(outputToConsole bool, script string) error {
@@ -89,7 +89,7 @@ func (tool *NpmTool) CleanInstall(settings *NpmCleanInstallSettings) error {
 
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 // NpmInstallSettings are the settings used for Install.
@@ -124,7 +124,7 @@ func (tool *NpmTool) Install(settings *NpmInstallSettings) error {
 
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 // NpmBinSettings are the settings used for Bin.
@@ -145,7 +145,7 @@ func (tool *NpmTool) Bin(settings *NpmBinSettings) (string, error) {
 
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	stdout, _, err := execr.RunCommandGetOutput(settings.OutputToConsole, cmd)
+	stdout, _, err := execr.RunCommandGetOutput(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 	return stdout, err
 }
 
@@ -170,7 +170,7 @@ func (tool *NpmTool) Publish(settings *NpmPublishSettings) error {
 	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
 
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////////////////////////////////////////////////////////

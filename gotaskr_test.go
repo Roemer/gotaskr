@@ -376,7 +376,7 @@ func TestLifeTimeTaskSetupAndTaskTeardownError(t *testing.T) {
 ////////////////////
 
 func getExitError(errorCode int) error {
-	return execr.Run(false, getBashPath(), "-c", fmt.Sprintf("exit %d", errorCode))
+	return execr.Run(getBashPath(), []string{"-c", fmt.Sprintf("exit %d", errorCode)})
 }
 
 func getBashPath() string {

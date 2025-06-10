@@ -81,7 +81,7 @@ func (tool *DevContainerCliTool) Build(settings *DevContainerCliBuildSettings) e
 	args = append(args, settings.CustomArguments...)
 	cmd := exec.Command("devcontainer", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////// Up
@@ -216,7 +216,7 @@ func (tool *DevContainerCliTool) Run(settings *DevContainerCliUpSettings) error 
 	args = append(args, settings.CustomArguments...)
 	cmd := exec.Command("devcontainer", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////// Exec
@@ -286,7 +286,7 @@ func (tool *DevContainerCliTool) Exec(command string, settings *DevContainerCliE
 	args = append(args, settings.CustomArguments...)
 	cmd := exec.Command("devcontainer", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////// Features Test
@@ -344,7 +344,7 @@ func (tool *DevContainerCliTool) FeaturesTest(settings *DevContainerCliFeaturesT
 	args = append(args, settings.CustomArguments...)
 	cmd := exec.Command("devcontainer", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////// Features Package
@@ -375,7 +375,7 @@ func (tool *DevContainerCliTool) FeaturesPackage(settings *DevContainerCliFeatur
 	args = append(args, settings.CustomArguments...)
 	cmd := exec.Command("devcontainer", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////// Features Publish
@@ -406,7 +406,7 @@ func (tool *DevContainerCliTool) FeaturesPublish(settings *DevContainerCliFeatur
 	args = append(args, settings.CustomArguments...)
 	cmd := exec.Command("devcontainer", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 ////////// Types

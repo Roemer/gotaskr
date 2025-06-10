@@ -36,10 +36,10 @@ func init() {
 ////////////////////////////////////////////////////////////
 
 func UpdateDependencies() error {
-	if err := execr.Run(true, "go", "get", "-u"); err != nil {
+	if err := execr.Run("go", execr.SplitArguments("get -u"), execr.WithConsoleOutput(true)); err != nil {
 		return err
 	}
-	if err := execr.Run(true, "go", "mod", "tidy"); err != nil {
+	if err := execr.Run("go", execr.SplitArguments("mod tidy"), execr.WithConsoleOutput(true)); err != nil {
 		return err
 	}
 	return nil
@@ -51,11 +51,11 @@ func RunTests() error {
 	}
 	goTestReport := path.Join(reportPath, "go-test-report.txt")
 	junitTestReport := path.Join(reportPath, "junit-test-report.xml")
-	if err := execr.Run(true, "go", "install", "github.com/jstemmer/go-junit-report/v2@latest"); err != nil {
+	if err := execr.Run("go", execr.SplitArguments("install github.com/jstemmer/go-junit-report/v2@latest"), execr.WithConsoleOutput(true)); err != nil {
 		return err
 	}
 
-	stdout, _, err := execr.RunGetOutput(false, "go", execr.SplitArgumentString("test -v ./... ")...)
+	stdout, _, err := execr.RunGetOutput("go", execr.SplitArguments("test -v ./... "), execr.WithConsoleOutput(true))
 	if err != nil {
 		return nil
 	}
@@ -63,7 +63,7 @@ func RunTests() error {
 		return err
 	}
 
-	if err := execr.Run(true, path.Join(build.Default.GOPATH, "bin/go-junit-report"), "-in", goTestReport, "-set-exit-code", "-out", junitTestReport); err != nil {
+	if err := execr.Run(path.Join(build.Default.GOPATH, "bin/go-junit-report"), execr.Arguments("-in", goTestReport, "-set-exit-code", "-out", junitTestReport), execr.WithConsoleOutput(true)); err != nil {
 		return err
 	}
 	return nil

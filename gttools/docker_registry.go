@@ -28,7 +28,7 @@ func (tool *DockerRegistryTool) Login(settings *DockerLoginSettings) error {
 	args = goext.AppendIf(args, settings.Registry != "", settings.Registry)
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 type DockerLogoutSettings struct {
@@ -44,5 +44,5 @@ func (tool *DockerRegistryTool) Logout(settings *DockerLogoutSettings) error {
 	args = goext.AppendIf(args, settings.Registry != "", settings.Registry)
 
 	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }

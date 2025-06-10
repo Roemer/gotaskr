@@ -132,21 +132,21 @@ func (tool *CypressTool) CypressOpenWithYarn(settings *CypressOpenSettings) erro
 func cypressExecute(cypressBinPath string, args []string, settings ToolSettingsBase) error {
 	cmd := exec.Command(cypressBinPath, goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 func cypressExecuteWithNpx(args []string, settings ToolSettingsBase) error {
 	args = append([]string{"cypress"}, args...)
 	cmd := exec.Command("npx", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 func cypressExecuteWithYarn(args []string, settings ToolSettingsBase) error {
 	args = append([]string{"cypress"}, args...)
 	cmd := exec.Command("yarn", goext.RemoveEmpty(args)...)
 	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommand(settings.OutputToConsole, cmd)
+	return execr.RunCommand(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
 }
 
 func (settings *CypressRunSettings) buildCliArguments() []string {
