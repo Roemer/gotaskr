@@ -11,7 +11,7 @@ import (
 	"github.com/roemer/gotaskr/log"
 )
 
-var argumentsRegex = regexp.MustCompile(`(?m)[\w]+|"[\w\\"\s]*"`)
+var argumentsRegex = regexp.MustCompile(`[^\s"]+|"((\\"|[^"])*)"`)
 
 func NewCmd(executable string, arguments ...string) *exec.Cmd {
 	return exec.Command(executable, arguments...)
