@@ -6,8 +6,9 @@ import (
 	"time"
 
 	"github.com/jfrog/jfrog-client-go/artifactory"
-	"github.com/jfrog/jfrog-client-go/artifactory/auth"
+	artifactoryAuth "github.com/jfrog/jfrog-client-go/artifactory/auth"
 	"github.com/jfrog/jfrog-client-go/artifactory/services"
+	"github.com/jfrog/jfrog-client-go/auth"
 	"github.com/jfrog/jfrog-client-go/config"
 	"github.com/jfrog/jfrog-client-go/utils/io/content"
 	"golang.org/x/exp/slices"
@@ -53,21 +54,18 @@ func (searchResult *ArtifactorySearchResultItem) HasProperty(key string) bool {
 	return hasProperty
 }
 
-// CreateManager creates a basic manager to interact with artifactory.
-func (tool *ArtifactoryTool) CreateManager(baseUrl string, apiKey string) (artifactory.ArtifactoryServicesManager, error) {
-	artifactoryDetails := auth.NewArtifactoryDetails()
-	artifactoryDetails.SetUrl(baseUrl)
+// Creates a basic manager to interact with Artifactory using a legacy API key.
+func (tool *ArtifactoryTool) CreateManagerWithApiKey(baseUrl string, apiKey string) (artifactory.ArtifactoryServicesManager, error) {
+	artifactoryDetails := createDetails(baseUrl)
 	artifactoryDetails.SetApiKey(apiKey)
+	return createManagerFromAuthDetails(artifactoryDetails)
+}
 
-	configBuilder, err := config.NewConfigBuilder().
-		SetServiceDetails(artifactoryDetails).
-		Build()
-	if err != nil {
-		return nil, err
-	}
-
-	artifactoryManager, err := artifactory.New(configBuilder)
-	return artifactoryManager, err
+// Creates a basic manager to interact with Artifactory using an access token.
+func (tool *ArtifactoryTool) CreateManager(baseUrl string, accessToken string) (artifactory.ArtifactoryServicesManager, error) {
+	artifactoryDetails := createDetails(baseUrl)
+	artifactoryDetails.SetAccessToken(accessToken)
+	return createManagerFromAuthDetails(artifactoryDetails)
 }
 
 // HasSearchResults performs the given search and returns a bool if the search contains any items or not.
@@ -133,4 +131,25 @@ func (tool *ArtifactoryTool) GetContentFromReader(reader *content.ContentReader)
 	}
 	content, _ := os.ReadFile(reader.GetFilesPaths()[0])
 	return string(content)
+}
+
+////////////////////////////////////////////////////////////
+// Internal Methods
+////////////////////////////////////////////////////////////
+
+func createDetails(baseUrl string) auth.ServiceDetails {
+	artifactoryDetails := artifactoryAuth.NewArtifactoryDetails()
+	artifactoryDetails.SetUrl(baseUrl)
+	return artifactoryDetails
+}
+
+func createManagerFromAuthDetails(artifactoryDetails auth.ServiceDetails) (artifactory.ArtifactoryServicesManager, error) {
+	configBuilder, err := config.NewConfigBuilder().
+		SetServiceDetails(artifactoryDetails).
+		Build()
+	if err != nil {
+		return nil, err
+	}
+	artifactoryManager, err := artifactory.New(configBuilder)
+	return artifactoryManager, err
 }

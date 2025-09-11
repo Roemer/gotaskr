@@ -1,13 +1,11 @@
 module github.com/roemer/gotaskr
 
-go 1.23.7
-
-toolchain go1.24.4
+go 1.24.6
 
 require (
 	github.com/fatih/color v1.18.0
-	github.com/jfrog/jfrog-client-go v1.53.1
-	github.com/stretchr/testify v1.10.0
+	github.com/jfrog/jfrog-client-go v1.54.7
+	github.com/stretchr/testify v1.11.1
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394
 )
 
@@ -17,7 +15,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
-	github.com/cloudflare/circl v1.6.0 // indirect
+	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
@@ -32,7 +30,7 @@ require (
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jfrog/archiver/v3 v3.6.1 // indirect
-	github.com/jfrog/build-info-go v1.10.12 // indirect
+	github.com/jfrog/build-info-go v1.10.17 // indirect
 	github.com/jfrog/gofrog v1.7.6 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
