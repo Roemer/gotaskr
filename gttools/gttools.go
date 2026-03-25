@@ -15,6 +15,7 @@ func (tool *ToolBase) run(binPath string, args []string, settings ToolSettingsBa
 	return goext.NewCmdRunner().
 		WithWorkingDirectory(settings.WorkingDirectory).
 		SetConsoleOutput(settings.OutputToConsole).
+		WithLogFile(settings.LogFilePath).
 		Run(binPath, args...)
 }
 
@@ -22,6 +23,7 @@ func (tool *ToolBase) runGetOutput(binPath string, args []string, settings ToolS
 	return goext.NewCmdRunner().
 		WithWorkingDirectory(settings.WorkingDirectory).
 		SetConsoleOutput(settings.OutputToConsole).
+		WithLogFile(settings.LogFilePath).
 		RunGetOutput(binPath, args...)
 }
 
@@ -61,6 +63,7 @@ func CreateToolsClient() *ToolsClient {
 type ToolSettingsBase struct {
 	WorkingDirectory string   // the path to use as working directory when running the tool
 	OutputToConsole  bool     // flag to define if the output of the tool should be written into the console or not.
+	LogFilePath      string   // if set, the output of the tool will be written to the given file path
 	CustomArguments  []string // list with custom arguments passed to the tool
 }
 

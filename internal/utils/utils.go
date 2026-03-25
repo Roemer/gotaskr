@@ -6,25 +6,6 @@ import (
 	"strings"
 )
 
-// PanicOnError panics if the given error is set.
-func PanicOnError(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-// Noop is a no operation function that can be used for tasks.
-// For example if they are just used for multiple dependencies.
-func Noop() error {
-	return nil
-}
-
-// Pass is a no-op function that can be used to set variables to used.
-// Useful during development but must be removed afterwards!
-func Pass(i ...any) {
-	// No-Op
-}
-
 // Joins any slice with the given separator.
 func StringsJoinAny[T any](elems []T, sep string) string {
 	values := []string{}
@@ -48,20 +29,6 @@ func GetMapKeys[TK comparable, TV any](m map[TK]TV) []TK {
 	})
 
 	return keys
-}
-
-// ProcessMapSorted calls the given function on all entries of the map, sorted by their key value (by string).
-func ProcessMapSorted[TK comparable, TV any](m map[TK]TV, pf func(TK, TV) error) error {
-	// Get all keys
-	keys := GetMapKeys(m)
-
-	// Call the method for each function
-	for _, k := range keys {
-		if err := pf(k, m[k]); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // ConvertMapToSingleString converts the given map into a joined string with the given separators

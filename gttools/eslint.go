@@ -41,7 +41,7 @@ func (tool *EsLintTool) ParseEsLintReport(esLintReportPath string) (*EsLintRepor
 	if err != nil {
 		return nil, err
 	}
-	defer jsonFile.Close()
+	defer func() { _ = jsonFile.Close() }() // read-only, close error irrelevant
 
 	byteValue, err := io.ReadAll(jsonFile)
 	if err != nil {

@@ -13,7 +13,7 @@ func ParseArgs() map[string]string {
 
 // ParseArgString parses the arguments from a given array.
 func ParseArgString(args []string) map[string]string {
-	var argsMap map[string]string = make(map[string]string)
+	argsMap := make(map[string]string)
 
 	var lastKey = ""
 	var nextCanBeValue = false

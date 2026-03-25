@@ -74,7 +74,7 @@ func (tool *ArtifactoryTool) HasSearchResults(artifactoryManager artifactory.Art
 	if err != nil {
 		return false, err
 	}
-	defer reader.Close()
+	defer func() { _ = reader.Close() }() // read-only, close error irrelevant
 
 	length, err := reader.Length()
 	if err != nil {
@@ -92,7 +92,7 @@ func (tool *ArtifactoryTool) GetSearchResults(artifactoryManager artifactory.Art
 	if err != nil {
 		return searchResultItems, err
 	}
-	defer reader.Close()
+	defer func() { _ = reader.Close() }() // read-only, close error irrelevant
 
 	searchResultItems = tool.GetResultItemsFromReader(reader)
 

@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/roemer/goext"
-	"github.com/roemer/gotaskr/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +15,7 @@ func TestNoErrorTask(t *testing.T) {
 
 	// Prepare
 	clear()
-	task := Task("NoErrorTask", utils.Noop)
+	task := Task("NoErrorTask", Noop)
 	argumentsMap = map[string]string{"target": task.name}
 
 	// Execute

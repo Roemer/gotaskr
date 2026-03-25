@@ -18,7 +18,7 @@ func init() {
 
 func initNxTasks() {
 	gotaskr.Task("Nx:List-Projects", func() error {
-		nxSettings := gttools.NxShowProjectsSettings{}
+		nxSettings := &gttools.NxShowProjectsSettings{}
 		projects, err := gotaskr.Tools.Nx.ShowProjects(gttools.NxRunTypeNpx, nxSettings)
 		if err != nil {
 			return err

@@ -25,9 +25,9 @@ func (tool *NpmTool) Init(settings *NpmInitSettings) error {
 	}
 	args := []string{
 		"init",
-		settings.PackageSpec,
-		"-y",
 	}
+	args = goext.SliceAppendIf(args, settings.PackageSpec != "", settings.PackageSpec)
+	args = append(args, "-y")
 	args = append(args, settings.CustomArguments...)
 
 	return tool.run("npm", args, settings.ToolSettingsBase)
@@ -45,8 +45,8 @@ func (tool *NpmTool) Run(settings *NpmRunSettings) error {
 	}
 	args := []string{
 		"run",
-		settings.Script,
 	}
+	args = goext.SliceAppendIf(args, settings.Script != "", settings.Script)
 	args = append(args, settings.CustomArguments...)
 
 	return tool.run("npm", args, settings.ToolSettingsBase)
@@ -103,8 +103,8 @@ func (tool *NpmTool) Install(settings *NpmInstallSettings) error {
 	}
 	args := []string{
 		"install",
-		settings.PackageSpec,
 	}
+	args = goext.SliceAppendIf(args, settings.PackageSpec != "", settings.PackageSpec)
 	args = goext.SliceAppendIf(args, settings.SaveProd, "--save-prod")
 	args = goext.SliceAppendIf(args, settings.SaveDev, "--save-dev")
 	args = goext.SliceAppendIf(args, settings.SaveOptional, "--save-optional")

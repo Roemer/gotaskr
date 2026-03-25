@@ -64,7 +64,7 @@ type NxAffectedSettings struct {
 }
 
 // Affected allows running target(s) for affected projects.
-func (tool *NxTool) Affected(runType NxRunType, settings NxAffectedSettings) error {
+func (tool *NxTool) Affected(runType NxRunType, settings *NxAffectedSettings) error {
 	args := []string{}
 	args = goext.SliceAppendIf(args, len(settings.Base) > 0, "--base="+settings.Base)
 	args = goext.SliceAppendIf(args, settings.Batch, "--batch")
@@ -94,7 +94,7 @@ type NxRunSettings struct {
 }
 
 // Runs a target defined for your project.
-func (tool *NxTool) Run(runType NxRunType, settings NxRunSettings) error {
+func (tool *NxTool) Run(runType NxRunType, settings *NxRunSettings) error {
 	args := []string{}
 	if len(settings.Project) > 0 && len(settings.Target) > 0 {
 		args = append(args, fmt.Sprintf("%s:%s", settings.Project, settings.Target))
@@ -125,7 +125,7 @@ type NxRunManySettings struct {
 }
 
 // RunMany runs target(s) for multiple listed projects.
-func (tool *NxTool) RunMany(runType NxRunType, settings NxRunManySettings) error {
+func (tool *NxTool) RunMany(runType NxRunType, settings *NxRunManySettings) error {
 	args := []string{}
 	args = goext.SliceAppendIf(args, settings.Batch, "--batch")
 	args = goext.SliceAppendIf(args, len(settings.Configuration) > 0, "--configuration="+settings.Configuration)
@@ -149,7 +149,7 @@ type NxShowProjectSettings struct {
 }
 
 // ShowProject shows the projects configuration and returns it as a string.
-func (tool *NxTool) ShowProject(runType NxRunType, settings NxShowProjectSettings) (string, error) {
+func (tool *NxTool) ShowProject(runType NxRunType, settings *NxShowProjectSettings) (string, error) {
 	args := []string{"project", settings.ProjectName}
 	stdout, stderr, err := tool.RunCommandGetOutput(runType, settings.ToolSettingsBase, "show", args...)
 	if err != nil {
@@ -174,7 +174,7 @@ type NxShowProjectsSettings struct {
 }
 
 // ShowProjects returns projects according to the given criteria.
-func (tool *NxTool) ShowProjects(runType NxRunType, settings NxShowProjectsSettings) ([]string, error) {
+func (tool *NxTool) ShowProjects(runType NxRunType, settings *NxShowProjectsSettings) ([]string, error) {
 	args := []string{"projects"}
 	args = goext.SliceAppendIf(args, settings.Affected, "--affected")
 	args = goext.SliceAppendIf(args, len(settings.Base) > 0, "--base="+settings.Base)
