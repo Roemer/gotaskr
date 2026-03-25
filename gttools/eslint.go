@@ -9,6 +9,7 @@ import (
 
 // EsLintTool provides access to the helper methods for ES Lint.
 type EsLintTool struct {
+	ToolBase
 }
 
 func CreateEsLintTool() *EsLintTool {

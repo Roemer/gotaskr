@@ -5,8 +5,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/roemer/goext"
 	"github.com/roemer/gotaskr"
-	"github.com/roemer/gotaskr/execr"
 	"github.com/roemer/gotaskr/log"
 )
 
@@ -36,10 +36,10 @@ func init() {
 ////////////////////////////////////////////////////////////
 
 func UpdateDependencies() error {
-	if err := execr.RunO("go", execr.WithArgsSplitted("get -u"), execr.WithConsoleOutput(true)); err != nil {
+	if err := goext.CmdRunners.Console.Run("go", "get", "-u"); err != nil {
 		return err
 	}
-	if err := execr.RunO("go", execr.WithArgsSplitted("mod tidy"), execr.WithConsoleOutput(true)); err != nil {
+	if err := goext.CmdRunners.Console.Run("go", "mod", "tidy"); err != nil {
 		return err
 	}
 	return nil
@@ -51,11 +51,11 @@ func RunTests() error {
 	}
 	goTestReport := path.Join(reportPath, "go-test-report.txt")
 	junitTestReport := path.Join(reportPath, "junit-test-report.xml")
-	if err := execr.RunO("go", execr.WithArgsSplitted("install github.com/jstemmer/go-junit-report/v2@latest"), execr.WithConsoleOutput(true)); err != nil {
+	if err := goext.CmdRunners.Console.Run("go", "install", "github.com/jstemmer/go-junit-report/v2@latest"); err != nil {
 		return err
 	}
 
-	stdout, _, err := execr.RunOGetOutput("go", execr.WithArgsSplitted("test -v ./... "), execr.WithConsoleOutput(true))
+	stdout, _, err := goext.CmdRunners.Console.RunGetOutput("go", "test", "-v", "./...")
 	if err != nil {
 		return nil
 	}
@@ -63,7 +63,7 @@ func RunTests() error {
 		return err
 	}
 
-	if err := execr.RunO(path.Join(build.Default.GOPATH, "bin/go-junit-report"), execr.WithArgs("-in", goTestReport, "-set-exit-code", "-out", junitTestReport), execr.WithConsoleOutput(true)); err != nil {
+	if err := goext.CmdRunners.Console.Run(path.Join(build.Default.GOPATH, "bin/go-junit-report"), "-in", goTestReport, "-set-exit-code", "-out", junitTestReport); err != nil {
 		return err
 	}
 	return nil

@@ -2,13 +2,13 @@ package gttools
 
 import (
 	"fmt"
-	"os/exec"
 
-	"github.com/roemer/gotaskr/execr"
-	"github.com/roemer/gotaskr/goext"
+	"github.com/roemer/goext"
+	"github.com/roemer/gotaskr/internal/utils"
 )
 
 type FlywayTool struct {
+	ToolBase
 }
 
 func CreateFlywayTool() *FlywayTool {
@@ -147,9 +147,7 @@ func (tool *FlywayTool) Baseline(settings *FlywaySettings) error {
 	args = append(args, settings.CustomArguments...)
 	args = append(args, "baseline")
 
-	cmd := exec.Command(settings.ToolPath, args...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run(settings.ToolPath, args, settings.ToolSettingsBase)
 }
 
 func (tool *FlywayTool) Clean(settings *FlywaySettings) error {
@@ -157,9 +155,7 @@ func (tool *FlywayTool) Clean(settings *FlywaySettings) error {
 	args = append(args, settings.CustomArguments...)
 	args = append(args, "clean")
 
-	cmd := exec.Command(settings.ToolPath, args...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run(settings.ToolPath, args, settings.ToolSettingsBase)
 }
 
 func (tool *FlywayTool) Info(settings *FlywaySettings) error {
@@ -167,9 +163,7 @@ func (tool *FlywayTool) Info(settings *FlywaySettings) error {
 	args = append(args, settings.CustomArguments...)
 	args = append(args, "info")
 
-	cmd := exec.Command(settings.ToolPath, args...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run(settings.ToolPath, args, settings.ToolSettingsBase)
 }
 
 func (tool *FlywayTool) Migrate(settings *FlywaySettings) error {
@@ -177,9 +171,7 @@ func (tool *FlywayTool) Migrate(settings *FlywaySettings) error {
 	args = append(args, settings.CustomArguments...)
 	args = append(args, "migrate")
 
-	cmd := exec.Command(settings.ToolPath, args...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run(settings.ToolPath, args, settings.ToolSettingsBase)
 }
 
 func (tool *FlywayTool) Repair(settings *FlywaySettings) error {
@@ -187,9 +179,7 @@ func (tool *FlywayTool) Repair(settings *FlywaySettings) error {
 	args = append(args, settings.CustomArguments...)
 	args = append(args, "repair")
 
-	cmd := exec.Command(settings.ToolPath, args...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run(settings.ToolPath, args, settings.ToolSettingsBase)
 }
 
 func (tool *FlywayTool) Validate(settings *FlywaySettings) error {
@@ -197,9 +187,7 @@ func (tool *FlywayTool) Validate(settings *FlywaySettings) error {
 	args = append(args, settings.CustomArguments...)
 	args = append(args, "validate")
 
-	cmd := exec.Command(settings.ToolPath, args...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run(settings.ToolPath, args, settings.ToolSettingsBase)
 }
 
 func (tool *FlywayTool) buildArguments(settings *FlywaySettings) []string {
@@ -217,7 +205,7 @@ func (tool *FlywayTool) buildArguments(settings *FlywaySettings) []string {
 	// General
 	args = addStringList(args, settings.Callbacks, addSettings{prefix: "-callbacks=", listSeparator: ","})
 	args = addStringList(args, settings.ConfigFiles, addSettings{prefix: "-configFiles=", listSeparator: ","})
-	args = goext.AppendIf(args, len(settings.Encoding) > 0, fmt.Sprintf("-encoding=%s", settings.Encoding))
+	args = goext.SliceAppendIf(args, len(settings.Encoding) > 0, fmt.Sprintf("-encoding=%s", settings.Encoding))
 	args = addString(args, settings.Environment, addSettings{prefix: "-environment="})
 	args = addBoolean(args, settings.ExecuteInTransaction, addSettings{prefix: "-executeInTransaction="})
 	args = addBoolean(args, settings.Group, addSettings{prefix: "-group="})
@@ -226,7 +214,7 @@ func (tool *FlywayTool) buildArguments(settings *FlywaySettings) []string {
 	args = addStringList(args, settings.Locations, addSettings{prefix: "-locations=", listSeparator: ","})
 	args = addBoolean(args, settings.FailOnMissingLocations, addSettings{prefix: "-failOnMissingLocations="})
 	args = addInt(args, settings.LockRetryCount, addSettings{prefix: "-lockRetryCount="})
-	args = goext.AppendIf(args, len(settings.Loggers) > 0, fmt.Sprintf("-loggers=%s", goext.StringsJoinAny(settings.Loggers, ",")))
+	args = goext.SliceAppendIf(args, len(settings.Loggers) > 0, fmt.Sprintf("-loggers=%s", utils.StringsJoinAny(settings.Loggers, ",")))
 	args = addBoolean(args, settings.Mixed, addSettings{prefix: "-mixed="})
 	args = addBoolean(args, settings.OutOfOrder, addSettings{prefix: "-outOfOrder="})
 	args = addString(args, settings.ReportFilename, addSettings{prefix: "-reportFilename="})

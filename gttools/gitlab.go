@@ -1,7 +1,7 @@
 package gttools
 
 import (
-	"github.com/roemer/gotaskr/goext"
+	"github.com/roemer/goext"
 )
 
 // GitLabTool provides access to the helper methods for GitLab.
@@ -37,7 +37,7 @@ type GitLabCodeQualityLines struct {
 
 // IsRunningOnGitLab returns a flag, if we are currently running on GitLab.
 func (tool *GitLabTool) IsRunningOnGitLab() bool {
-	return goext.EnvExists("GITLAB_CI")
+	return goext.Env.Exists("GITLAB_CI")
 }
 
 // ConvertEsLintReportToGitLabReport converts the given EsLintReport to a GitLabReport.

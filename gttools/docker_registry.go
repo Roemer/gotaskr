@@ -1,14 +1,12 @@
 package gttools
 
 import (
-	"os/exec"
-
-	"github.com/roemer/gotaskr/execr"
-	"github.com/roemer/gotaskr/goext"
+	"github.com/roemer/goext"
 )
 
 // DockerRegistryTool provides access to the helper methods for Docker Registries.
 type DockerRegistryTool struct {
+	ToolBase
 }
 
 type DockerLoginSettings struct {
@@ -25,10 +23,9 @@ func (tool *DockerRegistryTool) Login(settings *DockerLoginSettings) error {
 	args = append(args, "--username", settings.Username)
 	args = append(args, "--password", settings.Password)
 	args = append(args, settings.CustomArguments...)
-	args = goext.AppendIf(args, settings.Registry != "", settings.Registry)
+	args = goext.SliceAppendIf(args, settings.Registry != "", settings.Registry)
 
-	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("docker", args, settings.ToolSettingsBase)
 }
 
 type DockerLogoutSettings struct {
@@ -41,8 +38,7 @@ func (tool *DockerRegistryTool) Logout(settings *DockerLogoutSettings) error {
 		"logout",
 	}
 	args = append(args, settings.CustomArguments...)
-	args = goext.AppendIf(args, settings.Registry != "", settings.Registry)
+	args = goext.SliceAppendIf(args, settings.Registry != "", settings.Registry)
 
-	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("docker", args, settings.ToolSettingsBase)
 }

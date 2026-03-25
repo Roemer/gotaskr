@@ -6,8 +6,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/roemer/gotaskr/execr"
-	"github.com/roemer/gotaskr/goext"
+	"github.com/roemer/goext"
+	"github.com/roemer/gotaskr/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +16,7 @@ func TestNoErrorTask(t *testing.T) {
 
 	// Prepare
 	clear()
-	task := Task("NoErrorTask", goext.Noop)
+	task := Task("NoErrorTask", utils.Noop)
 	argumentsMap = map[string]string{"target": task.name}
 
 	// Execute
@@ -376,7 +376,7 @@ func TestLifeTimeTaskSetupAndTaskTeardownError(t *testing.T) {
 ////////////////////
 
 func getExitError(errorCode int) error {
-	return execr.RunO(getBashPath(), execr.WithArgs("-c", fmt.Sprintf("exit %d", errorCode)))
+	return goext.CmdRunners.Default.Run(getBashPath(), "-c", fmt.Sprintf("exit %d", errorCode))
 }
 
 func getBashPath() string {

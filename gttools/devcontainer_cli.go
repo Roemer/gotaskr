@@ -1,14 +1,8 @@
 package gttools
 
-import (
-	"os/exec"
-
-	"github.com/roemer/gotaskr/execr"
-	"github.com/roemer/gotaskr/goext"
-)
-
 // This tool allows interacting with the Dev Container CLI.
 type DevContainerCliTool struct {
+	ToolBase
 }
 
 func CreateDevContainerCliTool() *DevContainerCliTool {
@@ -79,9 +73,7 @@ func (tool *DevContainerCliTool) Build(settings *DevContainerCliBuildSettings) e
 	args = addString(args, settings.AdditionalFeatures, addSettings{prependElements: []string{"--additional-features"}})
 
 	args = append(args, settings.CustomArguments...)
-	cmd := exec.Command("devcontainer", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("devcontainer", args, settings.ToolSettingsBase)
 }
 
 ////////// Up
@@ -214,9 +206,7 @@ func (tool *DevContainerCliTool) Run(settings *DevContainerCliUpSettings) error 
 	args = addBoolean(args, settings.IncludeMergedConfiguration, addSettings{prependElements: []string{"--include-merged-configuration"}})
 
 	args = append(args, settings.CustomArguments...)
-	cmd := exec.Command("devcontainer", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("devcontainer", args, settings.ToolSettingsBase)
 }
 
 ////////// Exec
@@ -284,9 +274,7 @@ func (tool *DevContainerCliTool) Exec(command string, settings *DevContainerCliE
 	args = addStringList(args, settings.RemoteEnvs, addSettings{prependElements: []string{"remote-env"}, handleEachListItemSeparately: true})
 
 	args = append(args, settings.CustomArguments...)
-	cmd := exec.Command("devcontainer", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("devcontainer", args, settings.ToolSettingsBase)
 }
 
 ////////// Features Test
@@ -342,9 +330,7 @@ func (tool *DevContainerCliTool) FeaturesTest(settings *DevContainerCliFeaturesT
 	args = addBoolean(args, settings.Quiet, addSettings{prependElements: []string{"--quiet"}})
 
 	args = append(args, settings.CustomArguments...)
-	cmd := exec.Command("devcontainer", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("devcontainer", args, settings.ToolSettingsBase)
 }
 
 ////////// Features Package
@@ -373,9 +359,7 @@ func (tool *DevContainerCliTool) FeaturesPackage(settings *DevContainerCliFeatur
 	args = addString(args, string(settings.LogLevel), addSettings{prependElements: []string{"--log-level"}})
 
 	args = append(args, settings.CustomArguments...)
-	cmd := exec.Command("devcontainer", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("devcontainer", args, settings.ToolSettingsBase)
 }
 
 ////////// Features Publish
@@ -404,9 +388,7 @@ func (tool *DevContainerCliTool) FeaturesPublish(settings *DevContainerCliFeatur
 	args = addString(args, string(settings.LogLevel), addSettings{prependElements: []string{"--log-level"}})
 
 	args = append(args, settings.CustomArguments...)
-	cmd := exec.Command("devcontainer", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("devcontainer", args, settings.ToolSettingsBase)
 }
 
 ////////// Types
