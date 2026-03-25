@@ -3,16 +3,15 @@ package gttools
 import (
 	"bufio"
 	"fmt"
-	"os/exec"
 	"slices"
 	"strings"
 
-	"github.com/roemer/gotaskr/execr"
-	"github.com/roemer/gotaskr/goext"
+	"github.com/roemer/goext"
 )
 
 // NxTool provides access to the helper methods for Nx.
 type NxTool struct {
+	ToolBase
 }
 
 func CreateNxTool() *NxTool {
@@ -67,23 +66,23 @@ type NxAffectedSettings struct {
 // Affected allows running target(s) for affected projects.
 func (tool *NxTool) Affected(runType NxRunType, settings NxAffectedSettings) error {
 	args := []string{}
-	args = goext.AppendIf(args, len(settings.Base) > 0, "--base="+settings.Base)
-	args = goext.AppendIf(args, settings.Batch, "--batch")
-	args = goext.AppendIf(args, len(settings.Configuration) > 0, "--configuration="+settings.Configuration)
-	args = goext.AppendIf(args, len(settings.Exclude) > 0, "--exclude="+strings.Join(settings.Exclude, ","))
-	args = goext.AppendIf(args, len(settings.Files) > 0, "--files="+strings.Join(settings.Files, ","))
-	args = goext.AppendIf(args, len(settings.Head) > 0, "--head="+settings.Head)
-	args = goext.AppendIf(args, settings.NxBail, "--nxBail")
-	args = goext.AppendIf(args, settings.NxIgnoreCycles, "--nxIgnoreCycles")
-	args = goext.AppendIf(args, len(settings.OutputStyle) > 0, "--output-style="+settings.OutputStyle.String())
-	args = goext.AppendIf(args, len(settings.Parallel) > 0, "--parallel="+settings.Parallel)
-	args = goext.AppendIf(args, len(settings.Runner) > 0, "--runner="+settings.Runner)
-	args = goext.AppendIf(args, settings.SkipNxCache, "--skipNxCache")
-	args = goext.AppendIf(args, len(settings.Targets) > 0, "--targets="+strings.Join(settings.Targets, ","))
-	args = goext.AppendIf(args, settings.Uncommitted, "--uncommitted")
-	args = goext.AppendIf(args, settings.Untracked, "--untracked")
-	args = goext.AppendIf(args, settings.Verbose, "--verbose")
-	return tool.RunCommand(runType, &settings.ToolSettingsBase, "affected", args...)
+	args = goext.SliceAppendIf(args, len(settings.Base) > 0, "--base="+settings.Base)
+	args = goext.SliceAppendIf(args, settings.Batch, "--batch")
+	args = goext.SliceAppendIf(args, len(settings.Configuration) > 0, "--configuration="+settings.Configuration)
+	args = goext.SliceAppendIf(args, len(settings.Exclude) > 0, "--exclude="+strings.Join(settings.Exclude, ","))
+	args = goext.SliceAppendIf(args, len(settings.Files) > 0, "--files="+strings.Join(settings.Files, ","))
+	args = goext.SliceAppendIf(args, len(settings.Head) > 0, "--head="+settings.Head)
+	args = goext.SliceAppendIf(args, settings.NxBail, "--nxBail")
+	args = goext.SliceAppendIf(args, settings.NxIgnoreCycles, "--nxIgnoreCycles")
+	args = goext.SliceAppendIf(args, len(settings.OutputStyle) > 0, "--output-style="+settings.OutputStyle.String())
+	args = goext.SliceAppendIf(args, len(settings.Parallel) > 0, "--parallel="+settings.Parallel)
+	args = goext.SliceAppendIf(args, len(settings.Runner) > 0, "--runner="+settings.Runner)
+	args = goext.SliceAppendIf(args, settings.SkipNxCache, "--skipNxCache")
+	args = goext.SliceAppendIf(args, len(settings.Targets) > 0, "--targets="+strings.Join(settings.Targets, ","))
+	args = goext.SliceAppendIf(args, settings.Uncommitted, "--uncommitted")
+	args = goext.SliceAppendIf(args, settings.Untracked, "--untracked")
+	args = goext.SliceAppendIf(args, settings.Verbose, "--verbose")
+	return tool.RunCommand(runType, settings.ToolSettingsBase, "affected", args...)
 }
 
 // Settings for run: https://nx.dev/nx-api/nx/documents/run
@@ -104,8 +103,8 @@ func (tool *NxTool) Run(runType NxRunType, settings NxRunSettings) error {
 	} else if len(settings.Target) > 0 {
 		args = append(args, settings.Target)
 	}
-	args = goext.AppendIf(args, len(settings.Configuration) > 0, "--configuration="+settings.Configuration)
-	return tool.RunCommand(runType, &settings.ToolSettingsBase, "run", args...)
+	args = goext.SliceAppendIf(args, len(settings.Configuration) > 0, "--configuration="+settings.Configuration)
+	return tool.RunCommand(runType, settings.ToolSettingsBase, "run", args...)
 }
 
 // Settings for run-many: https://nx.dev/nx-api/nx/documents/run-many
@@ -128,19 +127,19 @@ type NxRunManySettings struct {
 // RunMany runs target(s) for multiple listed projects.
 func (tool *NxTool) RunMany(runType NxRunType, settings NxRunManySettings) error {
 	args := []string{}
-	args = goext.AppendIf(args, settings.Batch, "--batch")
-	args = goext.AppendIf(args, len(settings.Configuration) > 0, "--configuration="+settings.Configuration)
-	args = goext.AppendIf(args, len(settings.Exclude) > 0, "--exclude="+strings.Join(settings.Exclude, ","))
-	args = goext.AppendIf(args, settings.NxBail, "--nxBail")
-	args = goext.AppendIf(args, settings.NxIgnoreCycles, "--nxIgnoreCycles")
-	args = goext.AppendIf(args, len(settings.OutputStyle) > 0, "--output-style="+settings.OutputStyle.String())
-	args = goext.AppendIf(args, len(settings.Parallel) > 0, "--parallel="+settings.Parallel)
-	args = goext.AppendIf(args, len(settings.Projects) > 0, "--projects="+strings.Join(settings.Projects, ","))
-	args = goext.AppendIf(args, len(settings.Runner) > 0, "--runner="+settings.Runner)
-	args = goext.AppendIf(args, settings.SkipNxCache, "--skipNxCache")
-	args = goext.AppendIf(args, len(settings.Targets) > 0, "--targets="+strings.Join(settings.Targets, ","))
-	args = goext.AppendIf(args, settings.Verbose, "--verbose")
-	return tool.RunCommand(runType, &settings.ToolSettingsBase, "run-many", args...)
+	args = goext.SliceAppendIf(args, settings.Batch, "--batch")
+	args = goext.SliceAppendIf(args, len(settings.Configuration) > 0, "--configuration="+settings.Configuration)
+	args = goext.SliceAppendIf(args, len(settings.Exclude) > 0, "--exclude="+strings.Join(settings.Exclude, ","))
+	args = goext.SliceAppendIf(args, settings.NxBail, "--nxBail")
+	args = goext.SliceAppendIf(args, settings.NxIgnoreCycles, "--nxIgnoreCycles")
+	args = goext.SliceAppendIf(args, len(settings.OutputStyle) > 0, "--output-style="+settings.OutputStyle.String())
+	args = goext.SliceAppendIf(args, len(settings.Parallel) > 0, "--parallel="+settings.Parallel)
+	args = goext.SliceAppendIf(args, len(settings.Projects) > 0, "--projects="+strings.Join(settings.Projects, ","))
+	args = goext.SliceAppendIf(args, len(settings.Runner) > 0, "--runner="+settings.Runner)
+	args = goext.SliceAppendIf(args, settings.SkipNxCache, "--skipNxCache")
+	args = goext.SliceAppendIf(args, len(settings.Targets) > 0, "--targets="+strings.Join(settings.Targets, ","))
+	args = goext.SliceAppendIf(args, settings.Verbose, "--verbose")
+	return tool.RunCommand(runType, settings.ToolSettingsBase, "run-many", args...)
 }
 
 // Settings for show project: https://nx.dev/nx-api/nx/documents/show#project
@@ -152,7 +151,7 @@ type NxShowProjectSettings struct {
 // ShowProject shows the projects configuration and returns it as a string.
 func (tool *NxTool) ShowProject(runType NxRunType, settings NxShowProjectSettings) (string, error) {
 	args := []string{"project", settings.ProjectName}
-	stdout, stderr, err := tool.RunCommandGetOutput(runType, &settings.ToolSettingsBase, "show", args...)
+	stdout, stderr, err := tool.RunCommandGetOutput(runType, settings.ToolSettingsBase, "show", args...)
 	if err != nil {
 		return stdout, fmt.Errorf("nx show project failed: %s", stdout+" "+stderr)
 	}
@@ -177,18 +176,18 @@ type NxShowProjectsSettings struct {
 // ShowProjects returns projects according to the given criteria.
 func (tool *NxTool) ShowProjects(runType NxRunType, settings NxShowProjectsSettings) ([]string, error) {
 	args := []string{"projects"}
-	args = goext.AppendIf(args, settings.Affected, "--affected")
-	args = goext.AppendIf(args, len(settings.Base) > 0, "--base="+settings.Base)
-	args = goext.AppendIf(args, len(settings.Exclude) > 0, "--exclude="+strings.Join(settings.Exclude, ","))
-	args = goext.AppendIf(args, len(settings.Files) > 0, "--files="+strings.Join(settings.Files, ","))
-	args = goext.AppendIf(args, len(settings.Head) > 0, "--head="+settings.Head)
-	args = goext.AppendIf(args, len(settings.Projects) > 0, "--projects="+strings.Join(settings.Projects, ","))
-	args = goext.AppendIf(args, len(settings.Type) > 0, "--type="+settings.Type)
-	args = goext.AppendIf(args, settings.Uncommitted, "--uncommitted")
-	args = goext.AppendIf(args, settings.Untracked, "--untracked")
-	args = goext.AppendIf(args, len(settings.WithTarget) > 0, "--withTarget="+settings.WithTarget)
+	args = goext.SliceAppendIf(args, settings.Affected, "--affected")
+	args = goext.SliceAppendIf(args, len(settings.Base) > 0, "--base="+settings.Base)
+	args = goext.SliceAppendIf(args, len(settings.Exclude) > 0, "--exclude="+strings.Join(settings.Exclude, ","))
+	args = goext.SliceAppendIf(args, len(settings.Files) > 0, "--files="+strings.Join(settings.Files, ","))
+	args = goext.SliceAppendIf(args, len(settings.Head) > 0, "--head="+settings.Head)
+	args = goext.SliceAppendIf(args, len(settings.Projects) > 0, "--projects="+strings.Join(settings.Projects, ","))
+	args = goext.SliceAppendIf(args, len(settings.Type) > 0, "--type="+settings.Type)
+	args = goext.SliceAppendIf(args, settings.Uncommitted, "--uncommitted")
+	args = goext.SliceAppendIf(args, settings.Untracked, "--untracked")
+	args = goext.SliceAppendIf(args, len(settings.WithTarget) > 0, "--withTarget="+settings.WithTarget)
 
-	stdout, stderr, err := tool.RunCommandGetOutput(runType, &settings.ToolSettingsBase, "show", args...)
+	stdout, stderr, err := tool.RunCommandGetOutput(runType, settings.ToolSettingsBase, "show", args...)
 	if err != nil {
 		return nil, fmt.Errorf("nx show projects failed: %s", stdout+" "+stderr)
 	}
@@ -204,24 +203,20 @@ func (tool *NxTool) ShowProjects(runType NxRunType, settings NxShowProjectsSetti
 }
 
 // RunCommand is a generic runner for any Nx command.
-func (tool *NxTool) RunCommand(runType NxRunType, settings *ToolSettingsBase, command string, args ...string) error {
-	cmd := tool.prepareCommand(runType, settings, command, args...)
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+func (tool *NxTool) RunCommand(runType NxRunType, settings ToolSettingsBase, command string, args ...string) error {
+	bin, args := tool.prepareBinAndArgs(runType, settings, command, args...)
+	return tool.run(bin, args, settings)
 }
 
 // RunCommandGetOutput is a generic runner for any Nx command which also returns the stdout and stderr.
-func (tool *NxTool) RunCommandGetOutput(runType NxRunType, settings *ToolSettingsBase, command string, args ...string) (string, string, error) {
-	cmd := tool.prepareCommand(runType, settings, command, args...)
-	return execr.RunCommandOGetOutput(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+func (tool *NxTool) RunCommandGetOutput(runType NxRunType, settings ToolSettingsBase, command string, args ...string) (string, string, error) {
+	bin, args := tool.prepareBinAndArgs(runType, settings, command, args...)
+	return tool.runGetOutput(bin, args, settings)
 }
 
-func (tool *NxTool) prepareCommand(runType NxRunType, settings *ToolSettingsBase, command string, args ...string) *exec.Cmd {
-	if settings == nil {
-		settings = &ToolSettingsBase{}
-	}
-
+func (tool *NxTool) prepareBinAndArgs(runType NxRunType, settings ToolSettingsBase, command string, args ...string) (string, []string) {
 	// Add the command
-	args = goext.Prepend(args, command)
+	args = goext.SlicePrepend(args, command)
 
 	// Choose the runner type
 	var bin string
@@ -231,19 +226,17 @@ func (tool *NxTool) prepareCommand(runType NxRunType, settings *ToolSettingsBase
 		bin = "nx"
 	case NxRunTypeNpx:
 		bin = "npx"
-		args = goext.Prepend(args, "nx")
+		args = goext.SlicePrepend(args, "nx")
 	case NxRunTypeYarn:
 		bin = "yarn"
-		args = goext.Prepend(args, "nx")
+		args = goext.SlicePrepend(args, "nx")
 	case NxRunTypePnpx:
 		bin = "pnpx"
-		args = goext.Prepend(args, "nx")
+		args = goext.SlicePrepend(args, "nx")
 	}
 
+	// Add custom arguments
 	args = append(args, settings.CustomArguments...)
 
-	// Add the arguments and run the command
-	cmd := exec.Command(bin, args...)
-	cmd.Dir = settings.WorkingDirectory
-	return cmd
+	return bin, args
 }

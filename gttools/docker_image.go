@@ -2,16 +2,15 @@ package gttools
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 
-	"github.com/roemer/gotaskr/execr"
-	"github.com/roemer/gotaskr/goext"
+	"github.com/roemer/goext"
 )
 
 // DockerImageTool provides access to the helper methods for Docker Images.
 type DockerImageTool struct {
+	ToolBase
 }
 
 type DockerBuildSettings struct {
@@ -25,21 +24,21 @@ type DockerBuildSettings struct {
 
 func (settings *DockerBuildSettings) AddTags(tags ...string) *DockerBuildSettings {
 	for _, entry := range tags {
-		settings.Tags = goext.AppendIfMissing(settings.Tags, entry)
+		settings.Tags = goext.SliceAppendIfMissing(settings.Tags, entry)
 	}
 	return settings
 }
 
 func (settings *DockerBuildSettings) AddLabels(labels ...string) *DockerBuildSettings {
 	for _, entry := range labels {
-		settings.Labels = goext.AppendIfMissing(settings.Labels, entry)
+		settings.Labels = goext.SliceAppendIfMissing(settings.Labels, entry)
 	}
 	return settings
 }
 
 func (settings *DockerBuildSettings) AddBuildArgs(buildArgs ...string) *DockerBuildSettings {
 	for _, entry := range buildArgs {
-		settings.BuildArgs = goext.AppendIfMissing(settings.BuildArgs, entry)
+		settings.BuildArgs = goext.SliceAppendIfMissing(settings.BuildArgs, entry)
 	}
 	return settings
 }
@@ -48,7 +47,7 @@ func (tool *DockerImageTool) Build(settings *DockerBuildSettings) error {
 	args := []string{
 		"build",
 	}
-	args = goext.AppendIf(args, settings.Dockerfile != "", "--file", settings.Dockerfile)
+	args = goext.SliceAppendIf(args, settings.Dockerfile != "", "--file", settings.Dockerfile)
 	for _, entry := range settings.Tags {
 		args = append(args, "--tag", entry)
 	}
@@ -61,10 +60,9 @@ func (tool *DockerImageTool) Build(settings *DockerBuildSettings) error {
 	args = append(args, settings.CustomArguments...)
 	args = append(args, goext.Ternary(settings.ContextPath == "", ".", settings.ContextPath))
 
-	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	cmd.Stdin = os.Stdin
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	// Was this really needed?
+	//cmd.Stdin = os.Stdin
+	return tool.run("docker", args, settings.ToolSettingsBase)
 }
 
 type DockerSaveSettings struct {
@@ -77,7 +75,7 @@ func (tool *DockerImageTool) Save(settings *DockerSaveSettings) error {
 	args := []string{
 		"save",
 	}
-	args = goext.AppendIf(args, settings.OutputFile != "", "--output", settings.OutputFile)
+	args = goext.SliceAppendIf(args, settings.OutputFile != "", "--output", settings.OutputFile)
 	args = append(args, settings.CustomArguments...)
 	args = append(args, settings.ImageReference)
 
@@ -88,9 +86,7 @@ func (tool *DockerImageTool) Save(settings *DockerSaveSettings) error {
 		}
 	}
 
-	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("docker", args, settings.ToolSettingsBase)
 }
 
 type DockerLoadSettings struct {
@@ -102,12 +98,10 @@ func (tool *DockerImageTool) Load(settings *DockerLoadSettings) ([]string, error
 	args := []string{
 		"load",
 	}
-	args = goext.AppendIf(args, settings.InputFile != "", "--input", settings.InputFile)
+	args = goext.SliceAppendIf(args, settings.InputFile != "", "--input", settings.InputFile)
 	args = append(args, settings.CustomArguments...)
 
-	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	stdout, _, err := execr.RunCommandOGetOutput(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	stdout, _, err := tool.runGetOutput("docker", args, settings.ToolSettingsBase)
 
 	// Parse out all loaded images
 	loadedImages := []string{}
@@ -131,11 +125,9 @@ func (tool *DockerImageTool) Push(settings *DockerPushSettings) error {
 	args := []string{
 		"push",
 	}
-	args = goext.AppendIf(args, settings.AllTags, "--all-tags")
+	args = goext.SliceAppendIf(args, settings.AllTags, "--all-tags")
 	args = append(args, settings.CustomArguments...)
 	args = append(args, settings.ImageReference)
 
-	cmd := exec.Command("docker", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("docker", args, settings.ToolSettingsBase)
 }

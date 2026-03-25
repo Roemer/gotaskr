@@ -1,14 +1,12 @@
 package gttools
 
 import (
-	"os/exec"
-
-	"github.com/roemer/gotaskr/execr"
-	"github.com/roemer/gotaskr/goext"
+	"github.com/roemer/goext"
 )
 
 // NpmTool provides access to the helper methods for npm.
 type NpmTool struct {
+	ToolBase
 }
 
 func CreateNpmTool() *NpmTool {
@@ -32,9 +30,7 @@ func (tool *NpmTool) Init(settings *NpmInitSettings) error {
 	}
 	args = append(args, settings.CustomArguments...)
 
-	cmd := exec.Command("npm", args...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("npm", args, settings.ToolSettingsBase)
 }
 
 // NpmRunSettings are the settings used for Run.
@@ -53,9 +49,7 @@ func (tool *NpmTool) Run(settings *NpmRunSettings) error {
 	}
 	args = append(args, settings.CustomArguments...)
 
-	cmd := exec.Command("npm", args...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("npm", args, settings.ToolSettingsBase)
 }
 
 func (tool *NpmTool) RunScript(outputToConsole bool, script string) error {
@@ -82,14 +76,12 @@ func (tool *NpmTool) CleanInstall(settings *NpmCleanInstallSettings) error {
 	args := []string{
 		"ci",
 	}
-	args = goext.AppendIf(args, settings.NoAudit, "--no-audit")
-	args = goext.AppendIf(args, settings.PreferOffline, "--prefer-offline")
+	args = goext.SliceAppendIf(args, settings.NoAudit, "--no-audit")
+	args = goext.SliceAppendIf(args, settings.PreferOffline, "--prefer-offline")
 	args = tool.addCache(args, settings.CacheDir)
 	args = append(args, settings.CustomArguments...)
 
-	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("npm", args, settings.ToolSettingsBase)
 }
 
 // NpmInstallSettings are the settings used for Install.
@@ -113,18 +105,16 @@ func (tool *NpmTool) Install(settings *NpmInstallSettings) error {
 		"install",
 		settings.PackageSpec,
 	}
-	args = goext.AppendIf(args, settings.SaveProd, "--save-prod")
-	args = goext.AppendIf(args, settings.SaveDev, "--save-dev")
-	args = goext.AppendIf(args, settings.SaveOptional, "--save-optional")
-	args = goext.AppendIf(args, settings.SaveExact, "--save-exact")
-	args = goext.AppendIf(args, settings.NoAudit, "--no-audit")
-	args = goext.AppendIf(args, settings.PreferOffline, "--prefer-offline")
+	args = goext.SliceAppendIf(args, settings.SaveProd, "--save-prod")
+	args = goext.SliceAppendIf(args, settings.SaveDev, "--save-dev")
+	args = goext.SliceAppendIf(args, settings.SaveOptional, "--save-optional")
+	args = goext.SliceAppendIf(args, settings.SaveExact, "--save-exact")
+	args = goext.SliceAppendIf(args, settings.NoAudit, "--no-audit")
+	args = goext.SliceAppendIf(args, settings.PreferOffline, "--prefer-offline")
 	args = tool.addCache(args, settings.CacheDir)
 	args = append(args, settings.CustomArguments...)
 
-	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("npm", args, settings.ToolSettingsBase)
 }
 
 // NpmBinSettings are the settings used for Bin.
@@ -140,12 +130,10 @@ func (tool *NpmTool) Bin(settings *NpmBinSettings) (string, error) {
 	args := []string{
 		"bin",
 	}
-	args = goext.AppendIf(args, settings.Global, "--global")
+	args = goext.SliceAppendIf(args, settings.Global, "--global")
 	args = append(args, settings.CustomArguments...)
 
-	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	stdout, _, err := execr.RunCommandOGetOutput(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	stdout, _, err := tool.runGetOutput("npm", args, settings.ToolSettingsBase)
 	return stdout, err
 }
 
@@ -164,13 +152,10 @@ func (tool *NpmTool) Publish(settings *NpmPublishSettings) error {
 		"publish",
 		settings.PackageSpec,
 	}
-	args = goext.AppendIf(args, len(settings.Tag) > 0, "--tag", settings.Tag)
+	args = goext.SliceAppendIf(args, len(settings.Tag) > 0, "--tag", settings.Tag)
 	args = append(args, settings.CustomArguments...)
 
-	cmd := exec.Command("npm", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("npm", args, settings.ToolSettingsBase)
 }
 
 ////////////////////////////////////////////////////////////
@@ -178,5 +163,5 @@ func (tool *NpmTool) Publish(settings *NpmPublishSettings) error {
 ////////////////////////////////////////////////////////////
 
 func (tool *NpmTool) addCache(args []string, cacheDir string) []string {
-	return goext.AppendIf(args, len(cacheDir) > 0, "--cache", cacheDir)
+	return goext.SliceAppendIf(args, len(cacheDir) > 0, "--cache", cacheDir)
 }

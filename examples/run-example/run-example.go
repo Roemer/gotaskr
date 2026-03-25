@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
+	"github.com/roemer/goext"
 	"github.com/roemer/gotaskr"
-	"github.com/roemer/gotaskr/goext"
 	"github.com/roemer/gotaskr/log"
 )
 

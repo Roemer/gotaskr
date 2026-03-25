@@ -1,10 +1,7 @@
 package gttools
 
 import (
-	"os/exec"
-
-	"github.com/roemer/gotaskr/execr"
-	"github.com/roemer/gotaskr/goext"
+	"github.com/roemer/goext"
 )
 
 // DotNetVerbosity can be used to set the verbosity of the log output.
@@ -36,6 +33,7 @@ func (s DotNetVerbosity) String() string {
 }
 
 type DotNetTool struct {
+	ToolBase
 }
 
 func CreateDotNetTool() *DotNetTool {
@@ -71,22 +69,19 @@ func (tool *DotNetTool) DotNetBuild(project string, settings *DotNetBuildSetting
 	args := []string{
 		"build",
 	}
-	args = goext.AppendIf(args, project != "", project)
-	args = goext.AppendIf(args, settings.Configuration != "", "--configuration", settings.Configuration)
-	args = goext.AppendIf(args, settings.OutputDirectory != "", "--output", settings.OutputDirectory)
-	args = goext.AppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
-	args = goext.AppendIf(args, settings.Framework != "", "--framework", settings.Framework)
-	args = goext.AppendIf(args, settings.NoIncremental, "--no-incremental")
-	args = goext.AppendIf(args, settings.NoDependencies, "--no-dependencies")
-	args = goext.AppendIf(args, settings.NoRestore, "--no-restore")
-	args = goext.AppendIf(args, settings.NoLogo, "--nologo")
+	args = goext.SliceAppendIf(args, project != "", project)
+	args = goext.SliceAppendIf(args, settings.Configuration != "", "--configuration", settings.Configuration)
+	args = goext.SliceAppendIf(args, settings.OutputDirectory != "", "--output", settings.OutputDirectory)
+	args = goext.SliceAppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
+	args = goext.SliceAppendIf(args, settings.Framework != "", "--framework", settings.Framework)
+	args = goext.SliceAppendIf(args, settings.NoIncremental, "--no-incremental")
+	args = goext.SliceAppendIf(args, settings.NoDependencies, "--no-dependencies")
+	args = goext.SliceAppendIf(args, settings.NoRestore, "--no-restore")
+	args = goext.SliceAppendIf(args, settings.NoLogo, "--nologo")
 	args = append(args, settings.CustomArguments...)
 	args = tool.addDotNetSettings(args, settings.DotNetSettings)
 
-	dotNetExe := "dotnet"
-	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("dotnet", args, settings.ToolSettingsBase)
 }
 
 ////////////////////////////////////////////////////////////
@@ -110,19 +105,16 @@ func (tool *DotNetTool) DotNetClean(project string, settings *DotNetCleanSetting
 	args := []string{
 		"clean",
 	}
-	args = goext.AppendIf(args, project != "", project)
-	args = goext.AppendIf(args, settings.Configuration != "", "--configuration", settings.Configuration)
-	args = goext.AppendIf(args, settings.OutputDirectory != "", "--output", settings.OutputDirectory)
-	args = goext.AppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
-	args = goext.AppendIf(args, settings.Framework != "", "--framework", settings.Framework)
-	args = goext.AppendIf(args, settings.NoLogo, "--nologo")
+	args = goext.SliceAppendIf(args, project != "", project)
+	args = goext.SliceAppendIf(args, settings.Configuration != "", "--configuration", settings.Configuration)
+	args = goext.SliceAppendIf(args, settings.OutputDirectory != "", "--output", settings.OutputDirectory)
+	args = goext.SliceAppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
+	args = goext.SliceAppendIf(args, settings.Framework != "", "--framework", settings.Framework)
+	args = goext.SliceAppendIf(args, settings.NoLogo, "--nologo")
 	args = append(args, settings.CustomArguments...)
 	args = tool.addDotNetSettings(args, settings.DotNetSettings)
 
-	dotNetExe := "dotnet"
-	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("dotnet", args, settings.ToolSettingsBase)
 }
 
 ////////////////////////////////////////////////////////////
@@ -150,23 +142,20 @@ func (tool *DotNetTool) DotNetPack(project string, settings *DotNetPackSettings)
 	args := []string{
 		"pack",
 	}
-	args = goext.AppendIf(args, project != "", project)
-	args = goext.AppendIf(args, settings.Configuration != "", "--configuration", settings.Configuration)
-	args = goext.AppendIf(args, settings.OutputDirectory != "", "--output", settings.OutputDirectory)
-	args = goext.AppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
-	args = goext.AppendIf(args, settings.NoBuild, "--no-build")
-	args = goext.AppendIf(args, settings.NoDependencies, "--no-dependencies")
-	args = goext.AppendIf(args, settings.NoRestore, "--no-restore")
-	args = goext.AppendIf(args, settings.NoLogo, "--nologo")
-	args = goext.AppendIf(args, settings.IncludeSymbols, "--include-symbols")
-	args = goext.AppendIf(args, settings.IncludeSource, "--include-source")
+	args = goext.SliceAppendIf(args, project != "", project)
+	args = goext.SliceAppendIf(args, settings.Configuration != "", "--configuration", settings.Configuration)
+	args = goext.SliceAppendIf(args, settings.OutputDirectory != "", "--output", settings.OutputDirectory)
+	args = goext.SliceAppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
+	args = goext.SliceAppendIf(args, settings.NoBuild, "--no-build")
+	args = goext.SliceAppendIf(args, settings.NoDependencies, "--no-dependencies")
+	args = goext.SliceAppendIf(args, settings.NoRestore, "--no-restore")
+	args = goext.SliceAppendIf(args, settings.NoLogo, "--nologo")
+	args = goext.SliceAppendIf(args, settings.IncludeSymbols, "--include-symbols")
+	args = goext.SliceAppendIf(args, settings.IncludeSource, "--include-source")
 	args = append(args, settings.CustomArguments...)
 	args = tool.addDotNetSettings(args, settings.DotNetSettings)
 
-	dotNetExe := "dotnet"
-	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("dotnet", args, settings.ToolSettingsBase)
 }
 
 ////////////////////////////////////////////////////////////
@@ -194,23 +183,20 @@ func (tool *DotNetTool) DotNetPublish(path string, settings *DotNetPublishSettin
 	args := []string{
 		"publish",
 	}
-	args = goext.AppendIf(args, path != "", path)
-	args = goext.AppendIf(args, settings.Configuration != "", "--configuration", settings.Configuration)
-	args = goext.AppendIf(args, settings.OutputDirectory != "", "--output", settings.OutputDirectory)
-	args = goext.AppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
-	args = goext.AppendIf(args, settings.Framework != "", "--framework", settings.Framework)
-	args = goext.AppendIf(args, settings.NoBuild, "--no-build")
-	args = goext.AppendIf(args, settings.NoDependencies, "--no-dependencies")
-	args = goext.AppendIf(args, settings.NoRestore, "--no-restore")
-	args = goext.AppendIf(args, settings.NoLogo, "--nologo")
-	args = goext.AppendIf(args, settings.Force, "--force")
+	args = goext.SliceAppendIf(args, path != "", path)
+	args = goext.SliceAppendIf(args, settings.Configuration != "", "--configuration", settings.Configuration)
+	args = goext.SliceAppendIf(args, settings.OutputDirectory != "", "--output", settings.OutputDirectory)
+	args = goext.SliceAppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
+	args = goext.SliceAppendIf(args, settings.Framework != "", "--framework", settings.Framework)
+	args = goext.SliceAppendIf(args, settings.NoBuild, "--no-build")
+	args = goext.SliceAppendIf(args, settings.NoDependencies, "--no-dependencies")
+	args = goext.SliceAppendIf(args, settings.NoRestore, "--no-restore")
+	args = goext.SliceAppendIf(args, settings.NoLogo, "--nologo")
+	args = goext.SliceAppendIf(args, settings.Force, "--force")
 	args = append(args, settings.CustomArguments...)
 	args = tool.addDotNetSettings(args, settings.DotNetSettings)
 
-	dotNetExe := "dotnet"
-	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("dotnet", args, settings.ToolSettingsBase)
 }
 
 ////////////////////////////////////////////////////////////
@@ -237,22 +223,19 @@ func (tool *DotNetTool) DotNetRestore(root string, settings *DotNetRestoreSettin
 	args := []string{
 		"restore",
 	}
-	args = goext.AppendIf(args, root != "", root)
-	args = goext.AppendIf(args, settings.PackagesDirectory != "", "--packages", settings.PackagesDirectory)
-	args = goext.AppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
-	args = goext.AppendIf(args, settings.NoCache, "--no-cache")
-	args = goext.AppendIf(args, settings.DisableParallel, "--disable-parallel")
-	args = goext.AppendIf(args, settings.IgnoreFailedSources, "--ignore-failed-sources")
-	args = goext.AppendIf(args, settings.NoDependencies, "--no-dependencies")
-	args = goext.AppendIf(args, settings.Force, "--force")
-	args = goext.AppendIf(args, settings.Interactive, "--interactive")
+	args = goext.SliceAppendIf(args, root != "", root)
+	args = goext.SliceAppendIf(args, settings.PackagesDirectory != "", "--packages", settings.PackagesDirectory)
+	args = goext.SliceAppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
+	args = goext.SliceAppendIf(args, settings.NoCache, "--no-cache")
+	args = goext.SliceAppendIf(args, settings.DisableParallel, "--disable-parallel")
+	args = goext.SliceAppendIf(args, settings.IgnoreFailedSources, "--ignore-failed-sources")
+	args = goext.SliceAppendIf(args, settings.NoDependencies, "--no-dependencies")
+	args = goext.SliceAppendIf(args, settings.Force, "--force")
+	args = goext.SliceAppendIf(args, settings.Interactive, "--interactive")
 	args = append(args, settings.CustomArguments...)
 	args = tool.addDotNetSettings(args, settings.DotNetSettings)
 
-	dotNetExe := "dotnet"
-	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("dotnet", args, settings.ToolSettingsBase)
 }
 
 ////////////////////////////////////////////////////////////
@@ -276,19 +259,16 @@ func (tool *DotNetTool) DotNetRun(project string, settings *DotNetRunSettings) e
 	args := []string{
 		"run",
 	}
-	args = goext.AppendIf(args, project != "", project)
-	args = goext.AppendIf(args, settings.Configuration != "", "--configuration", settings.Configuration)
-	args = goext.AppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
-	args = goext.AppendIf(args, settings.Framework != "", "--framework", settings.Framework)
-	args = goext.AppendIf(args, settings.NoBuild, "--no-build")
-	args = goext.AppendIf(args, settings.NoRestore, "--no-restore")
+	args = goext.SliceAppendIf(args, project != "", project)
+	args = goext.SliceAppendIf(args, settings.Configuration != "", "--configuration", settings.Configuration)
+	args = goext.SliceAppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
+	args = goext.SliceAppendIf(args, settings.Framework != "", "--framework", settings.Framework)
+	args = goext.SliceAppendIf(args, settings.NoBuild, "--no-build")
+	args = goext.SliceAppendIf(args, settings.NoRestore, "--no-restore")
 	args = append(args, settings.CustomArguments...)
 	args = tool.addDotNetSettings(args, settings.DotNetSettings)
 
-	dotNetExe := "dotnet"
-	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("dotnet", args, settings.ToolSettingsBase)
 }
 
 ////////////////////////////////////////////////////////////
@@ -316,23 +296,20 @@ func (tool *DotNetTool) DotNeTest(project string, settings *DotNetTestSettings) 
 	args := []string{
 		"test",
 	}
-	args = goext.AppendIf(args, project != "", project)
-	args = goext.AppendIf(args, settings.Configuration != "", "--configuration", settings.Configuration)
-	args = goext.AppendIf(args, settings.OutputDirectory != "", "--output", settings.OutputDirectory)
-	args = goext.AppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
-	args = goext.AppendIf(args, settings.Framework != "", "--framework", settings.Framework)
-	args = goext.AppendIf(args, settings.Filter != "", "--filter", settings.Filter)
-	args = goext.AppendIf(args, settings.NoBuild, "--no-build")
-	args = goext.AppendIf(args, settings.NoRestore, "--no-restore")
-	args = goext.AppendIf(args, settings.NoLogo, "--nologo")
-	args = goext.AppendIf(args, settings.Blame, "--blame")
+	args = goext.SliceAppendIf(args, project != "", project)
+	args = goext.SliceAppendIf(args, settings.Configuration != "", "--configuration", settings.Configuration)
+	args = goext.SliceAppendIf(args, settings.OutputDirectory != "", "--output", settings.OutputDirectory)
+	args = goext.SliceAppendIf(args, settings.Runtime != "", "--runtime", settings.Runtime)
+	args = goext.SliceAppendIf(args, settings.Framework != "", "--framework", settings.Framework)
+	args = goext.SliceAppendIf(args, settings.Filter != "", "--filter", settings.Filter)
+	args = goext.SliceAppendIf(args, settings.NoBuild, "--no-build")
+	args = goext.SliceAppendIf(args, settings.NoRestore, "--no-restore")
+	args = goext.SliceAppendIf(args, settings.NoLogo, "--nologo")
+	args = goext.SliceAppendIf(args, settings.Blame, "--blame")
 	args = append(args, settings.CustomArguments...)
 	args = tool.addDotNetSettings(args, settings.DotNetSettings)
 
-	dotNetExe := "dotnet"
-	cmd := exec.Command(dotNetExe, goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("dotnet", args, settings.ToolSettingsBase)
 }
 
 ////////////////////////////////////////////////////////////
@@ -340,7 +317,7 @@ func (tool *DotNetTool) DotNeTest(project string, settings *DotNetTestSettings) 
 ////////////////////////////////////////////////////////////
 
 func (tool *DotNetTool) addDotNetSettings(args []string, settings DotNetSettings) []string {
-	args = goext.AppendIf(args, settings.DiagnosticOutput, "--diagnostics")
-	args = goext.AppendIf(args, settings.Verbosity != DotNetVerbosityUndefined, "--verbosity", settings.Verbosity.String())
+	args = goext.SliceAppendIf(args, settings.DiagnosticOutput, "--diagnostics")
+	args = goext.SliceAppendIf(args, settings.Verbosity != DotNetVerbosityUndefined, "--verbosity", settings.Verbosity.String())
 	return args
 }

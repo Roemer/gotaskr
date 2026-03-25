@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/roemer/goext"
 	"github.com/roemer/gotaskr/argparse"
-	"github.com/roemer/gotaskr/goext"
 	"github.com/roemer/gotaskr/gttools"
 	"github.com/roemer/gotaskr/log"
 )
@@ -347,7 +347,7 @@ func (taskObject *TaskObject) DependsOn(taskName ...string) *TaskObject {
 			// Skip itself
 			continue
 		}
-		taskObject.dependencies = goext.AppendIfMissing(taskObject.dependencies, entry)
+		taskObject.dependencies = goext.SliceAppendIfMissing(taskObject.dependencies, entry)
 	}
 	return taskObject
 }
@@ -359,7 +359,7 @@ func (taskObject *TaskObject) DependsOnTask(task ...*TaskObject) *TaskObject {
 			// Skip itself
 			continue
 		}
-		taskObject.dependencies = goext.AppendIfMissing(taskObject.dependencies, entry.name)
+		taskObject.dependencies = goext.SliceAppendIfMissing(taskObject.dependencies, entry.name)
 	}
 	return taskObject
 }
@@ -371,7 +371,7 @@ func (taskObject *TaskObject) DependeeOf(taskName ...string) *TaskObject {
 			// Skip itself
 			continue
 		}
-		taskObject.dependees = goext.AppendIfMissing(taskObject.dependees, entry)
+		taskObject.dependees = goext.SliceAppendIfMissing(taskObject.dependees, entry)
 	}
 	return taskObject
 }
@@ -383,7 +383,7 @@ func (taskObject *TaskObject) DependeeOfTask(task ...*TaskObject) *TaskObject {
 			// Skip itself
 			continue
 		}
-		taskObject.dependees = goext.AppendIfMissing(taskObject.dependees, entry.name)
+		taskObject.dependees = goext.SliceAppendIfMissing(taskObject.dependees, entry.name)
 	}
 	return taskObject
 }
@@ -395,7 +395,7 @@ func (taskObject *TaskObject) Then(taskName ...string) *TaskObject {
 			// Skip itself
 			continue
 		}
-		taskObject.followups = goext.AppendIfMissing(taskObject.followups, entry)
+		taskObject.followups = goext.SliceAppendIfMissing(taskObject.followups, entry)
 	}
 	return taskObject
 }
@@ -407,7 +407,7 @@ func (taskObject *TaskObject) ThenTask(task ...*TaskObject) *TaskObject {
 			// Skip itself
 			continue
 		}
-		taskObject.followups = goext.AppendIfMissing(taskObject.followups, entry.name)
+		taskObject.followups = goext.SliceAppendIfMissing(taskObject.followups, entry.name)
 	}
 	return taskObject
 }
@@ -495,7 +495,7 @@ func printTasks() {
 		fmt.Fprintf(&sb, "- %s", task.name)
 		sb.WriteString(log.Newline)
 		if task.description != "" {
-			lines := goext.SplitByNewLine(task.description)
+			lines := goext.StringSplitByNewLine(task.description)
 			for _, line := range lines {
 				fmt.Fprintf(&sb, "  %s", line)
 				sb.WriteString(log.Newline)

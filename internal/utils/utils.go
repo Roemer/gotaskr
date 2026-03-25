@@ -1,10 +1,38 @@
-package goext
+package utils
 
 import (
 	"fmt"
 	"sort"
 	"strings"
 )
+
+// PanicOnError panics if the given error is set.
+func PanicOnError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+// Noop is a no operation function that can be used for tasks.
+// For example if they are just used for multiple dependencies.
+func Noop() error {
+	return nil
+}
+
+// Pass is a no-op function that can be used to set variables to used.
+// Useful during development but must be removed afterwards!
+func Pass(i ...any) {
+	// No-Op
+}
+
+// Joins any slice with the given separator.
+func StringsJoinAny[T any](elems []T, sep string) string {
+	values := []string{}
+	for _, element := range elems {
+		values = append(values, fmt.Sprintf("%v", element))
+	}
+	return strings.Join(values, sep)
+}
 
 // GetMapKeys gets all the keys of the given map in alpahnummeric sorted order.
 func GetMapKeys[TK comparable, TV any](m map[TK]TV) []TK {

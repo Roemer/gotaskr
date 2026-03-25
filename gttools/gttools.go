@@ -4,7 +4,26 @@ package gttools
 import (
 	"fmt"
 	"strings"
+
+	"github.com/roemer/goext"
 )
+
+type ToolBase struct {
+}
+
+func (tool *ToolBase) run(binPath string, args []string, settings ToolSettingsBase) error {
+	return goext.NewCmdRunner().
+		WithWorkingDirectory(settings.WorkingDirectory).
+		SetConsoleOutput(settings.OutputToConsole).
+		Run(binPath, args...)
+}
+
+func (tool *ToolBase) runGetOutput(binPath string, args []string, settings ToolSettingsBase) (string, string, error) {
+	return goext.NewCmdRunner().
+		WithWorkingDirectory(settings.WorkingDirectory).
+		SetConsoleOutput(settings.OutputToConsole).
+		RunGetOutput(binPath, args...)
+}
 
 // ToolsClient provides typed access to the different tools.
 type ToolsClient struct {

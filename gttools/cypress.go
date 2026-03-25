@@ -1,15 +1,15 @@
 package gttools
 
 import (
-	"os/exec"
 	"strconv"
 	"strings"
 
-	"github.com/roemer/gotaskr/execr"
-	"github.com/roemer/gotaskr/goext"
+	"github.com/roemer/goext"
+	"github.com/roemer/gotaskr/internal/utils"
 )
 
 type CypressTool struct {
+	ToolBase
 }
 
 func CreateCypressTool() *CypressTool {
@@ -82,7 +82,7 @@ func (settings *CypressOpenSettings) AddEnv(key string, value string) *CypressOp
 // AddSpecs adds one or more specs to run to the Cypress settings.
 func (settings *CypressRunSettings) AddSpecs(specs ...string) *CypressRunSettings {
 	for _, entry := range specs {
-		settings.Specs = goext.AppendIfMissing(settings.Specs, entry)
+		settings.Specs = goext.SliceAppendIfMissing(settings.Specs, entry)
 	}
 	return settings
 }
@@ -90,90 +90,84 @@ func (settings *CypressRunSettings) AddSpecs(specs ...string) *CypressRunSetting
 // AddTags adds one or more tags to the Cypress settings.
 func (settings *CypressRunSettings) AddTags(tags ...string) *CypressRunSettings {
 	for _, entry := range tags {
-		settings.Tags = goext.AppendIfMissing(settings.Tags, entry)
+		settings.Tags = goext.SliceAppendIfMissing(settings.Tags, entry)
 	}
 	return settings
 }
 
 // CypressRun allows you to run Cypress with a defined binary. Useful for example when using cy2.
 func (tool *CypressTool) CypressRun(cypressBinPath string, settings *CypressRunSettings) error {
-	return cypressExecute(cypressBinPath, settings.buildCliArguments(), settings.ToolSettingsBase)
+	return tool.cypressExecute(cypressBinPath, settings.buildCliArguments(), settings.ToolSettingsBase)
 }
 
 // CypressRunWithNpx runs Cypress with npx.
 func (tool *CypressTool) CypressRunWithNpx(settings *CypressRunSettings) error {
-	return cypressExecuteWithNpx(settings.buildCliArguments(), settings.ToolSettingsBase)
+	return tool.cypressExecuteWithNpx(settings.buildCliArguments(), settings.ToolSettingsBase)
 }
 
 // CypressRunWithYarn runs Cypress with Yarn.
 func (tool *CypressTool) CypressRunWithYarn(settings *CypressRunSettings) error {
-	return cypressExecuteWithYarn(settings.buildCliArguments(), settings.ToolSettingsBase)
+	return tool.cypressExecuteWithYarn(settings.buildCliArguments(), settings.ToolSettingsBase)
 }
 
 // CypressOpen allows you to open Cypress with a defined binary.
 func (tool *CypressTool) CypressOpen(cypressBinPath string, settings *CypressOpenSettings) error {
-	return cypressExecute(cypressBinPath, settings.buildCliArguments(), settings.ToolSettingsBase)
+	return tool.cypressExecute(cypressBinPath, settings.buildCliArguments(), settings.ToolSettingsBase)
 }
 
 // CypressOpenWithNpx opens Cypress with npx.
 func (tool *CypressTool) CypressOpenWithNpx(settings *CypressOpenSettings) error {
-	return cypressExecuteWithNpx(settings.buildCliArguments(), settings.ToolSettingsBase)
+	return tool.cypressExecuteWithNpx(settings.buildCliArguments(), settings.ToolSettingsBase)
 }
 
 // CypressOpenWithYarn opens Cypress with Yarn.
 func (tool *CypressTool) CypressOpenWithYarn(settings *CypressOpenSettings) error {
-	return cypressExecuteWithYarn(settings.buildCliArguments(), settings.ToolSettingsBase)
+	return tool.cypressExecuteWithYarn(settings.buildCliArguments(), settings.ToolSettingsBase)
 }
 
 ////////////////////////////////////////////////////////////
 // Internal Methods
 ////////////////////////////////////////////////////////////
 
-func cypressExecute(cypressBinPath string, args []string, settings ToolSettingsBase) error {
-	cmd := exec.Command(cypressBinPath, goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+func (tool *CypressTool) cypressExecute(cypressBinPath string, args []string, settings ToolSettingsBase) error {
+	return tool.run(cypressBinPath, args, settings)
 }
 
-func cypressExecuteWithNpx(args []string, settings ToolSettingsBase) error {
+func (tool *CypressTool) cypressExecuteWithNpx(args []string, settings ToolSettingsBase) error {
 	args = append([]string{"cypress"}, args...)
-	cmd := exec.Command("npx", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("npx", args, settings)
 }
 
-func cypressExecuteWithYarn(args []string, settings ToolSettingsBase) error {
+func (tool *CypressTool) cypressExecuteWithYarn(args []string, settings ToolSettingsBase) error {
 	args = append([]string{"cypress"}, args...)
-	cmd := exec.Command("yarn", goext.RemoveEmpty(args)...)
-	cmd.Dir = settings.WorkingDirectory
-	return execr.RunCommandO(cmd, execr.WithConsoleOutput(settings.OutputToConsole))
+	return tool.run("yarn", args, settings)
 }
 
 func (settings *CypressRunSettings) buildCliArguments() []string {
 	args := []string{
 		"run",
 	}
-	args = goext.AppendIf(args, settings.Browser != "", "--browser", settings.Browser)
-	args = goext.AppendIf(args, settings.CiBuildId != "", "--ci-build-id", settings.CiBuildId)
-	args = goext.AppendIf(args, settings.Component, "--component")
-	args = goext.AppendIf(args, settings.Config != "", "--config", settings.Config)
-	args = goext.AppendIf(args, settings.ConfigFile != "", "--config-file", settings.ConfigFile)
-	args = goext.AppendIf(args, settings.E2e, "--e2e")
-	args = goext.AppendIf(args, len(settings.Env) > 0, "--env", goext.ConvertMapToSingleString(settings.Env, "=", ","))
-	args = goext.AppendIf(args, settings.Group != "", "--group", settings.Group)
-	args = goext.AppendIf(args, settings.Headed, "--headed")
-	args = goext.AppendIf(args, settings.Headless, "--headless")
-	args = goext.AppendIf(args, settings.RecordKey != "", "--key", settings.RecordKey)
-	args = goext.AppendIf(args, settings.NoExit, "--no-exit")
-	args = goext.AppendIf(args, settings.Parallel, "--parallel")
-	args = goext.AppendIf(args, settings.Port > 0, "--port", strconv.Itoa(settings.Port))
-	args = goext.AppendIf(args, settings.Project != "", "--project", settings.Project)
-	args = goext.AppendIf(args, settings.Quiet, "--quiet")
-	args = goext.AppendIf(args, settings.Record, "--record")
-	args = goext.AppendIf(args, settings.Reporter != "", "--reporter", settings.Reporter)
-	args = goext.AppendIf(args, settings.ReporterOptions != "", "--reporter-options", settings.ReporterOptions)
-	args = goext.AppendIf(args, len(settings.Specs) > 0, "--spec", strings.Join(settings.Specs, ","))
-	args = goext.AppendIf(args, len(settings.Tags) > 0, "--tag", strings.Join(settings.Tags, ","))
+	args = goext.SliceAppendIf(args, settings.Browser != "", "--browser", settings.Browser)
+	args = goext.SliceAppendIf(args, settings.CiBuildId != "", "--ci-build-id", settings.CiBuildId)
+	args = goext.SliceAppendIf(args, settings.Component, "--component")
+	args = goext.SliceAppendIf(args, settings.Config != "", "--config", settings.Config)
+	args = goext.SliceAppendIf(args, settings.ConfigFile != "", "--config-file", settings.ConfigFile)
+	args = goext.SliceAppendIf(args, settings.E2e, "--e2e")
+	args = goext.SliceAppendIf(args, len(settings.Env) > 0, "--env", utils.ConvertMapToSingleString(settings.Env, "=", ","))
+	args = goext.SliceAppendIf(args, settings.Group != "", "--group", settings.Group)
+	args = goext.SliceAppendIf(args, settings.Headed, "--headed")
+	args = goext.SliceAppendIf(args, settings.Headless, "--headless")
+	args = goext.SliceAppendIf(args, settings.RecordKey != "", "--key", settings.RecordKey)
+	args = goext.SliceAppendIf(args, settings.NoExit, "--no-exit")
+	args = goext.SliceAppendIf(args, settings.Parallel, "--parallel")
+	args = goext.SliceAppendIf(args, settings.Port > 0, "--port", strconv.Itoa(settings.Port))
+	args = goext.SliceAppendIf(args, settings.Project != "", "--project", settings.Project)
+	args = goext.SliceAppendIf(args, settings.Quiet, "--quiet")
+	args = goext.SliceAppendIf(args, settings.Record, "--record")
+	args = goext.SliceAppendIf(args, settings.Reporter != "", "--reporter", settings.Reporter)
+	args = goext.SliceAppendIf(args, settings.ReporterOptions != "", "--reporter-options", settings.ReporterOptions)
+	args = goext.SliceAppendIf(args, len(settings.Specs) > 0, "--spec", strings.Join(settings.Specs, ","))
+	args = goext.SliceAppendIf(args, len(settings.Tags) > 0, "--tag", strings.Join(settings.Tags, ","))
 	args = append(args, settings.CustomArguments...)
 	return args
 }
@@ -182,16 +176,16 @@ func (settings *CypressOpenSettings) buildCliArguments() []string {
 	args := []string{
 		"open",
 	}
-	args = goext.AppendIf(args, settings.Browser != "", "--browser", settings.Browser)
-	args = goext.AppendIf(args, settings.Component, "--component")
-	args = goext.AppendIf(args, settings.Config != "", "--config", settings.Config)
-	args = goext.AppendIf(args, settings.ConfigFile != "", "--config-file", settings.ConfigFile)
-	args = goext.AppendIf(args, settings.Detached, "--detached")
-	args = goext.AppendIf(args, settings.E2e, "--e2e")
-	args = goext.AppendIf(args, len(settings.Env) > 0, "--env", goext.ConvertMapToSingleString(settings.Env, "=", ","))
-	args = goext.AppendIf(args, settings.Global, "--global")
-	args = goext.AppendIf(args, settings.Port > 0, "--port", strconv.Itoa(settings.Port))
-	args = goext.AppendIf(args, settings.Project != "", "--project", settings.Project)
+	args = goext.SliceAppendIf(args, settings.Browser != "", "--browser", settings.Browser)
+	args = goext.SliceAppendIf(args, settings.Component, "--component")
+	args = goext.SliceAppendIf(args, settings.Config != "", "--config", settings.Config)
+	args = goext.SliceAppendIf(args, settings.ConfigFile != "", "--config-file", settings.ConfigFile)
+	args = goext.SliceAppendIf(args, settings.Detached, "--detached")
+	args = goext.SliceAppendIf(args, settings.E2e, "--e2e")
+	args = goext.SliceAppendIf(args, len(settings.Env) > 0, "--env", utils.ConvertMapToSingleString(settings.Env, "=", ","))
+	args = goext.SliceAppendIf(args, settings.Global, "--global")
+	args = goext.SliceAppendIf(args, settings.Port > 0, "--port", strconv.Itoa(settings.Port))
+	args = goext.SliceAppendIf(args, settings.Project != "", "--project", settings.Project)
 	args = append(args, settings.CustomArguments...)
 	return args
 }
