@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/roemer/gotaskr"
-	"github.com/roemer/gotaskr/internal/utils"
 )
 
 var varFunc = func() error {
@@ -25,7 +24,7 @@ func init() {
 	})
 	gotaskr.Task("Var-Register", varFunc)
 	gotaskr.Task("Regular-Register", RegularFunction)
-	gotaskr.Task("All", utils.Noop).DependsOn("Inline-Register", "Var-Register", "Regular-Register")
+	gotaskr.Task("All", gotaskr.Noop).DependsOn("Inline-Register", "Var-Register", "Regular-Register")
 }
 
 func main() {

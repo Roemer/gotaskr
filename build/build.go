@@ -55,10 +55,7 @@ func RunTests() error {
 		return err
 	}
 
-	stdout, _, err := goext.CmdRunners.Console.RunGetOutput("go", "test", "-v", "./...")
-	if err != nil {
-		return nil
-	}
+	stdout, _, testErr := goext.CmdRunners.Console.RunGetOutput("go", "test", "-v", "./...")
 	if err := os.WriteFile(goTestReport, []byte(stdout), os.ModePerm); err != nil {
 		return err
 	}
@@ -66,5 +63,5 @@ func RunTests() error {
 	if err := goext.CmdRunners.Console.Run(path.Join(build.Default.GOPATH, "bin/go-junit-report"), "-in", goTestReport, "-set-exit-code", "-out", junitTestReport); err != nil {
 		return err
 	}
-	return nil
+	return testErr
 }

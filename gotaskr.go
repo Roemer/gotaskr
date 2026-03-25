@@ -37,6 +37,10 @@ var context gotaskrContext = gotaskrContext{}
 // Tools provides typed access to the various tools supported.
 var Tools *gttools.ToolsClient = gttools.CreateToolsClient()
 
+// Noop is a no operation function that can be used for tasks.
+// For example if they are just used for chaining dependencies.
+func Noop() error { return nil }
+
 // Execute is the entry point of gotaskr.
 func Execute() int {
 	log.Initialize(HasArgument("verbose") || HasArgument("v"))
