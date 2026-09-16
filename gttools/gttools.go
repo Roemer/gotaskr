@@ -15,7 +15,7 @@ func (tool *ToolBase) run(binPath string, args []string, settings ToolSettingsBa
 	return goext.NewCmdRunner().
 		WithWorkingDirectory(settings.WorkingDirectory).
 		SetConsoleOutput(settings.OutputToConsole).
-		WithLogFile(settings.LogFilePath).
+		WithLogFile(settings.LogFilePath, goext.LogStreamBoth).
 		Run(binPath, args...)
 }
 
@@ -23,7 +23,7 @@ func (tool *ToolBase) runGetOutput(binPath string, args []string, settings ToolS
 	return goext.NewCmdRunner().
 		WithWorkingDirectory(settings.WorkingDirectory).
 		SetConsoleOutput(settings.OutputToConsole).
-		WithLogFile(settings.LogFilePath).
+		WithLogFile(settings.LogFilePath, goext.LogStreamBoth).
 		RunGetOutput(binPath, args...)
 }
 
