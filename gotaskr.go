@@ -19,6 +19,9 @@ import (
 // Generate a map that holds all passed arguments from the CLI
 var argumentsMap = argparse.ParseArgs()
 
+// Generate a map that holds all passed arguments from the CLI, preserving repeated flags
+var argumentsMultiMap = argparse.ParseArgsMulti()
+
 // Prepare a map for all the task objects
 var taskMap map[string]*TaskObject = make(map[string]*TaskObject)
 
@@ -45,12 +48,12 @@ func Noop() error { return nil }
 func Execute() int {
 	log.Initialize(HasArgument("verbose") || HasArgument("v"))
 
-	target, hasTarget := GetArgument("target")
-	if !hasTarget {
+	targets := GetArguments("target")
+	if len(targets) == 0 {
 		if taskMap["default"] != nil {
-			target = "default"
+			targets = []string{"default"}
 		} else if taskMap["Default"] != nil {
-			target = "Default"
+			targets = []string{"Default"}
 		} else {
 			printTasks()
 			return 0
@@ -99,8 +102,14 @@ func Execute() int {
 		return getExitCodeFromError(setupErr)
 	}
 
-	// Run the main target only if the setup succeeded
-	taskErr := RunTarget(target)
+	// Run the main targets only if the setup succeeded
+	var taskErr error
+	for _, target := range targets {
+		taskErr = RunTarget(target)
+		if taskErr != nil {
+			break
+		}
+	}
 
 	// Run the teardown method
 	teardownErr := runLifetimeFunc("Teardown", context.TeardownFunc)
@@ -134,6 +143,19 @@ func Execute() int {
 // and also a flag, if the argument was present or not.
 func GetArgument(argName string) (string, bool) {
 	return GetArgumentOrDefault(argName, "")
+}
+
+// GetArguments returns all values for the argument with the given name,
+// preserving repeated flags (e.g. --target A --target B). If the argument
+// was not specified multiple times, a single-element slice is returned.
+func GetArguments(argName string) []string {
+	if values, exists := argumentsMultiMap[argName]; exists {
+		return values
+	}
+	if value, hasArg := GetArgument(argName); hasArg {
+		return []string{value}
+	}
+	return nil
 }
 
 // GetArgumentOrDefault returns the value of the argument with the given name
@@ -629,4 +651,5 @@ func clear() {
 	context.TeardownFunc = nil
 	context.TaskSetupFunc = nil
 	context.TaskTeardownFunc = nil
+	argumentsMultiMap = map[string][]string{}
 }

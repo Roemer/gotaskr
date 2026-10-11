@@ -11,9 +11,26 @@ func ParseArgs() map[string]string {
 	return ParseArgString(os.Args[1:])
 }
 
+// ParseArgsMulti parses the arguments from the os.Args (ignoring the first one)
+// and returns all values for each key, preserving repeated flags.
+func ParseArgsMulti() map[string][]string {
+	return ParseArgStringMulti(os.Args[1:])
+}
+
 // ParseArgString parses the arguments from a given array.
 func ParseArgString(args []string) map[string]string {
-	argsMap := make(map[string]string)
+	multi := ParseArgStringMulti(args)
+	result := make(map[string]string, len(multi))
+	for key, values := range multi {
+		result[key] = values[len(values)-1]
+	}
+	return result
+}
+
+// ParseArgStringMulti parses the arguments from a given array and returns all
+// values for each key, preserving repeated flags (e.g. --target A --target B).
+func ParseArgStringMulti(args []string) map[string][]string {
+	argsMap := make(map[string][]string)
 
 	var lastKey = ""
 	var nextCanBeValue = false
@@ -26,14 +43,15 @@ func ParseArgString(args []string) map[string]string {
 				keyPart := parts[0]
 				valuePart := parts[1]
 				key := keyPart[2:]
-				argsMap[key] = valuePart
+				argsMap[key] = append(argsMap[key], valuePart)
 				lastKey = ""
+				nextCanBeValue = false
 			} else {
 				// Key only
 				key := arg[2:]
 				lastKey = key
 				nextCanBeValue = true
-				argsMap[key] = ""
+				argsMap[key] = append(argsMap[key], "")
 			}
 			continue
 		}
@@ -44,15 +62,16 @@ func ParseArgString(args []string) map[string]string {
 			if len(optionChars) > 1 {
 				// Multiple flags, so they do not have a value
 				for _, c := range optionChars {
-					argsMap[string(c)] = ""
+					argsMap[string(c)] = append(argsMap[string(c)], "")
 				}
 				lastKey = ""
+				nextCanBeValue = false
 			} else {
 				// Only one flag, so the next might be a value
 				key := optionChars
 				lastKey = key
 				nextCanBeValue = true
-				argsMap[key] = ""
+				argsMap[key] = append(argsMap[key], "")
 			}
 			continue
 		}
@@ -60,14 +79,10 @@ func ParseArgString(args []string) map[string]string {
 		// The current value is no key so it seems to be a value to a previous key
 		if nextCanBeValue && len(lastKey) > 0 {
 			nextCanBeValue = false
-			argsMap[lastKey] = arg
+			values := argsMap[lastKey]
+			values[len(values)-1] = arg
 			continue
 		}
-	}
-
-	// Make sure to add the last key when no value was provided
-	if nextCanBeValue && len(lastKey) > 0 {
-		argsMap[lastKey] = ""
 	}
 
 	return argsMap

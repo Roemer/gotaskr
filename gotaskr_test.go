@@ -393,3 +393,63 @@ func assertExitError(assert *assert.Assertions, err error, exitCode int) {
 		assert.Equal(exitCode, ierr.ExitCode())
 	}
 }
+
+func TestMultipleTargets(t *testing.T) {
+	assert := assert.New(t)
+
+	clear()
+	task1Ran := false
+	task2Ran := false
+	task1 := Task("Task1", func() error { task1Ran = true; return nil })
+	task2 := Task("Task2", func() error { task2Ran = true; return nil })
+	argumentsMap = map[string]string{"target": task1.name}
+	argumentsMultiMap = map[string][]string{"target": {task1.name, task2.name}}
+
+	exitCode := Execute()
+
+	assert.Equal(0, exitCode)
+	assert.True(task1Ran)
+	assert.True(task2Ran)
+	assert.Equal(2, len(taskRun))
+	assert.Equal(task1.name, taskRun[0].name)
+	assert.Equal(task2.name, taskRun[1].name)
+}
+
+func TestMultipleTargetsStopsOnError(t *testing.T) {
+	assert := assert.New(t)
+
+	clear()
+	desiredExitCode := 10
+	task1 := Task("Task1", func() error { return nil })
+	task2 := Task("Task2", func() error { return getExitError(desiredExitCode) })
+	task3 := Task("Task3", func() error { return nil })
+	argumentsMap = map[string]string{"target": task1.name}
+	argumentsMultiMap = map[string][]string{"target": {task1.name, task2.name, task3.name}}
+
+	exitCode := Execute()
+
+	assert.Equal(desiredExitCode, exitCode)
+	assert.Equal(2, len(taskRun))
+	assert.Equal(task1.name, taskRun[0].name)
+	assert.Equal(task2.name, taskRun[1].name)
+	assertExitError(assert, task2.err, desiredExitCode)
+}
+
+func TestMultipleTargetsWithSharedDependency(t *testing.T) {
+	assert := assert.New(t)
+
+	clear()
+	depRunCount := 0
+	dep := Task("Dep", func() error { depRunCount++; return nil })
+	task1 := Task("Task1", func() error { return nil }).DependsOn(dep.name)
+	task2 := Task("Task2", func() error { return nil }).DependsOn(dep.name)
+	argumentsMap = map[string]string{"target": task1.name}
+	argumentsMultiMap = map[string][]string{"target": {task1.name, task2.name}}
+
+	exitCode := Execute()
+
+	assert.Equal(0, exitCode)
+	assert.Equal(1, depRunCount)
+	assert.Equal(3, len(taskRun))
+	assert.Equal("Dep", taskRun[0].name)
+}

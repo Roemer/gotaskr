@@ -75,6 +75,10 @@ Now invoke this task by running:
 ```
 go run . --target My-Task
 ```
+You can also run multiple targets in a single invocation:
+```
+go run . --target Task1 --target Task2
+```
 Enjoy the fancy output and statistics:
 ```
 ------------------------------------------------------------
