@@ -45,6 +45,12 @@ func Noop() error { return nil }
 func Execute() int {
 	log.Initialize(HasArgument("verbose") || HasArgument("v"))
 
+	// Resolve the color setting first, so all following output uses it
+	if err := initColor(); err != nil {
+		log.Information(err.Error())
+		return 1
+	}
+
 	target, hasTarget := GetArgument("target")
 	if !hasTarget {
 		if taskMap["default"] != nil {
@@ -68,21 +74,21 @@ func Execute() int {
 		for _, followup := range task.followups {
 			followupTask := taskMap[followup]
 			if followupTask == nil {
-				color.Red("Followup '%s' for '%s' does not exist.", followup, task.name)
+				printColored(color.FgRed, "Followup '%s' for '%s' does not exist.", followup, task.name)
 				return 1
 			}
 		}
 		for _, dependency := range task.dependencies {
 			dependencyTask := taskMap[dependency]
 			if dependencyTask == nil {
-				color.Red("Dependency '%s' for '%s' does not exist.", dependency, task.name)
+				printColored(color.FgRed, "Dependency '%s' for '%s' does not exist.", dependency, task.name)
 				return 1
 			}
 		}
 		for _, dependee := range task.dependees {
 			dependeeTask := taskMap[dependee]
 			if dependeeTask == nil {
-				color.Red("Dependee '%s' for '%s' does not exist.", dependee, task.name)
+				printColored(color.FgRed, "Dependee '%s' for '%s' does not exist.", dependee, task.name)
 				return 1
 			}
 			dependeeTask.DependsOn(task.name)
@@ -160,7 +166,7 @@ func RunTarget(target string) error {
 	// Early exit if the target does not exist
 	if currentTask == nil {
 		err := fmt.Errorf("target does not exist: %s", target)
-		color.Red("%v", err)
+		printColored(color.FgRed, "%v", err)
 		return err
 	}
 	// Early exit if the task did already run
@@ -548,13 +554,13 @@ func printTaskFooter(task *TaskObject) {
 func printTaskError(task *TaskObject, withTaskName bool) {
 	taskString := goext.Ternary(withTaskName, fmt.Sprintf(" in '%s'", task.name), "")
 	if task.err != nil {
-		color.Red("Task error%s: %v", taskString, task.err)
+		printColored(color.FgRed, "Task error%s: %v", taskString, task.err)
 	}
 	if task.ignoredErr != nil {
-		color.Red("Ignored error%s: %v", taskString, task.ignoredErr)
+		printColored(color.FgRed, "Ignored error%s: %v", taskString, task.ignoredErr)
 	}
 	if task.deferredErr != nil {
-		color.Red("Deferred error%s: %v", taskString, task.deferredErr)
+		printColored(color.FgRed, "Deferred error%s: %v", taskString, task.deferredErr)
 	}
 }
 
@@ -562,30 +568,25 @@ func printTaskRuns() {
 	if len(taskRun) == 0 {
 		return
 	}
-	color.Set(color.FgGreen)
-	defer color.Unset()
-	log.Informationf("%-50s%-13s%-17s", "Task", "Exit Code", "Duration")
-	log.Information(strings.Repeat("-", 80))
+	// Each line is colored on its own, so no color state is left set if output is interrupted
+	printColored(color.FgGreen, "%-50s%-13s%-17s", "Task", "Exit Code", "Duration")
+	printColored(color.FgGreen, "%s", strings.Repeat("-", 80))
 	totalDuration := time.Duration(0)
 	for _, run := range taskRun {
 		text := fmt.Sprintf("%-50s%-13d%-17s", run.name, getExitCodeFromTaskRun(run), formatDuration(run.duration))
 		if run.err != nil || run.deferredErr != nil {
-			color.Red(text)
-
+			printColored(color.FgRed, "%s", text)
 		} else {
-			log.Information(text)
+			printColored(color.FgGreen, "%s", text)
 		}
-		color.Set(color.FgWhite)
 		for i, measurement := range run.timeMeasurements {
 			prefix := goext.Ternary(i == len(run.timeMeasurements)-1, "└─", "├─")
-			measurementText := fmt.Sprintf("%s %-60s%-17s", prefix, measurement.name, formatDuration(measurement.duration))
-			log.Information(measurementText)
+			printColored(color.FgWhite, "%s %-60s%-17s", prefix, measurement.name, formatDuration(measurement.duration))
 		}
-		color.Set(color.FgGreen)
 		totalDuration += run.duration
 	}
-	log.Information(strings.Repeat("-", 80))
-	log.Informationf("%-63s%-18s", "Total", formatDuration(totalDuration))
+	printColored(color.FgGreen, "%s", strings.Repeat("-", 80))
+	printColored(color.FgGreen, "%-63s%-18s", "Total", formatDuration(totalDuration))
 }
 
 func formatDuration(duration time.Duration) string {
