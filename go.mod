@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	github.com/fatih/color v1.19.0
 	github.com/jfrog/jfrog-client-go v1.55.0
+	github.com/mattn/go-isatty v0.0.20
 	github.com/roemer/goext v0.11.1
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394
@@ -37,7 +38,6 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
